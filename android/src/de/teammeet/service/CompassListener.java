@@ -23,7 +23,6 @@ package de.teammeet.service;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 
 public class CompassListener implements SensorEventListener {
 
@@ -41,10 +40,6 @@ public class CompassListener implements SensorEventListener {
 
 	@Override
 	public void onSensorChanged(final SensorEvent event) {
-		final float[] rotationMatrix = new float[16];
-		final float[] orientation = new float[3];
-		SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
-		SensorManager.getOrientation(rotationMatrix, orientation);
-		mServiceThread.updateDirection(orientation[0]);
+		mServiceThread.updateDirection(event.values[0]);
 	}
 }
