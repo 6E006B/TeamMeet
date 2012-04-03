@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright 2012 Daniel Kreischer, Christopher Holm, Christopher Schwardt
+
+    This file is part of TeamMeet.
+
+    TeamMeet is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    TeamMeet is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with TeamMeet.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<resources>
+<string name="app_name">TeamMeet</string>
+<string name="server_url">http://hack0r.net:8383/serv.php</string>
+<string name="menu_auto_center">Auto center position</string>
+<string name="menu_fullscreen">Fullscreen</string>
+<string name="menu_goto_mylocation">Current location</string>
+<string name="menu_satellite_view">Satellite map</string>
+<string name="button_show_map">Show Map</string>
+<string name="button_show_settings">Edit Settings</string>
+</resources>
