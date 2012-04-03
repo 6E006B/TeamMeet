@@ -62,8 +62,8 @@ public class ServiceThread extends Thread {
 					case ACTIVE:
 						// send position to server and fetch team mates from
 						// server and pass to Service Interface
-						mServiceInterface.setMates(mServerCommunication
-								.sendPositionAndGetMatesFromServer(mLocation));
+						// mServiceInterface.setMates(mServerCommunication
+						// .sendPositionAndGetMatesFromServer(mLocation));
 						break;
 					case LOGIN:
 						mServerCommunication.registerAtServer(mLocation);
