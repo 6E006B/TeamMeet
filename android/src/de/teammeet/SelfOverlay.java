@@ -69,19 +69,19 @@ public class SelfOverlay extends Overlay implements ILocationUpdateRecipient {
 					final Path path = new Path();
 					path.moveTo(
 							(float) (coords.x + mArrowLength *
-									Math.sin((-mPlayerDirection + 180) * 3.14 / 180)),
+									Math.sin((-mPlayerDirection + 180) * Math.PI / 180)),
 							(float) (coords.y + mArrowLength *
-									Math.cos((-mPlayerDirection + 180) * 3.14 / 180)));
+									Math.cos((-mPlayerDirection + 180) * Math.PI / 180)));
 					path.lineTo(
 							(float) (coords.x + (mArrowLength / 4) *
-									Math.sin((-mPlayerDirection + 90) * 3.14 / 180)),
+									Math.sin((-mPlayerDirection + 90) * Math.PI / 180)),
 							(float) (coords.y + (mArrowLength / 4) *
-									Math.cos((-mPlayerDirection + 90) * 3.14 / 180)));
+									Math.cos((-mPlayerDirection + 90) * Math.PI / 180)));
 					path.lineTo(
 							(float) (coords.x + (mArrowLength / 4) *
-									Math.sin((-mPlayerDirection - 90) * 3.14 / 180)),
+									Math.sin((-mPlayerDirection - 90) * Math.PI / 180)),
 							(float) (coords.y + (mArrowLength / 4) *
-									Math.cos((-mPlayerDirection - 90) * 3.14 / 180)));
+									Math.cos((-mPlayerDirection - 90) * Math.PI / 180)));
 					path.close();
 					canvas.drawPath(path, mPaintPlayer);
 				} else {
