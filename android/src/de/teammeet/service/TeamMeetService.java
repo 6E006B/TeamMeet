@@ -97,7 +97,7 @@ public class TeamMeetService extends Service {
 		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		final Criteria criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
-		final String providerString = mLocationManager.getBestProvider(criteria, true);
+		final String providerString = mLocationManager.getBestProvider(criteria, false);
 		if (providerString != null) {
 			Log.e(CLASS, "providerString is " + providerString);
 			mGpsLocationListener = new GpsLocationListener(mServiceThread);
