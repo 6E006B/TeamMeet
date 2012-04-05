@@ -21,7 +21,9 @@
 package de.teammeet.service;
 
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
@@ -41,15 +43,17 @@ public class ServiceThread extends Thread {
 	private int						mTimeout				= 0;
 
 	private ServiceInterfaceImpl	mServiceInterface		= null;
+	private Handler					mMessageHandler			= null;
 	private GeoPoint				mLocation				= null;
 	private ServerCommunication		mServerCommunication	= null;
 	private ServiceState			mState					= ServiceState.ACTIVE;
 
 	public ServiceThread(final ServiceInterfaceImpl serviceInterface, final Handler messageHandler,
 			final Resources res) {
-		this.mServiceInterface = serviceInterface;
+		mServiceInterface = serviceInterface;
+		mMessageHandler = messageHandler;
 		mResources = res;
-		this.mServerCommunication = new ServerCommunication(messageHandler, mResources);
+		mServerCommunication = new ServerCommunication(mMessageHandler, mResources);
 		mTimeout = mResources.getInteger(R.integer.server_timeout);
 	}
 
@@ -111,6 +115,7 @@ public class ServiceThread extends Thread {
 
 	public void signalGPSDisabled() {
 		Log.e(CLASS, "ServiceThread.signalGPSDisabled() called.");
+		showError("Please enable your GPS.");
 	}
 
 	public void signalGPSEnabled() {
@@ -124,5 +129,25 @@ public class ServiceThread extends Thread {
 	public void updateDirection(final float direction) {
 		// Log.e(CLASS, "new mLocation set: " + direction);
 		mServiceInterface.setDirection(direction);
+	}
+
+	// private void showToast(final String message) {
+	// if (mMessageHandler != null) {
+	// final Message msg = new Message();
+	// final Bundle bundle = new Bundle();
+	// bundle.putString("toast", message);
+	// msg.setData(bundle);
+	// mMessageHandler.sendMessage(msg);
+	// }
+	// }
+
+	private void showError(final String message) {
+		if (mMessageHandler != null) {
+			final Message msg = new Message();
+			final Bundle bundle = new Bundle();
+			bundle.putString("error", message);
+			msg.setData(bundle);
+			mMessageHandler.sendMessage(msg);
+		}
 	}
 }
