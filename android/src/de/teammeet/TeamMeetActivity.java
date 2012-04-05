@@ -45,20 +45,21 @@ public class TeamMeetActivity extends MapActivity {
 
 	final String						CLASS				= TeamMeetActivity.class.getSimpleName();
 
+	private ToastDisposerSingleton		mToastSingleton		= null;
+	private TeamMeetServiceConnection	mServiceConnection	= null;
+
+	private MapView						mMapView			= null;
+	private MapController				mMapController		= null;
+	private LocationFollower			mLocationFollower	= null;
+	private List<Overlay>				mListOfOverlays		= null;
+
 	private MatesOverlay				mMatesOverlay		= null;
 	private SelfOverlay					mSelfOverlay		= null;
-	private MapView						mMapView			= null;
-	private LocationFollower			mLocationFollower	= null;
-	private TeamMeetServiceConnection	mServiceConnection	= null;
-	private MapController				mMapController		= null;
-	private ToastDisposerSingleton		mToastSingleton		= null;
-	private List<Overlay>				mListOfOverlays		= null;
+	private IndicationOverlay			mIndicationOverlay	= null;
 
 	private boolean						mFollowingLocation	= false;
 	private boolean						mSatelliteView		= false;
 	private boolean						mFullscreen			= false;
-
-	private IndicationOverlay			mIndicationOverlay;
 
 	/** Called when the activity is first created. */
 	@Override
