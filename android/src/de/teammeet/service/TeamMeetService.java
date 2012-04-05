@@ -26,7 +26,6 @@ import java.util.List;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
@@ -52,12 +51,10 @@ public class TeamMeetService extends Service {
 	private final boolean								mSensorRunning			= false;
 	private SensorManager								mSensorManager			= null;
 	private SensorEventListener							mSensorEventListener	= null;
-	private Resources									mResources				= null;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		mResources = getResources();
 		// Log.e(CLASS, "TeamMeetService.onCreate() called.");
 		mServiceInterface = new ServiceInterfaceImpl();
 		mMessageHandler = new Handler() {
@@ -81,7 +78,7 @@ public class TeamMeetService extends Service {
 	}
 
 	private void startServiceThread() {
-		mServiceThread = new ServiceThread(mServiceInterface, mMessageHandler, mResources);
+		mServiceThread = new ServiceThread(mServiceInterface, mMessageHandler, getResources());
 		mServiceThread.setDaemon(true);
 		mServiceThread.start();
 		Log.e(CLASS, "ServiceThread started...");
