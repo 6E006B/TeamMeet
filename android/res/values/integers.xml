@@ -19,6 +19,7 @@
 -->
 <resources>
 <integer name="arrow_length">20</integer>
-<integer name="drawable_size">3</integer>
+<integer name="indicator_size">10</integer>
+<integer name="indicator_width">10</integer>
 <integer name="server_timeout">1000</integer>
 </resources>

@@ -58,6 +58,8 @@ public class TeamMeetActivity extends MapActivity {
 	private boolean						mSatelliteView		= false;
 	private boolean						mFullscreen			= false;
 
+	private IndicationOverlay			mIndicationOverlay;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -141,12 +143,14 @@ public class TeamMeetActivity extends MapActivity {
 	private void createOverlays() {
 		mSelfOverlay = new SelfOverlay(getResources());
 		mMatesOverlay = new MatesOverlay(getResources());
+		mIndicationOverlay = new IndicationOverlay(getResources());
 
 	}
 
 	private void addOverlays() {
 		mListOfOverlays.add(mSelfOverlay);
 		mListOfOverlays.add(mMatesOverlay);
+		mListOfOverlays.add(mIndicationOverlay);
 	}
 
 	private void showToast(final String message) {

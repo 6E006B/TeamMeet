@@ -23,4 +23,5 @@
 	<color name="path_default">#FF000000</color>
 	<color name="paint_default">#FF000000</color>
 	<color name="paint_mates">#00FFFF</color>
+	<color name="paint_indicator">#FF0000</color>
 </resources>
