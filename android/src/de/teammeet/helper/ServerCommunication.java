@@ -45,7 +45,7 @@ public class ServerCommunication {
 	// private ToastDisposerSingleton m_toastSingleton = null;
 
 	public ServerCommunication(final Handler messageHandler, final Resources res) {
-		this.mMessageHandler = messageHandler;
+		mMessageHandler = messageHandler;
 		mResources = res;
 		mServerUrl = mResources.getString(R.string.server_url);
 	}
