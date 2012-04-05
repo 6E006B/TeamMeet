@@ -92,7 +92,7 @@ public class ServiceThread extends Thread {
 				Log.e(CLASS, "sleep failed:" + e.getMessage());
 			}
 		}
-		// Log.e(CLASS, "ServiceThread.run() finished.");
+		Log.e(CLASS, "ServiceThread.run() finished.");
 	}
 
 	public void deactivateThread() {
@@ -110,16 +110,15 @@ public class ServiceThread extends Thread {
 	}
 
 	public void signalGPSDisabled() {
-		// Log.e(CLASS, "ServiceThread.signalGPSDisabled() called.");
+		Log.e(CLASS, "ServiceThread.signalGPSDisabled() called.");
 	}
 
 	public void signalGPSEnabled() {
-		// Log.e(CLASS, "ServiceThread.signalGPSEnabled() called.");
+		Log.e(CLASS, "ServiceThread.signalGPSEnabled() called.");
 	}
 
 	public void signalGPSStautsChange(final int status) {
-		// Log.e(CLASS,
-		// "ServiceThread.signalGPSStatusChange(" + status + ") called.");
+		Log.e(CLASS, "ServiceThread.signalGPSStatusChange(" + status + ") called.");
 	}
 
 	public void updateDirection(final float direction) {
