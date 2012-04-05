@@ -107,7 +107,7 @@ public class TeamMeetService extends Service {
 			// Log.e(CLASS, "sucessfully requested location updates...");
 		} else {
 			Log.e(CLASS, "WARNING: providerString is null!");
-			showError("You need to enable GPS.");
+			showError("You do not have any GPS device.");
 		}
 	}
 
