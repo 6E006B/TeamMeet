@@ -23,19 +23,38 @@ package de.teammeet.helper;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapController;
 
+import de.teammeet.TeamMeetServiceConnection;
 import de.teammeet.interfaces.ILocationUpdateRecipient;
 
 public class LocationFollower implements ILocationUpdateRecipient {
 
-	private MapController	mMapController	= null;
+	private MapController				mMapController		= null;
+	private TeamMeetServiceConnection	mServiceConnection	= null;
+	private boolean						mActive				= false;
 
-	public LocationFollower(final MapController mapController) {
+	public LocationFollower(final MapController mapController, TeamMeetServiceConnection serviceConnection) {
 		mMapController = mapController;
+		mServiceConnection = serviceConnection;
 	}
 
 	@Override
 	public void handleLocationUpdate(final GeoPoint geopoint) {
-		mMapController.animateTo(geopoint);
+		if (mActive) {
+			mMapController.animateTo(geopoint);
+		}
+	}
+
+	public boolean isActive() {
+		return mActive;
+	}
+
+	public void setActive(boolean active) {
+		mActive = active;
+		if (mActive) {
+			mServiceConnection.registerLocationUpdates(this);
+		} else {
+			mServiceConnection.unregisterLocationUpdates(this);
+		}
 	}
 
 	@Override

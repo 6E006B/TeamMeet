@@ -98,10 +98,6 @@ public class TeamMeetActivity extends MapActivity {
 		mMapController.setZoom(mMapView.getMaxZoomLevel());
 		mListOfOverlays = mMapView.getOverlays();
 
-		if (mFollowingLocation) {
-			mLocationFollower = new LocationFollower(mMapController);
-		}
-
 		// now connect to the service
 		mServiceConnection = new TeamMeetServiceConnection();
 		final boolean bindSuccess = bindService(intent, mServiceConnection, 0);
@@ -110,16 +106,20 @@ public class TeamMeetActivity extends MapActivity {
 			addOverlays();
 			// TODO investigate: something goes wrong here the first
 			// time, but is called a second time
+
+			// register to get status updates
 			mServiceConnection.registerMatesUpdates(mMatesOverlay);
 			mServiceConnection.registerLocationUpdates(mSelfOverlay);
-			if (mFollowingLocation && mLocationFollower != null) {
-				mServiceConnection.registerLocationUpdates(mLocationFollower);
-			}
+
+			// Create and enable the location follower
+			mLocationFollower = new LocationFollower(mMapController, mServiceConnection);
+			mLocationFollower.setActive(mFollowingLocation);
 		} else {
 			Log.e(CLASS, "bind failed");
 			showError("Couldn't connect to service.");
 			this.finish();
 		}
+
 	}
 
 	@Override
@@ -197,16 +197,8 @@ public class TeamMeetActivity extends MapActivity {
 	}
 
 	private void toggleFollowingLocation() {
-		if (mFollowingLocation) {
-			mServiceConnection.unregisterLocationUpdates(mLocationFollower);
-			mFollowingLocation = false;
-		} else {
-			if (mLocationFollower == null) {
-				mLocationFollower = new LocationFollower(mMapController);
-			}
-			mServiceConnection.registerLocationUpdates(mLocationFollower);
-			mFollowingLocation = true;
-		}
+		mFollowingLocation = !mFollowingLocation;
+		mLocationFollower.setActive(mFollowingLocation);
 	}
 
 	private void toggleSatelliteView() {
