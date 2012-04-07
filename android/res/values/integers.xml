@@ -18,8 +18,10 @@
     along with TeamMeet.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <resources>
-<integer name="arrow_length">20</integer>
-<integer name="indicator_size">10</integer>
-<integer name="indicator_width">10</integer>
-<integer name="server_timeout">1000</integer>
+	<integer name="arrow_length">20</integer>
+	<integer name="indicator_size">10</integer>
+	<integer name="indicator_width">10</integer>
+	<integer name="indicator_text_size">18</integer>
+	<integer name="indicator_text_border_width">4</integer>
+	<integer name="server_timeout">1000</integer>
 </resources>

@@ -18,10 +18,11 @@
     along with TeamMeet.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <resources>
-	
 	<color name="text_default">#FF000000</color>
 	<color name="path_default">#FF000000</color>
 	<color name="paint_default">#FF000000</color>
 	<color name="paint_mates">#00FFFF</color>
 	<color name="paint_indicator">#FF0000</color>
+	<color name="paint_indicator_text">#000000</color>
+	<color name="paint_indicator_text_border">#FFF</color>
 </resources>

@@ -20,12 +20,20 @@
 
 package de.teammeet;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Typeface;
+import android.location.Address;
+import android.location.Geocoder;
+import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
@@ -35,6 +43,7 @@ import com.google.android.maps.Projection;
 public class IndicationOverlay extends Overlay {
 	private static final String	CLASS					= IndicationOverlay.class.getSimpleName();
 	private GeoPoint			mLatestTouchGeoPoint	= null;
+	private List<String>		mAddressOfPoint			= null;
 
 	private final ReentrantLock	mLock					= new ReentrantLock();
 
@@ -42,6 +51,7 @@ public class IndicationOverlay extends Overlay {
 	private int					mIndicatorSize			= 0;
 	private int					mIndicatorWidth			= 0;
 	private Paint				mPaintIndicator			= null;
+	private Paint				mPaintIndicatorText		= null;
 
 	public IndicationOverlay(final Resources resources) {
 		mResources = resources;
@@ -53,11 +63,35 @@ public class IndicationOverlay extends Overlay {
 		mPaintIndicator.setStrokeWidth(mIndicatorWidth);
 		mPaintIndicator.setStyle(Paint.Style.STROKE);
 
+		mPaintIndicatorText = new Paint();
+		mPaintIndicatorText.setColor(mResources.getColor(R.color.paint_indicator_text));
+		mPaintIndicatorText.setAntiAlias(true);
+		mPaintIndicatorText.setTextSize(mResources.getInteger(R.integer.indicator_text_size));
+		mPaintIndicatorText.setTypeface(Typeface.DEFAULT_BOLD);
+		mPaintIndicatorText.setShadowLayer(mResources.getInteger(R.integer.indicator_text_border_width), 1,
+				1, mResources.getColor(R.color.paint_indicator_text_border));
 	}
 
 	@Override
 	public boolean onTap(GeoPoint p, MapView mapView) {
 		mLatestTouchGeoPoint = p;
+		Geocoder geoCoder = new Geocoder(mapView.getContext(), Locale.getDefault());
+		try {
+			List<Address> addresses = geoCoder.getFromLocation(mLatestTouchGeoPoint.getLatitudeE6() / 1E6,
+					mLatestTouchGeoPoint.getLongitudeE6() / 1E6, 1);
+
+			List<String> addressStringList = new LinkedList<String>();
+			if (addresses.size() > 0) {
+				for (int i = 0; i < addresses.get(0).getMaxAddressLineIndex(); i++)
+					addressStringList.add(addresses.get(0).getAddressLine(i));
+			}
+			// Collections.reverse(addressStringList);
+			mAddressOfPoint = addressStringList;
+		} catch (IOException e) {
+			Log.e(CLASS, "Error using Geocoder: " + e.getLocalizedMessage());
+			e.printStackTrace();
+		}
+
 		return super.onTap(p, mapView);
 	}
 
@@ -72,6 +106,15 @@ public class IndicationOverlay extends Overlay {
 
 				projection.toPixels(mLatestTouchGeoPoint, screenPoint);
 				canvas.drawCircle(screenPoint.x, screenPoint.y, mIndicatorSize + 1, mPaintIndicator);
+
+				if (mAddressOfPoint != null) {
+					int x = screenPoint.x + mIndicatorSize + mIndicatorWidth;
+					int y = screenPoint.y - mIndicatorSize / 2 - mIndicatorWidth / 2;
+					for (String line : mAddressOfPoint) {
+						canvas.drawText(line, x, y, mPaintIndicatorText);
+						y -= mPaintIndicatorText.ascent() - mPaintIndicatorText.descent() * 2f;
+					}
+				}
 			} finally {
 				releaseLock();
 			}
