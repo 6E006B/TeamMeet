@@ -29,7 +29,6 @@ import android.util.Log;
 import com.google.android.maps.GeoPoint;
 
 import de.teammeet.R;
-import de.teammeet.helper.ServerCommunication;
 
 public class ServiceThread extends Thread {
 
@@ -45,7 +44,6 @@ public class ServiceThread extends Thread {
 	private ServiceInterfaceImpl	mServiceInterface		= null;
 	private Handler					mMessageHandler			= null;
 	private GeoPoint				mLocation				= null;
-	private ServerCommunication		mServerCommunication	= null;
 	private ServiceState			mState					= ServiceState.ACTIVE;
 
 	public ServiceThread(final ServiceInterfaceImpl serviceInterface, final Handler messageHandler,
@@ -53,7 +51,6 @@ public class ServiceThread extends Thread {
 		mServiceInterface = serviceInterface;
 		mMessageHandler = messageHandler;
 		mResources = res;
-		mServerCommunication = new ServerCommunication(mMessageHandler, mResources);
 		mTimeout = mResources.getInteger(R.integer.server_timeout);
 	}
 
@@ -70,17 +67,17 @@ public class ServiceThread extends Thread {
 						// .sendPositionAndGetMatesFromServer(mLocation));
 						break;
 					case LOGIN:
-						mServerCommunication.registerAtServer(mLocation);
+//						mServerCommunication.registerAtServer(mLocation);
 						// mServiceInterface.signalRegisteredAtServer(); TODO
 						mState = ServiceState.ACTIVE;
 						break;
 					case LOGOUT:
-						mServerCommunication.logout();
+//						mServerCommunication.logout();
 						// mServiceInterface.signalLogout(); TODO
 						mState = ServiceState.ACTIVE;
 						break;
 					case LOGOUT_AND_DIE:
-						mServerCommunication.logout();
+//						mServerCommunication.logout();
 						mState = ServiceState.DIE;
 						break;
 					// TODO are "ACTIVE" and "INACTIVE" both needed?
