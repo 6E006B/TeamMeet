@@ -20,24 +20,15 @@
 
 package de.teammeet;
 
-import java.util.Iterator;
-
-import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
-import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.muc.MultiUserChat;
-
-import de.teammeet.xmpp.ConfigureProviderManager;
-import de.teammeet.xmpp.GeolocPacketExtension;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -45,6 +36,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import de.teammeet.xmpp.ConfigureProviderManager;
+import de.teammeet.xmpp.GeolocPacketExtension;
 
 public class MainActivity extends Activity {
 

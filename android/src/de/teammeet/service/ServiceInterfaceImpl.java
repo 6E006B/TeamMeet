@@ -22,7 +22,6 @@ package de.teammeet.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.jivesoftware.smack.XMPPException;
@@ -52,12 +51,12 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 		mXMPPService = xmppService;
 	}
 
-	public void setMates(final Set<Mate> mates) {
+	public void updateMate(final Mate mate) {
 		acquireMatesLock();
 		try {
-			if (mates != null) {
+			if (mate != null) {
 				for (final IMatesUpdateRecipient object : mMatesRecipients) {
-					object.handleMatesUpdate(mates);
+					object.handleMateUpdate(mate);
 				}
 			}
 		} finally {

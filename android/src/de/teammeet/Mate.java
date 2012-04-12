@@ -24,9 +24,23 @@ import com.google.android.maps.GeoPoint;
 
 public class Mate {
 
-	public GeoPoint	mLocation	= null;
+	private String mID = null; 
+	private GeoPoint mLocation	= null;
 
-	public Mate(final GeoPoint location) {
+	public Mate(final String id, final GeoPoint location) {
+		mID = id;
+		mLocation = location;
+	}
+	
+	public String getID() {
+		return mID;
+	}
+	
+	public GeoPoint getLocation() {
+		return mLocation;
+	}
+	
+	public void setLocation(GeoPoint location) {
 		mLocation = location;
 	}
 }

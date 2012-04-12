@@ -20,10 +20,8 @@
 
 package de.teammeet.interfaces;
 
-import java.util.Set;
-
 import de.teammeet.Mate;
 
 public interface IMatesUpdateRecipient {
-	void handleMatesUpdate(Set<Mate> mates);
+	public void handleMateUpdate(Mate mate);
 }
