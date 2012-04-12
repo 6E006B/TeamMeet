@@ -32,36 +32,31 @@ import android.util.Log;
 import com.google.android.maps.GeoPoint;
 
 import de.teammeet.R;
-import de.teammeet.helper.ServerCommunication;
 
-public class ServiceThread extends Thread {
+public class ServiceThread {
 
-	public enum ServiceState {
-		INACTIVE, ACTIVE, AWAITING_LOCATION, LOGIN, LOGOUT, DIE, LOGOUT_AND_DIE
-	}
+	private static final String		CLASS				= ServiceThread.class.getSimpleName();
 
-	private static final String		CLASS					= ServiceThread.class.getSimpleName();
+	private Resources				mResources			= null;
+	private int						mTimeout			= 0;
 
-	private Resources				mResources				= null;
-	private int						mTimeout				= 0;
+	private ServiceInterfaceImpl	mServiceInterface	= null;
+	private Handler					mMessageHandler		= null;
+	protected GeoPoint				mLocation			= null;
+	protected GeoPoint				mLastLocation		= null;
+	protected float					mAccuracy			= 0;
 
-	private ServiceInterfaceImpl	mServiceInterface		= null;
-	private Handler					mMessageHandler			= null;
-	protected GeoPoint				mLocation				= null;
-	protected GeoPoint				mLastLocation			= null;
-	protected float					mAccuracy				= 0;
-	private ServerCommunication		mServerCommunication	= null;
-	private ServiceState			mState					= ServiceState.ACTIVE;
+	private Timer					mTimer				= null;
+	private TimerTask				mTimerTask			= null;
 
 	public ServiceThread(final ServiceInterfaceImpl serviceInterface, final Handler messageHandler,
 			final Resources res) {
 		mServiceInterface = serviceInterface;
 		mMessageHandler = messageHandler;
 		mResources = res;
-		mServerCommunication = new ServerCommunication(mMessageHandler, mResources);
 		mTimeout = mResources.getInteger(R.integer.server_timeout);
-		Timer timer = new Timer(getName(), true);
-		TimerTask timerTask = new TimerTask() {
+		mTimer = new Timer(CLASS, true);
+		mTimerTask = new TimerTask() {
 
 			@Override
 			public void run() {
@@ -73,57 +68,7 @@ public class ServiceThread extends Thread {
 				}
 			}
 		};
-		timer.scheduleAtFixedRate(timerTask, mTimeout, mTimeout);
-	}
-
-	@Override
-	public void run() {
-		// Log.e(CLASS, "ServiceThread.run() called.");
-		while (mState != ServiceState.DIE) {
-			if (mLocation != null) {
-				switch (mState) {
-					case ACTIVE:
-						// send position to server and fetch team mates from
-						// server and pass to Service Interface
-						// mServiceInterface.setMates(mServerCommunication
-						// .sendPositionAndGetMatesFromServer(mLocation));
-						break;
-					case LOGIN:
-						mServerCommunication.registerAtServer(mLocation);
-						// mServiceInterface.signalRegisteredAtServer(); TODO
-						mState = ServiceState.ACTIVE;
-						break;
-					case LOGOUT:
-						mServerCommunication.logout();
-						// mServiceInterface.signalLogout(); TODO
-						mState = ServiceState.ACTIVE;
-						break;
-					case LOGOUT_AND_DIE:
-						mServerCommunication.logout();
-						mState = ServiceState.DIE;
-						break;
-					// TODO are "ACTIVE" and "INACTIVE" both needed?
-					case INACTIVE:
-					default:
-						break;
-				}
-			}
-			try {
-				Thread.sleep(mTimeout);
-			} catch (final InterruptedException e) {
-				e.printStackTrace();
-				Log.e(CLASS, "sleep failed:" + e.getMessage());
-			}
-		}
-		Log.e(CLASS, "ServiceThread.run() finished.");
-	}
-
-	public void deactivateThread() {
-		if (mState == ServiceState.ACTIVE) {
-			mState = ServiceState.LOGOUT_AND_DIE;
-		} else {
-			mState = ServiceState.DIE;
-		}
+		mTimer.scheduleAtFixedRate(mTimerTask, mTimeout, mTimeout);
 	}
 
 	public void setLocation(final GeoPoint geopoint, float accuracy) {

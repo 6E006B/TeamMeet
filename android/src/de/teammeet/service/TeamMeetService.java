@@ -79,14 +79,11 @@ public class TeamMeetService extends Service {
 
 	private void startServiceThread() {
 		mServiceThread = new ServiceThread(mServiceInterface, mMessageHandler, getResources());
-		mServiceThread.setDaemon(true);
-		mServiceThread.start();
 		Log.e(CLASS, "ServiceThread started...");
 	}
 
 	private void stopServiceThread() {
 		if (mServiceThread != null) {
-			mServiceThread.deactivateThread();
 		} else {
 			Log.e(CLASS, "WARNING: mServiceThread was null!");
 		}
