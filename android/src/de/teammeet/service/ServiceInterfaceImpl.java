@@ -25,7 +25,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jivesoftware.smack.XMPPException;
+
 import android.os.Binder;
+import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
@@ -33,15 +36,21 @@ import de.teammeet.Mate;
 import de.teammeet.interfaces.ILocationUpdateRecipient;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
 import de.teammeet.interfaces.IService;
+import de.teammeet.xmpp.XMPPService;
 
 public class ServiceInterfaceImpl extends Binder implements IService {
 
-	// private static final String CLASS =
-	// ServiceInterfaceImpl.class.getSimpleName();
+	private static final String						CLASS				= ServiceInterfaceImpl.class
+																				.getSimpleName();
 	private final ReentrantLock						mLockMates			= new ReentrantLock();
 	private final ReentrantLock						mLockLocation		= new ReentrantLock();
 	private final List<ILocationUpdateRecipient>	mLocationRecipients	= new ArrayList<ILocationUpdateRecipient>();
 	private final List<IMatesUpdateRecipient>		mMatesRecipients	= new ArrayList<IMatesUpdateRecipient>();
+	private XMPPService								mXMPPService		= null;
+
+	public ServiceInterfaceImpl(XMPPService xmppService) {
+		mXMPPService = xmppService;
+	}
 
 	public void setMates(final Set<Mate> mates) {
 		acquireMatesLock();
@@ -142,6 +151,28 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 
 	private void releaseMatesLock() {
 		mLockMates.unlock();
+	}
+
+	@Override
+	public void createGroup(String groupName) throws XMPPException {
+		mXMPPService.createGroup(groupName, this);
+	}
+
+	@Override
+	public void inviteContact(String contact, String groupName) {
+		Log.d(CLASS, "inviteContact('" + contact + "', '" + groupName + "')");
+	}
+
+	@Override
+	public void setIndicator(GeoPoint location) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteIndicator(GeoPoint location) {
+		// TODO Auto-generated method stub
+
 	}
 
 }
