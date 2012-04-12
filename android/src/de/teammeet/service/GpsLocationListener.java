@@ -42,7 +42,7 @@ public class GpsLocationListener implements LocationListener {
 		// .toString() + ")");
 		final GeoPoint geopoint = new GeoPoint((int) (location.getLatitude() * 1E6),
 				(int) (location.getLongitude() * 1E6));
-		mServiceThread.setLocation(geopoint);
+		mServiceThread.setLocation(geopoint, location.getAccuracy());
 	}
 
 	@Override

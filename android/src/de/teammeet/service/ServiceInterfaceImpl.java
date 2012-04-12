@@ -104,12 +104,12 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 		}
 	}
 
-	public void setLocation(final GeoPoint geopoint) {
+	public void setLocation(final GeoPoint geopoint, float accuracy) {
 		acquireLocationLock();
 		try {
 			if (geopoint != null) {
 				for (final ILocationUpdateRecipient locationRecipient : mLocationRecipients) {
-					locationRecipient.handleLocationUpdate(geopoint);
+					locationRecipient.handleLocationUpdate(geopoint, accuracy);
 				}
 			}
 		} finally {

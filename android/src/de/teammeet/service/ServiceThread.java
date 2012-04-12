@@ -47,11 +47,11 @@ public class ServiceThread extends Thread {
 
 	private ServiceInterfaceImpl	mServiceInterface		= null;
 	private Handler					mMessageHandler			= null;
-	private GeoPoint				mLocation				= null;
-	protected GeoPoint 				mLastLocation 			= null;
+	protected GeoPoint				mLocation				= null;
+	protected GeoPoint				mLastLocation			= null;
+	protected float					mAccuracy				= 0;
 	private ServerCommunication		mServerCommunication	= null;
 	private ServiceState			mState					= ServiceState.ACTIVE;
-
 
 	public ServiceThread(final ServiceInterfaceImpl serviceInterface, final Handler messageHandler,
 			final Resources res) {
@@ -62,11 +62,11 @@ public class ServiceThread extends Thread {
 		mTimeout = mResources.getInteger(R.integer.server_timeout);
 		Timer timer = new Timer(getName(), true);
 		TimerTask timerTask = new TimerTask() {
-			
+
 			@Override
 			public void run() {
 				if (mLocation != null && mLocation != mLastLocation) {
-//					serviceInterface.sendLocation(mLocation);
+					// serviceInterface.sendLocation(mLocation);
 					showToast("Location update to: " + mLocation.toString());
 					Log.d(CLASS, "Location update to: " + mLocation.toString());
 					mLastLocation = mLocation;
@@ -126,10 +126,11 @@ public class ServiceThread extends Thread {
 		}
 	}
 
-	public void setLocation(final GeoPoint geopoint) {
+	public void setLocation(final GeoPoint geopoint, float accuracy) {
 		// Log.e(CLASS, "new mLocation set: " + geopoint.toString());
 		mLocation = geopoint;
-		mServiceInterface.setLocation(geopoint);
+		mAccuracy = accuracy;
+		mServiceInterface.setLocation(geopoint, accuracy);
 	}
 
 	public void signalGPSDisabled() {
@@ -150,15 +151,15 @@ public class ServiceThread extends Thread {
 		mServiceInterface.setDirection(direction);
 	}
 
-	 private void showToast(final String message) {
-		 if (mMessageHandler != null) {
-			 final Message msg = new Message();
-			 final Bundle bundle = new Bundle();
-			 bundle.putString("toast", message);
-			 msg.setData(bundle);
-			 mMessageHandler.sendMessage(msg);
-	 	}
-	 }
+	private void showToast(final String message) {
+		if (mMessageHandler != null) {
+			final Message msg = new Message();
+			final Bundle bundle = new Bundle();
+			bundle.putString("toast", message);
+			msg.setData(bundle);
+			mMessageHandler.sendMessage(msg);
+		}
+	}
 
 	private void showError(final String message) {
 		if (mMessageHandler != null) {
