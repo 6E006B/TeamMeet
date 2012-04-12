@@ -20,6 +20,9 @@
 
 package de.teammeet.service;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,8 +48,10 @@ public class ServiceThread extends Thread {
 	private ServiceInterfaceImpl	mServiceInterface		= null;
 	private Handler					mMessageHandler			= null;
 	private GeoPoint				mLocation				= null;
+	protected GeoPoint 				mLastLocation 			= null;
 	private ServerCommunication		mServerCommunication	= null;
 	private ServiceState			mState					= ServiceState.ACTIVE;
+
 
 	public ServiceThread(final ServiceInterfaceImpl serviceInterface, final Handler messageHandler,
 			final Resources res) {
@@ -55,6 +60,20 @@ public class ServiceThread extends Thread {
 		mResources = res;
 		mServerCommunication = new ServerCommunication(mMessageHandler, mResources);
 		mTimeout = mResources.getInteger(R.integer.server_timeout);
+		Timer timer = new Timer(getName(), true);
+		TimerTask timerTask = new TimerTask() {
+			
+			@Override
+			public void run() {
+				if (mLocation != null && mLocation != mLastLocation) {
+//					serviceInterface.sendLocation(mLocation);
+					showToast("Location update to: " + mLocation.toString());
+					Log.d(CLASS, "Location update to: " + mLocation.toString());
+					mLastLocation = mLocation;
+				}
+			}
+		};
+		timer.scheduleAtFixedRate(timerTask, mTimeout, mTimeout);
 	}
 
 	@Override
@@ -131,15 +150,15 @@ public class ServiceThread extends Thread {
 		mServiceInterface.setDirection(direction);
 	}
 
-	// private void showToast(final String message) {
-	// if (mMessageHandler != null) {
-	// final Message msg = new Message();
-	// final Bundle bundle = new Bundle();
-	// bundle.putString("toast", message);
-	// msg.setData(bundle);
-	// mMessageHandler.sendMessage(msg);
-	// }
-	// }
+	 private void showToast(final String message) {
+		 if (mMessageHandler != null) {
+			 final Message msg = new Message();
+			 final Bundle bundle = new Bundle();
+			 bundle.putString("toast", message);
+			 msg.setData(bundle);
+			 mMessageHandler.sendMessage(msg);
+	 	}
+	 }
 
 	private void showError(final String message) {
 		if (mMessageHandler != null) {
