@@ -225,5 +225,4 @@ public class TeamMeetActivity extends MapActivity {
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		}
 	}
-
 }
