@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.os.Binder;
+import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
@@ -36,8 +37,8 @@ import de.teammeet.interfaces.IService;
 
 public class ServiceInterfaceImpl extends Binder implements IService {
 
-	// private static final String CLASS =
-	// ServiceInterfaceImpl.class.getSimpleName();
+	private static final String						CLASS				= ServiceInterfaceImpl.class
+																				.getSimpleName();
 	private final ReentrantLock						mLockMates			= new ReentrantLock();
 	private final ReentrantLock						mLockLocation		= new ReentrantLock();
 	private final List<ILocationUpdateRecipient>	mLocationRecipients	= new ArrayList<ILocationUpdateRecipient>();
@@ -142,6 +143,10 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 
 	private void releaseMatesLock() {
 		mLockMates.unlock();
+	}
+
+	public void sendLocation(GeoPoint mLocation) {
+		Log.e(CLASS, "sendLocation() has no implementation!");
 	}
 
 }
