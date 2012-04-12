@@ -20,6 +20,10 @@
 
 package de.teammeet.interfaces;
 
+import org.jivesoftware.smack.XMPPException;
+
+import com.google.android.maps.GeoPoint;
+
 public interface IService {
 
 	void registerMatesUpdates(IMatesUpdateRecipient object);
@@ -30,4 +34,11 @@ public interface IService {
 
 	void unregisterLocationUpdates(ILocationUpdateRecipient object);
 
+	void createGroup(String groupName) throws XMPPException;
+
+	void inviteContact(String contact, String groupName);
+
+	void setIndicator(GeoPoint location);
+
+	void deleteIndicator(GeoPoint location);
 }
