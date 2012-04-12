@@ -145,7 +145,7 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 		mLockMates.unlock();
 	}
 
-	public void sendLocation(GeoPoint mLocation) {
+	public void sendLocation(GeoPoint mLocation, float accuracy) {
 		Log.e(CLASS, "sendLocation() has no implementation!");
 	}
 

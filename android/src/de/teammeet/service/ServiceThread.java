@@ -66,7 +66,7 @@ public class ServiceThread extends Thread {
 			@Override
 			public void run() {
 				if (mLocation != null && mLocation != mLastLocation) {
-					serviceInterface.sendLocation(mLocation);
+					serviceInterface.sendLocation(mLocation, mAccuracy);
 					showToast("Location update to: " + mLocation.toString());
 					Log.d(CLASS, "Location update to: " + mLocation.toString());
 					mLastLocation = mLocation;
