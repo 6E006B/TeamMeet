@@ -25,8 +25,10 @@ import com.google.android.maps.GeoPoint;
 public class Mate {
 
 	public GeoPoint	mLocation	= null;
+	public float	mAccuracy	= 0;
 
-	public Mate(final GeoPoint location) {
+	public Mate(final GeoPoint location, final float accuracy) {
 		mLocation = location;
+		mAccuracy = accuracy;
 	}
 }
