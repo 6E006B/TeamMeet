@@ -212,9 +212,7 @@ public class TeamMeetActivity extends MapActivity {
 	}
 
 	private void focusCurrentLocation() {
-		if (mSelfOverlay.mCurrentLocation != null) {
-			mMapController.setCenter(mSelfOverlay.mCurrentLocation);
-		}
+		mLocationFollower.focusCurrentLocation();
 	}
 
 	private void toggleFullscreen() {

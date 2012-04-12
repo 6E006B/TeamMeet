@@ -31,6 +31,7 @@ public class LocationFollower implements ILocationUpdateRecipient {
 	private MapController				mMapController		= null;
 	private TeamMeetServiceConnection	mServiceConnection	= null;
 	private boolean						mActive				= false;
+	private GeoPoint					mLastLocation		= null;
 
 	public LocationFollower(final MapController mapController, TeamMeetServiceConnection serviceConnection) {
 		mMapController = mapController;
@@ -38,10 +39,11 @@ public class LocationFollower implements ILocationUpdateRecipient {
 	}
 
 	@Override
-	public void handleLocationUpdate(final GeoPoint geopoint) {
+	public void handleLocationUpdate(final GeoPoint geopoint, float accuracy) {
 		if (mActive) {
 			mMapController.animateTo(geopoint);
 		}
+		mLastLocation = geopoint;
 	}
 
 	public boolean isActive() {
@@ -67,6 +69,12 @@ public class LocationFollower implements ILocationUpdateRecipient {
 	public void handleDirectionUpdate(final float direction) {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void focusCurrentLocation() {
+		if (mLastLocation != null) {
+			mMapController.animateTo(mLastLocation);
+		}
 	}
 
 }
