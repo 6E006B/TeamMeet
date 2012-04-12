@@ -8,7 +8,7 @@ import de.teammeet.service.ServiceInterfaceImpl;
 
 public class GroupMessageListener implements PacketListener {
 
-	private static String	CLASS			= GroupMessageListener.class.getSimpleName();
+	private static String	CLASS				= GroupMessageListener.class.getSimpleName();
 
 	ServiceInterfaceImpl	mServiceInterface	= null;
 
@@ -21,7 +21,8 @@ public class GroupMessageListener implements PacketListener {
 		String from = packet.getFrom();
 		String xml = packet.toXML();
 		Log.d(CLASS, from + " sent " + xml);
-		// mServiceInterface.updateMate(from, location);
+		// Mate mate = new Mate(from, location);
+		// mServiceInterface.updateMate(mate);
 	}
 
 }
