@@ -37,6 +37,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import de.teammeet.helper.ToastDisposerSingleton;
+import de.teammeet.xmpp.XMPPService;
 
 public class TeamMeetService extends Service {
 	private static final String							CLASS					= TeamMeetService.class
@@ -51,12 +52,14 @@ public class TeamMeetService extends Service {
 	private final boolean								mSensorRunning			= false;
 	private SensorManager								mSensorManager			= null;
 	private SensorEventListener							mSensorEventListener	= null;
+	private XMPPService									mXMPPService			= null;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		// Log.e(CLASS, "TeamMeetService.onCreate() called.");
-		mServiceInterface = new ServiceInterfaceImpl();
+		mXMPPService = new XMPPService();
+		mServiceInterface = new ServiceInterfaceImpl(mXMPPService);
 		mMessageHandler = new Handler() {
 			@Override
 			public void handleMessage(final Message msg) {
