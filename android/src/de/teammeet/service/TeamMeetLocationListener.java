@@ -24,6 +24,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.content.res.Resources;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -33,9 +38,9 @@ import com.google.android.maps.GeoPoint;
 
 import de.teammeet.R;
 
-public class ServiceThread {
+public class TeamMeetLocationListener implements LocationListener, SensorEventListener{
 
-	private static final String		CLASS				= ServiceThread.class.getSimpleName();
+	private static final String		CLASS				= TeamMeetLocationListener.class.getSimpleName();
 
 	private Resources				mResources			= null;
 	private int						mTimeout			= 0;
@@ -49,7 +54,7 @@ public class ServiceThread {
 	private Timer					mTimer				= null;
 	private TimerTask				mTimerTask			= null;
 
-	public ServiceThread(final ServiceInterfaceImpl serviceInterface, final Handler messageHandler,
+	public TeamMeetLocationListener(final ServiceInterfaceImpl serviceInterface, final Handler messageHandler,
 			final Resources res) {
 		mServiceInterface = serviceInterface;
 		mMessageHandler = messageHandler;
@@ -69,31 +74,6 @@ public class ServiceThread {
 			}
 		};
 		mTimer.scheduleAtFixedRate(mTimerTask, mTimeout, mTimeout);
-	}
-
-	public void setLocation(final GeoPoint geopoint, float accuracy) {
-		// Log.e(CLASS, "new mLocation set: " + geopoint.toString());
-		mLocation = geopoint;
-		mAccuracy = accuracy;
-		mServiceInterface.setLocation(geopoint, accuracy);
-	}
-
-	public void signalGPSDisabled() {
-		Log.e(CLASS, "ServiceThread.signalGPSDisabled() called.");
-		showError("Please enable your GPS.");
-	}
-
-	public void signalGPSEnabled() {
-		Log.e(CLASS, "ServiceThread.signalGPSEnabled() called.");
-	}
-
-	public void signalGPSStautsChange(final int status) {
-		Log.e(CLASS, "ServiceThread.signalGPSStatusChange(" + status + ") called.");
-	}
-
-	public void updateDirection(final float direction) {
-		// Log.e(CLASS, "new mLocation set: " + direction);
-		mServiceInterface.setDirection(direction);
 	}
 
 	private void showToast(final String message) {
@@ -118,5 +98,48 @@ public class ServiceThread {
 
 	public void deactivate() {
 		mTimerTask.cancel();
+	}
+	
+	@Override
+	public void onLocationChanged(final Location location) {
+		
+		// Log.e(CLASS, "GpsLocationListener.onLocationChanged(" + location
+		// .toString() + ")");
+		final GeoPoint geopoint = new GeoPoint((int) (location.getLatitude() * 1E6),
+				(int) (location.getLongitude() * 1E6));
+		mLocation = geopoint;
+		mAccuracy = location.getAccuracy();
+		mServiceInterface.setLocation(mLocation, mAccuracy);
+	}
+
+	@Override
+	public void onProviderDisabled(final String provider) {
+		// TODO handle if provider gets disabled and probably also if provided
+		// isn't enabled in the first place
+		Log.e(CLASS, "TeamMeetLocationListener.onProviderDisabled() called.");
+		showError("Please enable your GPS.");
+	}
+
+	@Override
+	public void onProviderEnabled(final String provider) {
+		// TODO handle activation of provider?
+		Log.e(CLASS, "TeamMeetLocationListener.onProviderEnabled() called.");
+	}
+
+	@Override
+	public void onStatusChanged(final String provider, final int status, final Bundle extras) {
+		// TODO handle status changes
+		Log.e(CLASS, "TeamMeetLocationListener.onStatusChange(" + status + ") called.");
+	}
+	
+	@Override
+	public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
+		//NOTE: this is the accuracy of the compass not the gps
+	}
+
+	@Override
+	public void onSensorChanged(final SensorEvent event) {
+		// Log.e(CLASS, "new mLocation set: " + direction);
+		mServiceInterface.setDirection(event.values[0]);
 	}
 }
