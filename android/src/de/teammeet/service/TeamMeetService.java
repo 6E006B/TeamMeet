@@ -84,6 +84,7 @@ public class TeamMeetService extends Service {
 
 	private void stopServiceThread() {
 		if (mServiceThread != null) {
+			mServiceThread.deactivate();
 		} else {
 			Log.e(CLASS, "WARNING: mServiceThread was null!");
 		}

@@ -115,4 +115,8 @@ public class ServiceThread {
 			mMessageHandler.sendMessage(msg);
 		}
 	}
+
+	public void deactivate() {
+		mTimerTask.cancel();
+	}
 }
