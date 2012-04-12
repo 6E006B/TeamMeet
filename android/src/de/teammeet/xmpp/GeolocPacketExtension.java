@@ -9,12 +9,12 @@ public class GeolocPacketExtension implements PacketExtension {
 	private static String CLASS = GeolocPacketExtension.class.getSimpleName();
 	private int mLatitude = 0;
 	private int mLongitude = 0;
-	private int mError = 0;
+	private float mAccuracy = 0;
 	
-	public GeolocPacketExtension(int latitude, int longitude, int error) {
+	public GeolocPacketExtension(int latitude, int longitude, float accuracy) {
 		mLatitude = latitude;
 		mLongitude = longitude;
-		mError = error;
+		mAccuracy = accuracy;
 	}
 	
 	@Override
@@ -30,6 +30,6 @@ public class GeolocPacketExtension implements PacketExtension {
 
 	@Override
 	public String toXML() {
-		return String.format("<x xmlns=\"%s\"><geoloc><lat>%d</lat><long>%d</long><error>%s</error></geoloc></x>", getNamespace(), mLatitude, mLongitude, mError);
+		return String.format("<x xmlns=\"%s\"><geoloc><lat>%d</lat><long>%d</long><error>%f</error></geoloc></x>", getNamespace(), mLatitude, mLongitude, mAccuracy);
 	}
 }
