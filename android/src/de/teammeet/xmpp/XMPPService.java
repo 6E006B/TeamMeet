@@ -20,14 +20,12 @@ import de.teammeet.service.ServiceInterfaceImpl;
 
 public class XMPPService {
 
-	private XMPPConnection	mXMPP	= null;
-	private String mJID = null;
-	private String mServer = null;
-	private Map<String, MultiUserChat> groups = null;
-	private ServiceInterfaceImpl mServiceImpl = null;
+	private XMPPConnection				mXMPP	= null;
+	private String						mJID	= null;
+	private String						mServer	= null;
+	private Map<String, MultiUserChat>	groups	= null;
 
-	public XMPPService(ServiceInterfaceImpl serviceImpl) {
-		mServiceImpl  = serviceImpl;
+	public XMPPService() {
 		ConfigureProviderManager.configureProviderManager();
 		groups = new HashMap<String, MultiUserChat>();
 	}
@@ -35,7 +33,7 @@ public class XMPPService {
 	public void connect(String jid, String server, String password) throws XMPPException {
 		mJID = jid;
 		mServer = server;
-		
+
 		ConnectionConfiguration config = new ConnectionConfiguration(server);
 		config.setSelfSignedCertificateEnabled(true);
 		config.setDebuggerEnabled(true);
@@ -59,24 +57,25 @@ public class XMPPService {
 		}
 		return contacts;
 	}
-	
-	public void createGroup(String groupName) throws XMPPException {
+
+	public void createGroup(String groupName, ServiceInterfaceImpl serviceInterface) throws XMPPException {
 		MultiUserChat muc = new MultiUserChat(mXMPP, String.format("%s@conference.%s", groupName, mServer));
 		muc.create(mJID);
 		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
-		muc.addMessageListener(new GroupMessageListener(mServiceImpl));
+		muc.addMessageListener(new GroupMessageListener(serviceInterface));
 		groups.put(groupName, muc);
 	}
 
 	public void sendLocation(GeoPoint location, float accuracy) throws XMPPException {
 		Message message = new Message();
-		GeolocPacketExtension geoloc = new GeolocPacketExtension(location.getLatitudeE6(), location.getLongitudeE6(), accuracy);
+		GeolocPacketExtension geoloc = new GeolocPacketExtension(location.getLatitudeE6(),
+				location.getLongitudeE6(), accuracy);
 		message.addExtension(geoloc);
 		sendAllGroups(message);
 	}
-	
+
 	private void sendAllGroups(Message message) throws XMPPException {
-		for(MultiUserChat muc : groups.values()) {
+		for (MultiUserChat muc : groups.values()) {
 			muc.sendMessage(message);
 		}
 	}
