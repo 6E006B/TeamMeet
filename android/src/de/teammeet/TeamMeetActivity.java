@@ -118,7 +118,7 @@ public class TeamMeetActivity extends MapActivity {
 			mLocationFollower.setActive(mFollowingLocation);
 		} else {
 			Log.e(CLASS, "bind failed");
-			showError("Couldn't connect to service.");
+			mToastSingleton.showError("Couldn't connect to service.");
 			this.finish();
 		}
 
@@ -151,14 +151,6 @@ public class TeamMeetActivity extends MapActivity {
 		mListOfOverlays.add(mSelfOverlay);
 		mListOfOverlays.add(mMatesOverlay);
 		mListOfOverlays.add(mIndicationOverlay);
-	}
-
-	private void showToast(final String message) {
-		mToastSingleton.addLongToast(message);
-	}
-
-	private void showError(final String message) {
-		showToast("Error:\n" + message);
 	}
 
 	@Override
