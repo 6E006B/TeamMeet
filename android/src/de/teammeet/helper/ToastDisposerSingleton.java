@@ -102,6 +102,14 @@ public class ToastDisposerSingleton extends Activity {
 		addToast(message, Toast.LENGTH_LONG);
 	}
 
+	public void show(final String message) {
+		addLongToast(message);
+	}
+
+	public void showError(final String message) {
+		show("Error:\n" + message);
+	}
+
 	// supplements messages to the queue
 	private void addToast(final String message, int duration) {
 		ToastRunnable toastRunnable = new ToastRunnable(mContext, message, duration, mViewID);
