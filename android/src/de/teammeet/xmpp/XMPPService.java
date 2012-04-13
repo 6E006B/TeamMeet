@@ -66,6 +66,12 @@ public class XMPPService {
 		groups.put(groupName, muc);
 	}
 
+	public void invite(String contact, String groupName) {
+		MultiUserChat muc = groups.get(groupName);
+		muc.invite(contact, "reason");
+		//TODO: there is an InvitationRejectionListener - maybe use it
+	}
+
 	public void sendLocation(GeoPoint location, float accuracy) throws XMPPException {
 		Message message = new Message();
 		GeolocPacketExtension geoloc = new GeolocPacketExtension(location.getLatitudeE6(),

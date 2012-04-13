@@ -164,7 +164,7 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 
 	@Override
 	public void inviteContact(String contact, String groupName) {
-		Log.d(CLASS, "inviteContact('" + contact + "', '" + groupName + "') not yet implemented");
+		mXMPPService.invite(contact, groupName);
 	}
 
 	@Override
