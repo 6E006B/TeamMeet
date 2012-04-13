@@ -114,8 +114,9 @@ public class TeamMeetActivity extends MapActivity {
 			mServiceConnection.registerLocationUpdates(mSelfOverlay);
 
 			// Create and enable the location follower
-			mLocationFollower = new LocationFollower(mMapController, mServiceConnection);
+			mLocationFollower = new LocationFollower(mMapController);
 			mLocationFollower.setActive(mFollowingLocation);
+			mServiceConnection.registerLocationUpdates(mLocationFollower);
 		} else {
 			Log.e(CLASS, "bind failed");
 			showError("Couldn't connect to service.");
@@ -211,9 +212,7 @@ public class TeamMeetActivity extends MapActivity {
 	}
 
 	private void focusCurrentLocation() {
-		if (mSelfOverlay.mCurrentLocation != null) {
-			mMapController.setCenter(mSelfOverlay.mCurrentLocation);
-		}
+		mLocationFollower.focusCurrentLocation();
 	}
 
 	private void toggleFullscreen() {
@@ -226,5 +225,4 @@ public class TeamMeetActivity extends MapActivity {
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		}
 	}
-
 }

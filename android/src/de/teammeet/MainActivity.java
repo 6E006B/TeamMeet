@@ -102,8 +102,7 @@ public class MainActivity extends Activity {
 				// e1.getMessage());
 				// e1.printStackTrace();
 				// }
-				
-				
+
 				ConfigureProviderManager.configureProviderManager();
 
 				ConnectionConfiguration config = new ConnectionConfiguration("jabber.no");
@@ -132,30 +131,34 @@ public class MainActivity extends Activity {
 					MultiUserChat muc = new MultiUserChat(xmpp, "teammeettestroom@conference.jabber.org");
 					muc.create("ichbins");
 					muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
-//					muc.join("ichbins");
+					// muc.join("ichbins");
 
-//					assert(xmpp != null);
-//					Iterator<String> rooms = MultiUserChat.getJoinedRooms(xmpp, "teammeettest@jabber.no");
-//					while(rooms.hasNext()) {
-//						Log.d(CLASS, rooms.next());
-//					}
+					// assert(xmpp != null);
+					// Iterator<String> rooms =
+					// MultiUserChat.getJoinedRooms(xmpp,
+					// "teammeettest@jabber.no");
+					// while(rooms.hasNext()) {
+					// Log.d(CLASS, rooms.next());
+					// }
 					muc.invite("dtk@jabber.ccc.de", "hier");
 					Message message = new Message();
 					message.addExtension(new GeolocPacketExtension(123456, 654321, 0));
 					message.setBody("testmessage");
 					muc.sendMessage(message);
 
-//					ChatManager chatManager = xmpp.getChatManager();
-//					Chat chat = chatManager.createChat("3schward@jabber.mafiasi.de", new MessageListener() {
-//
-//						@Override
-//						public void processMessage(Chat arg0, Message arg1) {
-//							// TODO Auto-generated method stub
-//							Log.d(CLASS, arg1.getBody());
-//						}
-//					});
-					
-//					chat.sendMessage(message);
+					// ChatManager chatManager = xmpp.getChatManager();
+					// Chat chat =
+					// chatManager.createChat("3schward@jabber.mafiasi.de", new
+					// MessageListener() {
+					//
+					// @Override
+					// public void processMessage(Chat arg0, Message arg1) {
+					// // TODO Auto-generated method stub
+					// Log.d(CLASS, arg1.getBody());
+					// }
+					// });
+
+					// chat.sendMessage(message);
 				} catch (XMPPException e) {
 					Log.e(CLASS, "Failed to login or send:\n" + e.getMessage());
 					e.printStackTrace();
@@ -163,7 +166,5 @@ public class MainActivity extends Activity {
 			}
 		}).start();
 	}
-
-
 
 }

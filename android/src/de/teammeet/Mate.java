@@ -26,10 +26,12 @@ public class Mate {
 
 	private String mID = null; 
 	private GeoPoint mLocation	= null;
+	public float	mAccuracy	= 0;
 
-	public Mate(final String id, final GeoPoint location) {
+	public Mate(final String id, final GeoPoint location, final float accuracy) {
 		mID = id;
 		mLocation = location;
+		mAccuracy = accuracy;
 	}
 	
 	public String getID() {
@@ -42,5 +44,6 @@ public class Mate {
 	
 	public void setLocation(GeoPoint location) {
 		mLocation = location;
+		mAccuracy = accuracy;
 	}
 }
