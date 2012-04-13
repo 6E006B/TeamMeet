@@ -166,7 +166,7 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 	public void disconnectXMPP() {
 		mXMPPService.disconnect();
 	}
-	
+
 	@Override
 	public void createGroup(String groupName) throws XMPPException {
 		mXMPPService.createGroup(groupName, this);
@@ -187,8 +187,13 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 		Log.d(CLASS, "deleteIndicator(" + location.toString() + ") not yet implemented");
 	}
 
-	public void sendLocation(GeoPoint mLocation, float accuracy) {
-		Log.e(CLASS, "sendLocation() has no implementation!");
+	public void sendLocation(GeoPoint location, float accuracy) {
+		try {
+			mXMPPService.sendLocation(location, accuracy);
+		} catch (XMPPException e) {
+			// TODO Decide what to do depending on exception
+			Log.e(CLASS, "Error sending locaiton: " + e.toString());
+			e.printStackTrace();
+		}
 	}
-
 }
