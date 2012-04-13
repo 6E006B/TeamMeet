@@ -88,6 +88,22 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if (mServiceConnection != null) {
+			unbindService(mServiceConnection);
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		mServiceConnection.disconnectXMPP();
+		final Intent intent = new Intent(this, TeamMeetService.class);
+		stopService(intent);
+		super.onDestroy();
+	}
+
 	protected void startMapActivity() {
 		final Intent intent = new Intent(MainActivity.this, TeamMeetActivity.class);
 		startActivity(intent);
