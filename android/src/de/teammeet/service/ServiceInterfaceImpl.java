@@ -156,6 +156,16 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 	public void connectXMPP(String userID, String server, String password) throws XMPPException {
 		mXMPPService.connect(userID, server, password);
 	}
+
+	@Override
+	public boolean isXMPPAuthenticated() {
+		return mXMPPService.isAuthenticated();
+	}
+
+	@Override
+	public void disconnectXMPP() {
+		mXMPPService.disconnect();
+	}
 	
 	@Override
 	public void createGroup(String groupName) throws XMPPException {

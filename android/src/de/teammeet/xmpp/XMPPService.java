@@ -44,6 +44,14 @@ public class XMPPService {
 		MultiUserChat.addInvitationListener(mXMPP, new GroupInvitationListener());
 	}
 
+	public boolean isAuthenticated() {
+		return mXMPP.isAuthenticated();
+	}
+
+	public void disconnect() {
+		mXMPP.disconnect();
+	}
+
 	public List<String> getContacts() throws Exception {
 		List<String> contacts = new ArrayList<String>();
 		if (mXMPP != null) {

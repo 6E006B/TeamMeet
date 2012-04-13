@@ -36,6 +36,10 @@ public interface IService {
 
 	void connectXMPP(String userID, String server, String password) throws XMPPException;
 
+	boolean isXMPPAuthenticated();
+
+	void disconnectXMPP();
+
 	void createGroup(String groupName) throws XMPPException;
 
 	void inviteContact(String contact, String groupName);
