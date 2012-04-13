@@ -25,11 +25,11 @@ public class GeolocPacketExtension implements PacketExtension {
 	@Override
 	public String getNamespace() {
 		Log.d(CLASS, "getNamespace() called");
-		return "https://teammeet.de/geoloc.ns";
+		return "https://teammeet.de/teammeet.ns";
 	}
 
 	@Override
 	public String toXML() {
-		return String.format("<x xmlns=\"%s\"><geoloc><lat>%d</lat><long>%d</long><error>%f</error></geoloc></x>", getNamespace(), mLatitude, mLongitude, mAccuracy);
+		return String.format("<x xmlns=\"%s\"><geoloc><lat>%d</lat><long>%d</long><accuracy>%f</accuracy></geoloc></x>", getNamespace(), mLatitude, mLongitude, mAccuracy);
 	}
 }
