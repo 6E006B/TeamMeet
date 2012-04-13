@@ -98,7 +98,6 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		mServiceConnection.disconnectXMPP();
 		final Intent intent = new Intent(this, TeamMeetService.class);
 		stopService(intent);
 		super.onDestroy();

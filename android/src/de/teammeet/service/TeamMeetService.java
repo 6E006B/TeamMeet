@@ -171,7 +171,7 @@ public class TeamMeetService extends Service {
 		stopServiceThread();
 		deactivateGPS();
 		deactivateCompass();
-
+		mXMPPService.disconnect();
 		Log.e(CLASS, "TeamMeetService.onDestroy() called");
 		super.onDestroy();
 	}
