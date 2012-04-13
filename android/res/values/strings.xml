@@ -19,7 +19,6 @@
 -->
 <resources>
 <string name="app_name">TeamMeet</string>
-<string name="server_url">http://hack0r.net:8383/serv.php</string>
 <string name="menu_auto_center">Auto center position</string>
 <string name="menu_fullscreen">Fullscreen</string>
 <string name="menu_goto_mylocation">Current location</string>
@@ -27,4 +26,8 @@
 <string name="button_show_map">Show Map</string>
 <string name="button_show_settings">Edit Settings</string>
 <string name="button_xmpp">XMPP Stuff</string>
+<string name="text_xmpp_account">XMPP Account Details</string>
+<string name="text_user_id">User ID:</string>
+<string name="text_server">Server:</string>
+<string name="text_password">Password:</string>
 </resources>

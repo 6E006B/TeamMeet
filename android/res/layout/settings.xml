@@ -20,4 +20,63 @@
 <RelativeLayout android:id="@+id/RelativeLayout01" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:background="#000044">
 	<CheckBox android:id="@+id/CheckBoxFollowPlayer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Auto center on position"></CheckBox>
 	<CheckBox android:layout_below="@+id/CheckBoxFollowPlayer" android:id="@+id/CheckBoxFullscreen" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Fullscreen"></CheckBox>
+
+	<TextView
+	    android:id="@+id/TextXMPPAccount"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/CheckBoxFullscreen"
+	    android:text="@string/text_xmpp_account" />
+
+	<TextView
+	    android:id="@+id/TextUserID"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/TextXMPPAccount"
+	    android:text="@string/text_user_id" />
+
+	<EditText
+	    android:id="@+id/EditTextUserID"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+		android:layout_below="@+id/TextXMPPAccount"
+	    android:layout_toRightOf="@id/TextUserID"
+	    android:ems="10"
+	    android:inputType="textEmailAddress" >
+
+	    <requestFocus />
+	</EditText>
+
+	<TextView
+	    android:id="@+id/TextServer"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/EditTextUserID"
+	    android:text="@string/text_server" />
+
+	<EditText
+	    android:id="@+id/EditTextServer"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/EditTextUserID"
+	    android:layout_toRightOf="@id/TextServer"
+	    android:ems="10"
+	    android:inputType="textUri" />
+
+	<TextView
+	    android:id="@+id/TextPassword"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/EditTextServer"
+	    android:text="@string/text_password" />
+
+	<EditText
+	    android:id="@+id/EditTextPassword"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/EditTextServer"
+	    android:layout_toRightOf="@id/TextPassword"
+	    android:ems="10"
+	    android:inputType="textPassword" />
+
 </RelativeLayout>
