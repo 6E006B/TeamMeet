@@ -112,12 +112,12 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 		}
 	}
 
-	public void setLocation(final GeoPoint geopoint) {
+	public void setLocation(final GeoPoint geopoint, float accuracy) {
 		acquireLocationLock();
 		try {
 			if (geopoint != null) {
 				for (final ILocationUpdateRecipient locationRecipient : mLocationRecipients) {
-					locationRecipient.handleLocationUpdate(geopoint);
+					locationRecipient.handleLocationUpdate(geopoint, accuracy);
 				}
 			}
 		} finally {
@@ -185,6 +185,9 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 	@Override
 	public void deleteIndicator(GeoPoint location) {
 		Log.d(CLASS, "deleteIndicator(" + location.toString() + ") not yet implemented");
+
+	public void sendLocation(GeoPoint mLocation, float accuracy) {
+		Log.e(CLASS, "sendLocation() has no implementation!");
 	}
 
 }

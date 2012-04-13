@@ -38,12 +38,13 @@ import de.teammeet.interfaces.ILocationUpdateRecipient;
 public class SelfOverlay extends Overlay implements ILocationUpdateRecipient {
 
 	private double				mArrowLength		= 0;
-	public GeoPoint				mCurrentLocation	= null;
+	private GeoPoint			mCurrentLocation	= null;
 	private Paint				mPaintPlayer		= null;
 	private final ReentrantLock	mLock				= new ReentrantLock();
 	private boolean				mHasPlayerDirection	= false;
 	private float				mPlayerDirection	= 0;
 	private Resources			mResources			= null;
+	private float				mAccuracy			= 0;
 
 	public SelfOverlay(final Resources res) {
 		super();
@@ -89,6 +90,7 @@ public class SelfOverlay extends Overlay implements ILocationUpdateRecipient {
 					mPaintPlayer.setStyle(Style.STROKE);
 					canvas.drawCircle(coords.x, coords.y, 5, mPaintPlayer);
 				}
+				// TODO: represent accuracy somehow
 			} finally {
 				releaseLock();
 			}
@@ -97,10 +99,11 @@ public class SelfOverlay extends Overlay implements ILocationUpdateRecipient {
 	}
 
 	@Override
-	public void handleLocationUpdate(final GeoPoint geopoint) {
+	public void handleLocationUpdate(final GeoPoint geopoint, final float accuracy) {
 		acquireLock();
 		try {
 			mCurrentLocation = geopoint;
+			mAccuracy = accuracy;
 		} finally {
 			releaseLock();
 		}

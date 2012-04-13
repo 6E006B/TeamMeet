@@ -23,7 +23,7 @@ package de.teammeet.interfaces;
 import com.google.android.maps.GeoPoint;
 
 public interface ILocationUpdateRecipient {
-	void handleLocationUpdate(GeoPoint geopoint);
+	void handleLocationUpdate(GeoPoint geopoint, float accuracy);
 
 	void handleDirectionUpdate(float direction);
 

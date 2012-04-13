@@ -27,7 +27,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Criteria;
 import android.location.LocationManager;
@@ -42,16 +41,14 @@ import de.teammeet.xmpp.XMPPService;
 public class TeamMeetService extends Service {
 	private static final String							CLASS					= TeamMeetService.class
 																						.getSimpleName();
-	private ServiceThread								mServiceThread			= null;
+	private TeamMeetLocationListener					mLocationListener		= null;
 	private ServiceInterfaceImpl						mServiceInterface		= null;
 	private Handler										mMessageHandler			= null;
 	private de.teammeet.helper.ToastDisposerSingleton	mTostSingleton			= null;
 
 	private LocationManager								mLocationManager		= null;
-	private GpsLocationListener							mGpsLocationListener	= null;
 	private final boolean								mSensorRunning			= false;
 	private SensorManager								mSensorManager			= null;
-	private SensorEventListener							mSensorEventListener	= null;
 	private XMPPService									mXMPPService			= null;
 
 	@Override
@@ -73,25 +70,23 @@ public class TeamMeetService extends Service {
 		};
 		mTostSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
 
-		startServiceThread();
+		startLocationListener();
 		activateGPS();
 		activateCompass();
 
 		// Log.e(CLASS, "TeamMeetService.onCreate() done");
 	}
 
-	private void startServiceThread() {
-		mServiceThread = new ServiceThread(mServiceInterface, mMessageHandler, getResources());
-		mServiceThread.setDaemon(true);
-		mServiceThread.start();
-		Log.e(CLASS, "ServiceThread started...");
+	private void startLocationListener() {
+		mLocationListener = new TeamMeetLocationListener(mServiceInterface, mMessageHandler, getResources());
+		Log.e(CLASS, "TeamMeetLocationListener started...");
 	}
 
-	private void stopServiceThread() {
-		if (mServiceThread != null) {
-			mServiceThread.deactivateThread();
+	private void stopLocationListener() {
+		if (mLocationListener != null) {
+			mLocationListener.deactivate();
 		} else {
-			Log.e(CLASS, "WARNING: mServiceThread was null!");
+			Log.e(CLASS, "WARNING: mLocationListener was null!");
 		}
 	}
 
@@ -103,8 +98,7 @@ public class TeamMeetService extends Service {
 		final String providerString = mLocationManager.getBestProvider(criteria, false);
 		if (providerString != null) {
 			Log.e(CLASS, "providerString is " + providerString);
-			mGpsLocationListener = new GpsLocationListener(mServiceThread);
-			mLocationManager.requestLocationUpdates(providerString, 0, 0, mGpsLocationListener); // TODO
+			mLocationManager.requestLocationUpdates(providerString, 0, 0, mLocationListener); // TODO
 			// save
 			// power
 			// Log.e(CLASS, "sucessfully requested location updates...");
@@ -117,8 +111,8 @@ public class TeamMeetService extends Service {
 	private void deactivateGPS() {
 		Log.e(CLASS, "TeamMeetService.deactivateGPS() called.");
 		if (mLocationManager != null) {
-			if (mGpsLocationListener != null) {
-				mLocationManager.removeUpdates(mGpsLocationListener);
+			if (mLocationListener != null) {
+				mLocationManager.removeUpdates(mLocationListener);
 			} else {
 				Log.e(CLASS, "WARNING: mGpsLocationListener was null!");
 			}
@@ -126,7 +120,6 @@ public class TeamMeetService extends Service {
 			Log.e(CLASS, "WARNING: mLocationManager was null!");
 		}
 		mLocationManager = null;
-		mGpsLocationListener = null;
 	}
 
 	private void activateCompass() {
@@ -140,8 +133,7 @@ public class TeamMeetService extends Service {
 		Sensor m_rotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 
 		if (m_rotationVectorSensor != null) {
-			mSensorEventListener = new CompassListener(mServiceThread);
-			mSensorManager.registerListener(mSensorEventListener, m_rotationVectorSensor,
+			mSensorManager.registerListener(mLocationListener, m_rotationVectorSensor,
 					SensorManager.SENSOR_DELAY_NORMAL);
 		} else {
 			mTostSingleton.addLongToast("No ORIENTATION Sensor");
@@ -150,7 +142,7 @@ public class TeamMeetService extends Service {
 
 	private void deactivateCompass() {
 		if (mSensorRunning) {
-			mSensorManager.unregisterListener(mSensorEventListener);
+			mSensorManager.unregisterListener(mLocationListener);
 		}
 	}
 
@@ -168,7 +160,7 @@ public class TeamMeetService extends Service {
 
 	@Override
 	public void onDestroy() {
-		stopServiceThread();
+		stopLocationListener();
 		deactivateGPS();
 		deactivateCompass();
 		mXMPPService.disconnect();
