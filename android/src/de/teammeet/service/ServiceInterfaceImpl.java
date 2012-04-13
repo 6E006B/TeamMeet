@@ -185,6 +185,7 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 	@Override
 	public void deleteIndicator(GeoPoint location) {
 		Log.d(CLASS, "deleteIndicator(" + location.toString() + ") not yet implemented");
+	}
 
 	public void sendLocation(GeoPoint mLocation, float accuracy) {
 		Log.e(CLASS, "sendLocation() has no implementation!");
