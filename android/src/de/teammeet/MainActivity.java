@@ -26,15 +26,23 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import de.teammeet.helper.ToastDisposerSingleton;
+import de.teammeet.service.TeamMeetService;
 
 public class MainActivity extends Activity {
 
 	private String	CLASS	= MainActivity.class.getSimpleName();
 
+	private TeamMeetServiceConnection mServiceConnection = null;
+
+	private ToastDisposerSingleton mToastSingleton = null;
+
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+
+		mToastSingleton  = ToastDisposerSingleton.getInstance(getApplicationContext());
 
 		Button b;
 
@@ -58,6 +66,26 @@ public class MainActivity extends Activity {
 				sendXMPPMessage();
 			}
 		});
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		// create the service (if it isn't already running
+		final Intent intent = new Intent(getApplicationContext(), TeamMeetService.class);
+		startService(intent);
+
+		// now connect to the service
+		mServiceConnection  = new TeamMeetServiceConnection();
+		final boolean bindSuccess = bindService(intent, mServiceConnection, 0);
+		if (bindSuccess) {
+			Log.e(CLASS, "bind succeeded");
+		} else {
+			Log.e(CLASS, "bind failed");
+			mToastSingleton.showError("Couldn't connect to service.");
+			this.finish();
+		}
 	}
 
 	protected void startMapActivity() {
