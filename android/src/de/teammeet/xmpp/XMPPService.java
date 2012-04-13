@@ -74,6 +74,14 @@ public class XMPPService {
 		sendAllGroups(message);
 	}
 
+	public void sendIndicator(GeoPoint location) throws XMPPException {
+		Message message = new Message();
+		IndicatorPacketExtension indication = new IndicatorPacketExtension(location.getLatitudeE6(),
+				location.getLongitudeE6());
+		message.addExtension(indication);
+		sendAllGroups(message);
+	}
+
 	private void sendAllGroups(Message message) throws XMPPException {
 		for (MultiUserChat muc : groups.values()) {
 			muc.sendMessage(message);
