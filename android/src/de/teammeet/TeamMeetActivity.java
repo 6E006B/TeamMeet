@@ -126,11 +126,11 @@ public class TeamMeetActivity extends MapActivity {
 
 	@Override
 	protected void onPause() {
-		super.onPause();
 		if (mServiceConnection != null) {
 			unbindService(mServiceConnection);
 		}
 		mListOfOverlays.clear();
+		super.onPause();
 	}
 
 	@Override
