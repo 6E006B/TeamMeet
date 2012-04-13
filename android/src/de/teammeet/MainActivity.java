@@ -22,6 +22,7 @@ package de.teammeet;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -66,6 +67,16 @@ public class MainActivity extends Activity {
 				sendXMPPMessage();
 			}
 		});
+
+		// If the user has not yet configured his XMPP settings lead the way
+		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+		if (settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "").equals("") ||
+			settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "").equals("") ||
+			settings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, "").equals("")) {
+			mToastSingleton.show("Please configure your XMPP Account.");
+			Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+			startActivity(settingsIntent);
+		}
 	}
 
 	@Override
