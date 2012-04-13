@@ -153,8 +153,8 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 	}
 
 	@Override
-	public void connectXMPP(String jid, String server, String password) throws XMPPException {
-		mXMPPService.connect(jid, server, password);
+	public void connectXMPP(String userID, String server, String password) throws XMPPException {
+		mXMPPService.connect(userID, server, password);
 	}
 	
 	@Override

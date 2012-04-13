@@ -21,7 +21,7 @@ import de.teammeet.service.ServiceInterfaceImpl;
 public class XMPPService {
 
 	private XMPPConnection				mXMPP	= null;
-	private String						mJID	= null;
+	private String						mUserID	= null;
 	private String						mServer	= null;
 	private Map<String, MultiUserChat>	groups	= null;
 
@@ -30,8 +30,8 @@ public class XMPPService {
 		groups = new HashMap<String, MultiUserChat>();
 	}
 
-	public void connect(String jid, String server, String password) throws XMPPException {
-		mJID = jid;
+	public void connect(String userID, String server, String password) throws XMPPException {
+		mUserID = userID;
 		mServer = server;
 
 		ConnectionConfiguration config = new ConnectionConfiguration(server);
@@ -40,7 +40,7 @@ public class XMPPService {
 
 		mXMPP = new XMPPConnection(config);
 		mXMPP.connect();
-		mXMPP.login(jid, password);
+		mXMPP.login(userID, password);
 		MultiUserChat.addInvitationListener(mXMPP, new GroupInvitationListener());
 	}
 
@@ -60,7 +60,7 @@ public class XMPPService {
 
 	public void createGroup(String groupName, ServiceInterfaceImpl serviceInterface) throws XMPPException {
 		MultiUserChat muc = new MultiUserChat(mXMPP, String.format("%s@conference.%s", groupName, mServer));
-		muc.create(mJID);
+		muc.create(mUserID);
 		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
 		muc.addMessageListener(new GroupMessageListener(serviceInterface));
 		groups.put(groupName, muc);

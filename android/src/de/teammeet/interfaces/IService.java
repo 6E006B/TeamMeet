@@ -34,7 +34,7 @@ public interface IService {
 
 	void unregisterLocationUpdates(ILocationUpdateRecipient object);
 
-	void connectXMPP(String jid, String server, String password) throws XMPPException;
+	void connectXMPP(String userID, String server, String password) throws XMPPException;
 
 	void createGroup(String groupName) throws XMPPException;
 
