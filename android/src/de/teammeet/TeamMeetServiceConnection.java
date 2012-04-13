@@ -22,6 +22,8 @@ package de.teammeet;
 
 import java.util.ArrayList;
 
+import org.jivesoftware.smack.XMPPException;
+
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -123,4 +125,15 @@ public class TeamMeetServiceConnection implements ServiceConnection {
 		}
 	}
 
+	public void connectXMPP(String userID, String server, String password) throws XMPPException {
+		mService.connectXMPP(userID, server, password);
+	}
+
+	public boolean isXMPPAuthenticated() {
+		return mService.isXMPPAuthenticated();
+	}
+
+	public void disconnectXMPP() {
+		mService.disconnectXMPP();
+	}
 }
