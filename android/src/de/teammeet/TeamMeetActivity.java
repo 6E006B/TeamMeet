@@ -98,7 +98,6 @@ public class TeamMeetActivity extends MapActivity {
 		mMapView.setBuiltInZoomControls(false);
 		mMapView.setSatellite(mSatelliteView);
 		mMapController = mMapView.getController();
-		mMapController.setZoom(mMapView.getMaxZoomLevel());
 		mListOfOverlays = mMapView.getOverlays();
 
 		// now connect to the service
