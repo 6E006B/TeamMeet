@@ -153,25 +153,28 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 	}
 
 	@Override
+	public void connectXMPP(String jid, String server, String password) throws XMPPException {
+		mXMPPService.connect(jid, server, password);
+	}
+	
+	@Override
 	public void createGroup(String groupName) throws XMPPException {
 		mXMPPService.createGroup(groupName, this);
 	}
 
 	@Override
 	public void inviteContact(String contact, String groupName) {
-		Log.d(CLASS, "inviteContact('" + contact + "', '" + groupName + "')");
+		Log.d(CLASS, "inviteContact('" + contact + "', '" + groupName + "') not yet implemented");
 	}
 
 	@Override
-	public void setIndicator(GeoPoint location) {
-		// TODO Auto-generated method stub
-
+	public void setIndicator(GeoPoint location) throws XMPPException {
+		mXMPPService.sendIndicator(location);
 	}
 
 	@Override
 	public void deleteIndicator(GeoPoint location) {
-		// TODO Auto-generated method stub
-
+		Log.d(CLASS, "deleteIndicator(" + location.toString() + ") not yet implemented");
 	}
 
 }
