@@ -49,7 +49,9 @@ public class XMPPService {
 	}
 
 	public void disconnect() {
-		mXMPP.disconnect();
+		if (mXMPP != null) {
+			mXMPP.disconnect();
+		}
 	}
 
 	public List<String> getContacts() throws Exception {
