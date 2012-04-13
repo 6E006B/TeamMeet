@@ -27,17 +27,25 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
+import android.widget.EditText;
 
 public class SettingsActivity extends Activity {
 
+	private static final String CLASS = SettingsActivity.class.getSimpleName();
 	public static final String	PREFS_NAME				= "de.teammeet";
 	public static final String	SETTING_FULLSCREEN		= "fullscreen";
 	public static final String	SETTING_FOLLOW_LOCATION	= "followLocation";
+	public static final String SETTING_XMPP_USER_ID = "xmppUserID";
+	protected static final String SETTING_XMPP_SERVER = "xmppServer";
+	protected static final String SETTING_XMPP_PASSWORD = "xmppPassword";
 
 	private CheckBox			mFullscreenCheck		= null;
 	private CheckBox			mFollowLocationCheck	= null;
 	private SharedPreferences	mSettings				= null;
 	private Editor				mEditor					= null;
+	private EditText mTextUserID = null;
+	private EditText mTextServer = null;
+	private EditText mTextPassword = null;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -50,7 +58,6 @@ public class SettingsActivity extends Activity {
 		mFollowLocationCheck.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				boolean isChecked = false;
 				if (((CheckBox) v).isChecked()) {
 					isChecked = true;
@@ -63,7 +70,6 @@ public class SettingsActivity extends Activity {
 		mFullscreenCheck.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				boolean isChecked = false;
 				if (((CheckBox) v).isChecked()) {
 					isChecked = true;
@@ -72,11 +78,19 @@ public class SettingsActivity extends Activity {
 			}
 		});
 
+		mTextUserID = (EditText) findViewById(R.id.EditTextUserID);
+		mTextServer = (EditText) findViewById(R.id.EditTextServer);
+		mTextPassword = (EditText) findViewById(R.id.EditTextPassword);
+
 		final boolean follow = mSettings.getBoolean(SETTING_FOLLOW_LOCATION, false);
 		mFollowLocationCheck.setChecked(follow);
 
 		final boolean fullscreen = mSettings.getBoolean(SETTING_FULLSCREEN, false);
 		mFullscreenCheck.setChecked(fullscreen);
+
+		mTextUserID.setText(mSettings.getString(SETTING_XMPP_USER_ID, ""));
+		mTextServer.setText(mSettings.getString(SETTING_XMPP_SERVER, ""));
+		mTextPassword.setText(mSettings.getString(SETTING_XMPP_PASSWORD, ""));
 	}
 
 	private void setFollowLocation(final boolean follow) {
@@ -89,4 +103,12 @@ public class SettingsActivity extends Activity {
 		mEditor.commit();
 	}
 
+	@Override
+	protected void onPause() {
+		mEditor.putString(SETTING_XMPP_USER_ID, mTextUserID.getEditableText().toString());
+		mEditor.putString(SETTING_XMPP_SERVER, mTextServer.getEditableText().toString());
+		mEditor.putString(SETTING_XMPP_PASSWORD, mTextPassword.getEditableText().toString());
+		mEditor.apply();
+		super.onPause();
+	}
 }
