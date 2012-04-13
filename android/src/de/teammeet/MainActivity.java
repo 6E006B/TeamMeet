@@ -20,6 +20,9 @@
 
 package de.teammeet;
 
+import org.jivesoftware.smack.XMPPException;
+import org.xbill.DNS.MXRecord;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -125,6 +128,20 @@ public class MainActivity extends Activity {
 	}
 
 	protected void sendXMPPMessage() {
-
+		if (!mServiceConnection.isXMPPAuthenticated()) {
+			SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+			try {
+				mServiceConnection.connectXMPP(settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, ""),
+											   settings.getString(SettingsActivity.SETTING_XMPP_SERVER, ""),
+											   settings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, ""));
+			} catch (XMPPException e) {
+				e.printStackTrace();
+				Log.e(CLASS, "Failed to login: " + e.toString());
+				mToastSingleton.showError("Failed to login: " + e.toString());
+			}
+		} else {
+			mServiceConnection.disconnectXMPP();
+			Log.d(CLASS, "Disconnected from XMPP");
+		}
 	}
 }
