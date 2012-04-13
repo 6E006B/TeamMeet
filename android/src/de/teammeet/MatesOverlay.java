@@ -20,7 +20,8 @@
 
 package de.teammeet;
 
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.content.res.Resources;
@@ -38,11 +39,12 @@ public class MatesOverlay extends Overlay implements IMatesUpdateRecipient {
 
 	private static final String	CLASS		= MatesOverlay.class.getSimpleName();
 
-	private Set<Mate>			mMates		= null;
+	private Map<String, Mate>			mMates		= null;
 	private Resources			mResources	= null;
 	private final ReentrantLock	mLock		= new ReentrantLock();
 
 	public MatesOverlay(final Resources res) {
+		mMates = new HashMap<String, Mate>();
 		mResources = res;
 	}
 
@@ -59,8 +61,8 @@ public class MatesOverlay extends Overlay implements IMatesUpdateRecipient {
 			acquireLock();
 			try {
 				final Point coords = new Point();
-				for (final Mate mate : mMates) {
-					final GeoPoint point = mate.mLocation;
+				for (final Mate mate : mMates.values()) {
+					final GeoPoint point = mate.getLocation();
 					mapView.getProjection().toPixels(point, coords);
 					canvas.drawCircle(coords.x, coords.y, 5, paintPlayer);
 				}
@@ -74,10 +76,10 @@ public class MatesOverlay extends Overlay implements IMatesUpdateRecipient {
 	}
 
 	@Override
-	public void handleMatesUpdate(final Set<Mate> mates) {
+	public void handleMateUpdate(Mate mate) {
 		acquireLock();
 		try {
-			this.mMates = mates;
+			mMates.put(mate.getID(), mate);
 		} finally {
 			releaseLock();
 		}

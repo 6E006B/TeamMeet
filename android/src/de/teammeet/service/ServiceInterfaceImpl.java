@@ -22,7 +22,6 @@ package de.teammeet.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.os.Binder;
@@ -43,12 +42,12 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 	private final List<ILocationUpdateRecipient>	mLocationRecipients	= new ArrayList<ILocationUpdateRecipient>();
 	private final List<IMatesUpdateRecipient>		mMatesRecipients	= new ArrayList<IMatesUpdateRecipient>();
 
-	public void setMates(final Set<Mate> mates) {
+	public void updateMate(final Mate mate) {
 		acquireMatesLock();
 		try {
-			if (mates != null) {
+			if (mate != null) {
 				for (final IMatesUpdateRecipient object : mMatesRecipients) {
-					object.handleMatesUpdate(mates);
+					object.handleMateUpdate(mate);
 				}
 			}
 		} finally {
