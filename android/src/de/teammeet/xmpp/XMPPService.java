@@ -50,6 +50,8 @@ public class XMPPService {
 		config.setReconnectionAllowed(true);
 //		config.setNotMatchingDomainCheckEnabled(false);
 		config.setSecurityMode(SecurityMode.disabled);
+		// This could be helpful to ensure a roster request after login (mandatory by XMPP)
+		config.setRosterLoadedAtLogin(true); // TODO Check if this realy does it
 
 		mXMPP = new XMPPConnection(config);
 		mXMPP.connect();
