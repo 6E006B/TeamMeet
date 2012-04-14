@@ -146,6 +146,15 @@ public class TeamMeetService extends Service {
 		}
 	}
 
+	private void disconnectXMPP() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				mXMPPService.disconnect();
+			}
+		}).start();
+	}
+
 	@Override
 	public IBinder onBind(final Intent intent) {
 		Log.e(CLASS, "TeamMeetService.onBind() done");
@@ -163,7 +172,7 @@ public class TeamMeetService extends Service {
 		stopLocationListener();
 		deactivateGPS();
 		deactivateCompass();
-		mXMPPService.disconnect();
+		disconnectXMPP();
 		Log.e(CLASS, "TeamMeetService.onDestroy() called");
 		super.onDestroy();
 	}
