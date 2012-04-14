@@ -10,6 +10,7 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -43,6 +44,12 @@ public class XMPPService {
 		ConnectionConfiguration config = new ConnectionConfiguration(server);
 		config.setSelfSignedCertificateEnabled(true);
 		config.setDebuggerEnabled(true);
+		config.setCompressionEnabled(false);
+//		config.setExpiredCertificatesCheckEnabled(false);
+//		config.setSASLAuthenticationEnabled(false);
+		config.setReconnectionAllowed(true);
+//		config.setNotMatchingDomainCheckEnabled(false);
+		config.setSecurityMode(SecurityMode.disabled);
 
 		mXMPP = new XMPPConnection(config);
 		mXMPP.connect();
