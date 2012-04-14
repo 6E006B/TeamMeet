@@ -14,11 +14,15 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
+import android.util.Log;
+
 import com.google.android.maps.GeoPoint;
 
 import de.teammeet.service.ServiceInterfaceImpl;
 
 public class XMPPService {
+
+	private static final String CLASS = XMPPService.class.getSimpleName();
 
 	private XMPPConnection				mXMPP	= null;
 	private String						mUserID	= null;
@@ -26,6 +30,7 @@ public class XMPPService {
 	private Map<String, MultiUserChat>	groups	= null;
 
 	public XMPPService() {
+		Log.d(CLASS, "XMPPService() created");
 		ConfigureProviderManager.configureProviderManager();
 		groups = new HashMap<String, MultiUserChat>();
 	}
@@ -34,6 +39,7 @@ public class XMPPService {
 		mUserID = userID;
 		mServer = server;
 
+		Log.d(CLASS, "XMPPService.connect('" + mUserID + "', '" + mServer + "')");
 		ConnectionConfiguration config = new ConnectionConfiguration(server);
 		config.setSelfSignedCertificateEnabled(true);
 		config.setDebuggerEnabled(true);
@@ -45,10 +51,16 @@ public class XMPPService {
 	}
 
 	public boolean isAuthenticated() {
-		return mXMPP.isAuthenticated();
+		boolean authenticated = false;
+		if (mXMPP != null) {
+			authenticated = mXMPP.isAuthenticated();
+		}
+		Log.d(CLASS, "XMPPService.isAuthenticated() -> " + authenticated);
+		return authenticated;
 	}
 
 	public void disconnect() {
+		Log.d(CLASS, "XMPPService.disconnect()");
 		if (mXMPP != null) {
 			mXMPP.disconnect();
 		}
