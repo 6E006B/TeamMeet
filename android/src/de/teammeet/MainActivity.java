@@ -65,7 +65,12 @@ public class MainActivity extends Activity {
 		b = (Button) findViewById(R.id.buttonXMPP);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(final View arg0) {
-				sendXMPPMessage();
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						sendXMPPMessage();
+					}
+				}).start();
 			}
 		});
 
