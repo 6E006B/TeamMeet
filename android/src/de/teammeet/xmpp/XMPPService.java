@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -41,6 +42,12 @@ public class XMPPService {
 		mServer = server;
 
 		Log.d(CLASS, "XMPPService.connect('" + mUserID + "', '" + mServer + "')");
+
+		if (mXMPP != null) {
+			Log.w(CLASS, "XMPPService.connect() : XMPPConnection not null -> disconnecting it");
+			mXMPP.disconnect();
+		}
+
 		ConnectionConfiguration config = new ConnectionConfiguration(server);
 		config.setSelfSignedCertificateEnabled(true);
 		config.setDebuggerEnabled(true);
@@ -49,12 +56,13 @@ public class XMPPService {
 //		config.setSASLAuthenticationEnabled(false);
 		config.setReconnectionAllowed(true);
 //		config.setNotMatchingDomainCheckEnabled(false);
-		config.setSecurityMode(SecurityMode.disabled);
+//		config.setSecurityMode(SecurityMode.disabled);
 		// This could be helpful to ensure a roster request after login (mandatory by XMPP)
 		config.setRosterLoadedAtLogin(true); // TODO Check if this realy does it
 
 		mXMPP = new XMPPConnection(config);
 		mXMPP.connect();
+		SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 		mXMPP.login(userID, password);
 		MultiUserChat.addInvitationListener(mXMPP, new GroupInvitationListener());
 	}
