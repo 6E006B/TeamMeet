@@ -97,6 +97,11 @@ public class XMPPService {
 		return contacts;
 	}
 
+	public void addContact(String userID, String identifier) throws XMPPException {
+		Roster roster = mXMPP.getRoster();
+		roster.createEntry(userID, identifier, null);
+	}
+
 	public void createGroup(String groupName, ServiceInterfaceImpl serviceInterface) throws XMPPException {
 		MultiUserChat muc = new MultiUserChat(mXMPP, String.format("%s@conference.%s", groupName, mServer));
 		muc.create(mUserID);
