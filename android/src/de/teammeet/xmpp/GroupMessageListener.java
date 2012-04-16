@@ -12,8 +12,7 @@ public class GroupMessageListener implements PacketListener {
 
 	ServiceInterfaceImpl	mServiceInterface	= null;
 
-	public GroupMessageListener(ServiceInterfaceImpl serviceImpl) {
-		mServiceInterface = serviceImpl;
+	public GroupMessageListener() {
 	}
 
 	@Override
@@ -21,8 +20,6 @@ public class GroupMessageListener implements PacketListener {
 		String from = packet.getFrom();
 		String xml = packet.toXML();
 		Log.d(CLASS, from + " sent " + xml);
-		// Mate mate = new Mate(from, location);
-		// mServiceInterface.updateMate(mate);
 	}
 
 }

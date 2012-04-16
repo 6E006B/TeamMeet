@@ -21,30 +21,52 @@
 package de.teammeet;
 
 import org.jivesoftware.smack.XMPPException;
+
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import de.teammeet.helper.ToastDisposerSingleton;
-import de.teammeet.service.TeamMeetService;
+import de.teammeet.xmpp.RealXMPPService;
 
 public class MainActivity extends Activity {
 
-	private String	CLASS	= MainActivity.class.getSimpleName();
+	private String					CLASS				= MainActivity.class.getSimpleName();
 
-	private TeamMeetServiceConnection mServiceConnection = null;
+	private ServiceConnection		mServiceConnection	= new ServiceConnection() {
+															@Override
+															public void onServiceConnected(
+																	ComponentName className, IBinder binder) {
+																Log.d(CLASS,
+																		"MainActivity.ServiceConnection.onServiceConnected('" +
+																				className + "')");
+																mXMPPService = ((RealXMPPService.LocalBinder) binder)
+																		.getService();
+															}
 
-	private ToastDisposerSingleton mToastSingleton = null;
+															@Override
+															public void onServiceDisconnected(
+																	ComponentName arg0) {
+
+															}
+														};
+
+	private RealXMPPService			mXMPPService		= null;
+
+	private ToastDisposerSingleton	mToastSingleton		= null;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		mToastSingleton  = ToastDisposerSingleton.getInstance(getApplicationContext());
+		mToastSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
 
 		Button b;
 
@@ -77,8 +99,8 @@ public class MainActivity extends Activity {
 		// If the user has not yet configured his XMPP settings lead the way
 		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
 		if (settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "").equals("") ||
-			settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "").equals("") ||
-			settings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, "").equals("")) {
+				settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "").equals("") ||
+				settings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, "").equals("")) {
 			mToastSingleton.show("Please configure your XMPP Account.");
 			Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
 			startActivity(settingsIntent);
@@ -90,11 +112,10 @@ public class MainActivity extends Activity {
 		super.onResume();
 
 		// create the service (if it isn't already running
-		final Intent intent = new Intent(getApplicationContext(), TeamMeetService.class);
+		final Intent intent = new Intent(getApplicationContext(), RealXMPPService.class);
 		startService(intent);
 
 		// now connect to the service
-		mServiceConnection  = new TeamMeetServiceConnection();
 		final boolean bindSuccess = bindService(intent, mServiceConnection, 0);
 		if (bindSuccess) {
 			Log.e(CLASS, "bind succeeded");
@@ -115,7 +136,8 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		final Intent intent = new Intent(this, TeamMeetService.class);
+		mXMPPService.disconnect();
+		final Intent intent = new Intent(getApplicationContext(), RealXMPPService.class);
 		stopService(intent);
 		super.onDestroy();
 	}
@@ -131,19 +153,21 @@ public class MainActivity extends Activity {
 	}
 
 	protected void sendXMPPMessage() {
-		if (!mServiceConnection.isXMPPAuthenticated()) {
+		Log.d(CLASS, "MainActivity.sendXMPPMessage()");
+
+		if (!mXMPPService.isAuthenticated()) {
 			SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
 			try {
-				mServiceConnection.connectXMPP(settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, ""),
-											   settings.getString(SettingsActivity.SETTING_XMPP_SERVER, ""),
-											   settings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, ""));
+				mXMPPService.connect(settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, ""),
+						settings.getString(SettingsActivity.SETTING_XMPP_SERVER, ""),
+						settings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, ""));
 			} catch (XMPPException e) {
 				e.printStackTrace();
 				Log.e(CLASS, "Failed to login: " + e.toString());
 				mToastSingleton.showError("Failed to login: " + e.toString());
 			}
 		} else {
-			mServiceConnection.disconnectXMPP();
+			mXMPPService.disconnect();
 			Log.d(CLASS, "Disconnected from XMPP");
 		}
 	}
