@@ -130,7 +130,12 @@ public class RealXMPPService extends Service {
 
 	@Override
 	public void onDestroy() {
-		disconnect();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				disconnect();
+			}
+		}).start();
 		super.onDestroy();
 	}
 

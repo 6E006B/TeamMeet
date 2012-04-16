@@ -24,10 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.jivesoftware.smack.XMPPException;
-
 import android.os.Binder;
-import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
@@ -35,7 +32,6 @@ import de.teammeet.Mate;
 import de.teammeet.interfaces.ILocationUpdateRecipient;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
 import de.teammeet.interfaces.IService;
-import de.teammeet.xmpp.XMPPService;
 
 public class ServiceInterfaceImpl extends Binder implements IService {
 
@@ -45,11 +41,6 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 	private final ReentrantLock						mLockLocation		= new ReentrantLock();
 	private final List<ILocationUpdateRecipient>	mLocationRecipients	= new ArrayList<ILocationUpdateRecipient>();
 	private final List<IMatesUpdateRecipient>		mMatesRecipients	= new ArrayList<IMatesUpdateRecipient>();
-	private XMPPService								mXMPPService		= null;
-
-	public ServiceInterfaceImpl(XMPPService xmppService) {
-		mXMPPService = xmppService;
-	}
 
 	public void updateMate(final Mate mate) {
 		acquireMatesLock();
@@ -150,50 +141,5 @@ public class ServiceInterfaceImpl extends Binder implements IService {
 
 	private void releaseMatesLock() {
 		mLockMates.unlock();
-	}
-
-	@Override
-	public void connectXMPP(String userID, String server, String password) throws XMPPException {
-		mXMPPService.connect(userID, server, password);
-	}
-
-	@Override
-	public boolean isXMPPAuthenticated() {
-		return mXMPPService.isAuthenticated();
-	}
-
-	@Override
-	public void disconnectXMPP() {
-		mXMPPService.disconnect();
-	}
-
-	@Override
-	public void createGroup(String groupName) throws XMPPException {
-		mXMPPService.createGroup(groupName, this);
-	}
-
-	@Override
-	public void inviteContact(String contact, String groupName) {
-		mXMPPService.invite(contact, groupName);
-	}
-
-	@Override
-	public void setIndicator(GeoPoint location) throws XMPPException {
-		mXMPPService.sendIndicator(location);
-	}
-
-	@Override
-	public void deleteIndicator(GeoPoint location) {
-		Log.d(CLASS, "deleteIndicator(" + location.toString() + ") not yet implemented");
-	}
-
-	public void sendLocation(GeoPoint location, float accuracy) {
-		try {
-			mXMPPService.sendLocation(location, accuracy);
-		} catch (XMPPException e) {
-			// TODO Decide what to do depending on exception
-			Log.e(CLASS, "Error sending locaiton: " + e.toString());
-			e.printStackTrace();
-		}
 	}
 }

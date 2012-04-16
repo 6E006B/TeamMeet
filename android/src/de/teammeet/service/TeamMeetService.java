@@ -36,27 +36,24 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import de.teammeet.helper.ToastDisposerSingleton;
-import de.teammeet.xmpp.XMPPService;
 
 public class TeamMeetService extends Service {
-	private static final String							CLASS					= TeamMeetService.class
-																						.getSimpleName();
-	private TeamMeetLocationListener					mLocationListener		= null;
-	private ServiceInterfaceImpl						mServiceInterface		= null;
-	private Handler										mMessageHandler			= null;
-	private de.teammeet.helper.ToastDisposerSingleton	mTostSingleton			= null;
+	private static final String							CLASS				= TeamMeetService.class
+																					.getSimpleName();
+	private TeamMeetLocationListener					mLocationListener	= null;
+	private ServiceInterfaceImpl						mServiceInterface	= null;
+	private Handler										mMessageHandler		= null;
+	private de.teammeet.helper.ToastDisposerSingleton	mTostSingleton		= null;
 
-	private LocationManager								mLocationManager		= null;
-	private final boolean								mSensorRunning			= false;
-	private SensorManager								mSensorManager			= null;
-	private XMPPService									mXMPPService			= null;
+	private LocationManager								mLocationManager	= null;
+	private final boolean								mSensorRunning		= false;
+	private SensorManager								mSensorManager		= null;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		// Log.e(CLASS, "TeamMeetService.onCreate() called.");
-		mXMPPService = new XMPPService();
-		mServiceInterface = new ServiceInterfaceImpl(mXMPPService);
+		mServiceInterface = new ServiceInterfaceImpl();
 		mMessageHandler = new Handler() {
 			@Override
 			public void handleMessage(final Message msg) {
@@ -146,15 +143,6 @@ public class TeamMeetService extends Service {
 		}
 	}
 
-	private void disconnectXMPP() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				mXMPPService.disconnect();
-			}
-		}).start();
-	}
-
 	@Override
 	public IBinder onBind(final Intent intent) {
 		Log.e(CLASS, "TeamMeetService.onBind() done");
@@ -172,7 +160,6 @@ public class TeamMeetService extends Service {
 		stopLocationListener();
 		deactivateGPS();
 		deactivateCompass();
-		disconnectXMPP();
 		Log.e(CLASS, "TeamMeetService.onDestroy() called");
 		super.onDestroy();
 	}

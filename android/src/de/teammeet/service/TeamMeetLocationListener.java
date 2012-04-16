@@ -38,7 +38,7 @@ import com.google.android.maps.GeoPoint;
 
 import de.teammeet.R;
 
-public class TeamMeetLocationListener implements LocationListener, SensorEventListener{
+public class TeamMeetLocationListener implements LocationListener, SensorEventListener {
 
 	private static final String		CLASS				= TeamMeetLocationListener.class.getSimpleName();
 
@@ -54,8 +54,8 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 	private Timer					mTimer				= null;
 	private TimerTask				mTimerTask			= null;
 
-	public TeamMeetLocationListener(final ServiceInterfaceImpl serviceInterface, final Handler messageHandler,
-			final Resources res) {
+	public TeamMeetLocationListener(final ServiceInterfaceImpl serviceInterface,
+			final Handler messageHandler, final Resources res) {
 		mServiceInterface = serviceInterface;
 		mMessageHandler = messageHandler;
 		mResources = res;
@@ -66,7 +66,7 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 			@Override
 			public void run() {
 				if (mLocation != null && mLocation != mLastLocation) {
-					serviceInterface.sendLocation(mLocation, mAccuracy);
+					// serviceInterface.sendLocation(mLocation, mAccuracy);
 					showToast("Location update to: " + mLocation.toString());
 					Log.d(CLASS, "Location update to: " + mLocation.toString());
 					mLastLocation = mLocation;
@@ -99,10 +99,10 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 	public void deactivate() {
 		mTimerTask.cancel();
 	}
-	
+
 	@Override
 	public void onLocationChanged(final Location location) {
-		
+
 		// Log.e(CLASS, "GpsLocationListener.onLocationChanged(" + location
 		// .toString() + ")");
 		final GeoPoint geopoint = new GeoPoint((int) (location.getLatitude() * 1E6),
@@ -131,10 +131,10 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 		// TODO handle status changes
 		Log.e(CLASS, "TeamMeetLocationListener.onStatusChange(" + status + ") called.");
 	}
-	
+
 	@Override
 	public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
-		//NOTE: this is the accuracy of the compass not the gps
+		// NOTE: this is the accuracy of the compass not the gps
 	}
 
 	@Override
