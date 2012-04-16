@@ -38,30 +38,25 @@ public class MainActivity extends Activity {
 
 	private String					CLASS				= MainActivity.class.getSimpleName();
 
-	private ServiceConnection		mServiceConnection	= new ServiceConnection() {
-															@Override
-															public void onServiceConnected(
-																	ComponentName className, IBinder binder) {
-																Log.d(CLASS,
-																		"MainActivity.ServiceConnection.onServiceConnected('" +
-																				className + "')");
-																mXMPPService = ((XMPPService.LocalBinder) binder)
-																		.getService();
-															}
-
-															@Override
-															public void onServiceDisconnected(
-																	ComponentName className) {
-																Log.d(CLASS,
-																		"MainActivity.ServiceConnection.onServiceDisconnected('" +
-																				className + "')");
-																mXMPPService = null;
-															}
-														};
-
 	private XMPPService				mXMPPService		= null;
 
 	private ToastDisposerSingleton	mToastSingleton		= null;
+
+	private ServiceConnection		mServiceConnection	= new XMPPServiceConnection();
+
+	private class XMPPServiceConnection implements ServiceConnection {
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder binder) {
+			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceConnected('" + className + "')");
+			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName className) {
+			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceDisconnected('" + className + "')");
+			mXMPPService = null;
+		}
+	}
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
