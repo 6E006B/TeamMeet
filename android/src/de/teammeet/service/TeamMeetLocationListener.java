@@ -45,7 +45,7 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 	private Resources			mResources			= null;
 	private int					mTimeout			= 0;
 
-	private TeamMeetService		mLocationService	= null;
+	private LocationService		mLocationService	= null;
 	private Handler				mMessageHandler		= null;
 	protected GeoPoint			mLocation			= null;
 	protected GeoPoint			mLastLocation		= null;
@@ -54,7 +54,7 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 	private Timer				mTimer				= null;
 	private TimerTask			mTimerTask			= null;
 
-	public TeamMeetLocationListener(final TeamMeetService serviceInterface, final Handler messageHandler,
+	public TeamMeetLocationListener(final LocationService serviceInterface, final Handler messageHandler,
 			final Resources res) {
 		mLocationService = serviceInterface;
 		mMessageHandler = messageHandler;

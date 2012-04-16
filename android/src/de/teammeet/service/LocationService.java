@@ -45,8 +45,8 @@ import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.ILocationService;
 import de.teammeet.interfaces.ILocationUpdateRecipient;
 
-public class TeamMeetService extends Service implements ILocationService {
-	private static final String							CLASS				= TeamMeetService.class
+public class LocationService extends Service implements ILocationService {
+	private static final String							CLASS				= LocationService.class
 																					.getSimpleName();
 	private TeamMeetLocationListener					mLocationListener	= null;
 	private Handler										mMessageHandler		= null;
@@ -62,15 +62,15 @@ public class TeamMeetService extends Service implements ILocationService {
 	private final IBinder								mBinder				= new LocalBinder();
 
 	public class LocalBinder extends Binder {
-		public TeamMeetService getService() {
-			return TeamMeetService.this;
+		public LocationService getService() {
+			return LocationService.this;
 		}
 	}
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		// Log.e(CLASS, "TeamMeetService.onCreate() called.");
+		// Log.e(CLASS, "LocationService.onCreate() called.");
 		mMessageHandler = new Handler() {
 			@Override
 			public void handleMessage(final Message msg) {
@@ -88,7 +88,7 @@ public class TeamMeetService extends Service implements ILocationService {
 		activateGPS();
 		activateCompass();
 
-		// Log.e(CLASS, "TeamMeetService.onCreate() done");
+		// Log.e(CLASS, "LocationService.onCreate() done");
 	}
 
 	private void startLocationListener() {
@@ -123,7 +123,7 @@ public class TeamMeetService extends Service implements ILocationService {
 	}
 
 	private void deactivateGPS() {
-		Log.e(CLASS, "TeamMeetService.deactivateGPS() called.");
+		Log.e(CLASS, "LocationService.deactivateGPS() called.");
 		if (mLocationManager != null) {
 			if (mLocationListener != null) {
 				mLocationManager.removeUpdates(mLocationListener);
@@ -162,13 +162,13 @@ public class TeamMeetService extends Service implements ILocationService {
 
 	@Override
 	public IBinder onBind(final Intent intent) {
-		Log.e(CLASS, "TeamMeetService.onBind() done");
+		Log.e(CLASS, "LocationService.onBind() done");
 		return mBinder;
 	}
 
 	@Override
 	public boolean onUnbind(final Intent intent) {
-		Log.e(CLASS, "TeamMeetService.onUnbind() called.");
+		Log.e(CLASS, "LocationService.onUnbind() called.");
 		return super.onUnbind(intent);
 	}
 
@@ -177,7 +177,7 @@ public class TeamMeetService extends Service implements ILocationService {
 		stopLocationListener();
 		deactivateGPS();
 		deactivateCompass();
-		Log.e(CLASS, "TeamMeetService.onDestroy() called");
+		Log.e(CLASS, "LocationService.onDestroy() called");
 		super.onDestroy();
 	}
 

@@ -43,7 +43,7 @@ import com.google.android.maps.Overlay;
 import de.teammeet.helper.LocationFollower;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.ILocationService;
-import de.teammeet.service.TeamMeetService;
+import de.teammeet.service.LocationService;
 
 public class TeamMeetActivity extends MapActivity {
 
@@ -72,7 +72,7 @@ public class TeamMeetActivity extends MapActivity {
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceConnected('" + className + "')");
-			mLocationService = ((TeamMeetService.LocalBinder) binder).getService();
+			mLocationService = ((LocationService.LocalBinder) binder).getService();
 		}
 
 		@Override
@@ -102,7 +102,7 @@ public class TeamMeetActivity extends MapActivity {
 		super.onResume();
 
 		// create the service (if it isn't already running
-		final Intent intent = new Intent(getApplicationContext(), TeamMeetService.class);
+		final Intent intent = new Intent(getApplicationContext(), LocationService.class);
 		startService(intent);
 
 		Window w = getWindow();
@@ -154,7 +154,7 @@ public class TeamMeetActivity extends MapActivity {
 
 	@Override
 	protected void onDestroy() {
-		final Intent intent = new Intent(this, TeamMeetService.class);
+		final Intent intent = new Intent(this, LocationService.class);
 		stopService(intent);
 		super.onDestroy();
 	}
