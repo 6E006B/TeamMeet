@@ -25,7 +25,7 @@
 <string name="menu_satellite_view">Satellite map</string>
 <string name="button_show_map">Show Map</string>
 <string name="button_show_settings">Edit Settings</string>
-<string name="button_xmpp">XMPP Stuff</string>
+<string name="button_xmpp">connect to XMPP</string>
 <string name="text_xmpp_account">XMPP Account Details</string>
 <string name="text_user_id">User ID:</string>
 <string name="text_server">Server:</string>
