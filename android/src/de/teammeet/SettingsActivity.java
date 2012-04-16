@@ -36,8 +36,8 @@ public class SettingsActivity extends Activity {
 	public static final String	SETTING_FULLSCREEN		= "fullscreen";
 	public static final String	SETTING_FOLLOW_LOCATION	= "followLocation";
 	public static final String SETTING_XMPP_USER_ID = "xmppUserID";
-	protected static final String SETTING_XMPP_SERVER = "xmppServer";
-	protected static final String SETTING_XMPP_PASSWORD = "xmppPassword";
+	public static final String SETTING_XMPP_SERVER = "xmppServer";
+	public static final String SETTING_XMPP_PASSWORD = "xmppPassword";
 
 	private CheckBox			mFullscreenCheck		= null;
 	private CheckBox			mFollowLocationCheck	= null;
