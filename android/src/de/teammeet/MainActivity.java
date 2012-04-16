@@ -52,12 +52,14 @@ public class MainActivity extends Activity {
 
 															@Override
 															public void onServiceDisconnected(
-																	ComponentName arg0) {
-
+																	ComponentName className) {
+																Log.d(CLASS,
+																		"MainActivity.ServiceConnection.onServiceDisconnected('" +
+																				className + "')");
 															}
 														};
 
-	private XMPPService			mXMPPService		= null;
+	private XMPPService				mXMPPService		= null;
 
 	private ToastDisposerSingleton	mToastSingleton		= null;
 
