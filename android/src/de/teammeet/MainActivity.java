@@ -33,7 +33,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import de.teammeet.helper.ToastDisposerSingleton;
-import de.teammeet.xmpp.RealXMPPService;
+import de.teammeet.xmpp.XMPPService;
 
 public class MainActivity extends Activity {
 
@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
 																Log.d(CLASS,
 																		"MainActivity.ServiceConnection.onServiceConnected('" +
 																				className + "')");
-																mXMPPService = ((RealXMPPService.LocalBinder) binder)
+																mXMPPService = ((XMPPService.LocalBinder) binder)
 																		.getService();
 															}
 
@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
 															}
 														};
 
-	private RealXMPPService			mXMPPService		= null;
+	private XMPPService			mXMPPService		= null;
 
 	private ToastDisposerSingleton	mToastSingleton		= null;
 
@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
 		super.onResume();
 
 		// create the service (if it isn't already running
-		final Intent intent = new Intent(getApplicationContext(), RealXMPPService.class);
+		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
 		startService(intent);
 
 		// now connect to the service
@@ -137,7 +137,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		mXMPPService.disconnect();
-		final Intent intent = new Intent(getApplicationContext(), RealXMPPService.class);
+		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
 		stopService(intent);
 		super.onDestroy();
 	}

@@ -23,9 +23,9 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
-public class RealXMPPService extends Service {
+public class XMPPService extends Service {
 
-	private static final String			CLASS			= RealXMPPService.class.getSimpleName();
+	private static final String			CLASS			= XMPPService.class.getSimpleName();
 
 	public static final String			ACTION			= "action";
 	public static final String			USER_ID			= "userID";
@@ -48,15 +48,15 @@ public class RealXMPPService extends Service {
 	private Map<String, MultiUserChat>	groups			= null;
 
 	public class LocalBinder extends Binder {
-		public RealXMPPService getService() {
-			return RealXMPPService.this;
+		public XMPPService getService() {
+			return XMPPService.this;
 		}
 	}
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		Log.d(CLASS, "RealXMPPService.onCreate()");
+		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
 		groups = new HashMap<String, MultiUserChat>();
 	}
