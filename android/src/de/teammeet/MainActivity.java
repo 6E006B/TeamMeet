@@ -56,6 +56,7 @@ public class MainActivity extends Activity {
 																Log.d(CLASS,
 																		"MainActivity.ServiceConnection.onServiceDisconnected('" +
 																				className + "')");
+																mXMPPService = null;
 															}
 														};
 
