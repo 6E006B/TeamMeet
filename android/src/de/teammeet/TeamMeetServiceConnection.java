@@ -26,9 +26,9 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
+import de.teammeet.interfaces.ILocationService;
 import de.teammeet.interfaces.ILocationUpdateRecipient;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
-import de.teammeet.interfaces.IService;
 
 public class TeamMeetServiceConnection implements ServiceConnection {
 
@@ -36,7 +36,7 @@ public class TeamMeetServiceConnection implements ServiceConnection {
 																					.getSimpleName();
 	private final ArrayList<ILocationUpdateRecipient>	mLocationRecipients	= new ArrayList<ILocationUpdateRecipient>();
 	private final ArrayList<IMatesUpdateRecipient>		mMatesRecipients	= new ArrayList<IMatesUpdateRecipient>();
-	private IService									mService			= null;
+	private ILocationService							mService			= null;
 	private boolean										mConnected			= false;
 
 	@Override
@@ -44,21 +44,15 @@ public class TeamMeetServiceConnection implements ServiceConnection {
 		for (final ILocationUpdateRecipient object : mLocationRecipients) {
 			mService.unregisterLocationUpdates(object);
 		}
-		for (final IMatesUpdateRecipient object : mMatesRecipients) {
-			mService.unregisterMatesUpdates(object);
-		}
 		mConnected = false;
 		// Log.e(CLASS, "onServiceDisconnected() done");
 	}
 
 	@Override
 	public void onServiceConnected(final ComponentName name, final IBinder binder) {
-		mService = (IService) binder;
+		mService = (ILocationService) binder;
 		for (final ILocationUpdateRecipient object : mLocationRecipients) {
 			mService.registerLocationUpdates(object);
-		}
-		for (final IMatesUpdateRecipient object : mMatesRecipients) {
-			mService.registerMatesUpdates(object);
 		}
 		mConnected = true;
 		Log.e(CLASS, "onServiceConnected() done");
@@ -78,20 +72,6 @@ public class TeamMeetServiceConnection implements ServiceConnection {
 		}
 	}
 
-	public void registerMatesUpdates(final IMatesUpdateRecipient object) {
-		assert (object != null);
-		if (!mMatesRecipients.contains(object)) {
-			if (mConnected) {
-				mService.registerMatesUpdates(object);
-			} else {
-				Log.e(CLASS, "WARNING: trying to register mates updates while mService==null!");
-			}
-			mMatesRecipients.add(object);
-		} else {
-			Log.e(CLASS, "WARNING: object tried to reregister for mates updates: " + object.toString());
-		}
-	}
-
 	public void unregisterLocationUpdates(final ILocationUpdateRecipient object) {
 		assert (object != null);
 		if (mLocationRecipients.contains(object)) {
@@ -105,21 +85,6 @@ public class TeamMeetServiceConnection implements ServiceConnection {
 			Log.e(CLASS,
 					"WARNING: not previously for location updates registered object tried to unregister: " +
 							object.toString());
-		}
-	}
-
-	public void unregisterMatesUpdates(final IMatesUpdateRecipient object) {
-		assert (object != null);
-		if (mMatesRecipients.contains(object)) {
-			mMatesRecipients.remove(object);
-			if (mConnected) {
-				mService.unregisterMatesUpdates(object);
-			} else {
-				Log.e(CLASS, "WARNING: trying to unregister mates updates while mService==null!");
-			}
-		} else {
-			Log.e(CLASS, "WARNING: not previously for mates updates registered object tried to unregister: " +
-					object.toString());
 		}
 	}
 }
