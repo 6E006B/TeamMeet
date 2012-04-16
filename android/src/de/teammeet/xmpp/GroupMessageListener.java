@@ -4,13 +4,10 @@ import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.packet.Packet;
 
 import android.util.Log;
-import de.teammeet.service.ServiceInterfaceImpl;
 
 public class GroupMessageListener implements PacketListener {
 
-	private static String	CLASS				= GroupMessageListener.class.getSimpleName();
-
-	ServiceInterfaceImpl	mServiceInterface	= null;
+	private static String	CLASS	= GroupMessageListener.class.getSimpleName();
 
 	public GroupMessageListener() {
 	}

@@ -22,9 +22,12 @@ package de.teammeet;
 
 import java.util.List;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,6 +42,7 @@ import com.google.android.maps.Overlay;
 
 import de.teammeet.helper.LocationFollower;
 import de.teammeet.helper.ToastDisposerSingleton;
+import de.teammeet.interfaces.ILocationService;
 import de.teammeet.service.TeamMeetService;
 
 public class TeamMeetActivity extends MapActivity {
@@ -46,7 +50,7 @@ public class TeamMeetActivity extends MapActivity {
 	final String						CLASS				= TeamMeetActivity.class.getSimpleName();
 
 	private ToastDisposerSingleton		mToastSingleton		= null;
-	private TeamMeetServiceConnection	mServiceConnection	= null;
+	private LocationServiceConnection	mServiceConnection	= null;
 
 	private MapView						mMapView			= null;
 	private MapController				mMapController		= null;
@@ -60,6 +64,23 @@ public class TeamMeetActivity extends MapActivity {
 	private boolean						mFollowingLocation	= false;
 	private boolean						mSatelliteView		= false;
 	private boolean						mFullscreen			= false;
+
+	private ILocationService			mLocationService	= null;
+
+	private class LocationServiceConnection implements ServiceConnection {
+
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder binder) {
+			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceConnected('" + className + "')");
+			mLocationService = ((TeamMeetService.LocalBinder) binder).getService();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName className) {
+			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceDisconnected('" + className + "')");
+			mLocationService = null;
+		}
+	};
 
 	/** Called when the activity is first created. */
 	@Override
@@ -101,22 +122,19 @@ public class TeamMeetActivity extends MapActivity {
 		mListOfOverlays = mMapView.getOverlays();
 
 		// now connect to the service
-		mServiceConnection = new TeamMeetServiceConnection();
 		final boolean bindSuccess = bindService(intent, mServiceConnection, 0);
 		if (bindSuccess) {
 			Log.e(CLASS, "bind succeeded");
 			addOverlays();
-			// TODO investigate: something goes wrong here the first
-			// time, but is called a second time
 
 			// register to get status updates
-			mServiceConnection.registerMatesUpdates(mMatesOverlay);
-			mServiceConnection.registerLocationUpdates(mSelfOverlay);
+			// TODO mServiceConnection.registerMatesUpdates(mMatesOverlay);
+			mLocationService.registerLocationUpdates(mSelfOverlay);
 
 			// Create and enable the location follower
 			mLocationFollower = new LocationFollower(mMapController);
 			mLocationFollower.setActive(mFollowingLocation);
-			mServiceConnection.registerLocationUpdates(mLocationFollower);
+			mLocationService.registerLocationUpdates(mLocationFollower);
 		} else {
 			Log.e(CLASS, "bind failed");
 			mToastSingleton.showError("Couldn't connect to service.");

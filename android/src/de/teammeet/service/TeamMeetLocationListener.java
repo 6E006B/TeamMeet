@@ -40,23 +40,23 @@ import de.teammeet.R;
 
 public class TeamMeetLocationListener implements LocationListener, SensorEventListener {
 
-	private static final String		CLASS				= TeamMeetLocationListener.class.getSimpleName();
+	private static final String	CLASS				= TeamMeetLocationListener.class.getSimpleName();
 
-	private Resources				mResources			= null;
-	private int						mTimeout			= 0;
+	private Resources			mResources			= null;
+	private int					mTimeout			= 0;
 
-	private ServiceInterfaceImpl	mServiceInterface	= null;
-	private Handler					mMessageHandler		= null;
-	protected GeoPoint				mLocation			= null;
-	protected GeoPoint				mLastLocation		= null;
-	protected float					mAccuracy			= 0;
+	private TeamMeetService		mLocationService	= null;
+	private Handler				mMessageHandler		= null;
+	protected GeoPoint			mLocation			= null;
+	protected GeoPoint			mLastLocation		= null;
+	protected float				mAccuracy			= 0;
 
-	private Timer					mTimer				= null;
-	private TimerTask				mTimerTask			= null;
+	private Timer				mTimer				= null;
+	private TimerTask			mTimerTask			= null;
 
-	public TeamMeetLocationListener(final ServiceInterfaceImpl serviceInterface,
-			final Handler messageHandler, final Resources res) {
-		mServiceInterface = serviceInterface;
+	public TeamMeetLocationListener(final TeamMeetService serviceInterface, final Handler messageHandler,
+			final Resources res) {
+		mLocationService = serviceInterface;
 		mMessageHandler = messageHandler;
 		mResources = res;
 		mTimeout = mResources.getInteger(R.integer.server_timeout);
@@ -109,7 +109,7 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 				(int) (location.getLongitude() * 1E6));
 		mLocation = geopoint;
 		mAccuracy = location.getAccuracy();
-		mServiceInterface.setLocation(mLocation, mAccuracy);
+		mLocationService.setLocation(mLocation, mAccuracy);
 	}
 
 	@Override
@@ -140,6 +140,6 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 	@Override
 	public void onSensorChanged(final SensorEvent event) {
 		// Log.e(CLASS, "new mLocation set: " + direction);
-		mServiceInterface.setDirection(event.values[0]);
+		mLocationService.setDirection(event.values[0]);
 	}
 }

@@ -20,12 +20,7 @@
 
 package de.teammeet.interfaces;
 
-
-public interface IService {
-
-	void registerMatesUpdates(IMatesUpdateRecipient object);
-
-	void unregisterMatesUpdates(IMatesUpdateRecipient object);
+public interface ILocationService {
 
 	void registerLocationUpdates(ILocationUpdateRecipient object);
 

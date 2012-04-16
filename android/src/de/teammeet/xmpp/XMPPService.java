@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.Roster;
@@ -23,29 +24,36 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
-public class XMPPService extends Service {
+import de.teammeet.Mate;
+import de.teammeet.interfaces.IMatesUpdateRecipient;
+import de.teammeet.interfaces.IXMPPService;
 
-	private static final String			CLASS			= XMPPService.class.getSimpleName();
+public class XMPPService extends Service implements IXMPPService {
 
-	public static final String			ACTION			= "action";
-	public static final String			USER_ID			= "userID";
-	public static final String			SERVER			= "server";
-	public static final String			PASSWORD		= "password";
-	public static final String			GROUP_NAME		= "groupName";
+	private static final String					CLASS				= XMPPService.class.getSimpleName();
 
-	public static final int				NO_ACTION		= -1;
-	public static final int				CONNECT			= 0;
-	public static final int				DISCONNECT		= 1;
-	public static final int				CREATE_GROUP	= 2;
-	public static final int				INVITE_CONTACT	= 3;
-	public static final int				SEND_INDICATOR	= 4;
+	public static final String					ACTION				= "action";
+	public static final String					USER_ID				= "userID";
+	public static final String					SERVER				= "server";
+	public static final String					PASSWORD			= "password";
+	public static final String					GROUP_NAME			= "groupName";
 
-	private final IBinder				mBinder			= new LocalBinder();
+	public static final int						NO_ACTION			= -1;
+	public static final int						CONNECT				= 0;
+	public static final int						DISCONNECT			= 1;
+	public static final int						CREATE_GROUP		= 2;
+	public static final int						INVITE_CONTACT		= 3;
+	public static final int						SEND_INDICATOR		= 4;
 
-	private XMPPConnection				mXMPP			= null;
-	private String						mUserID			= null;
-	private String						mServer			= null;
-	private Map<String, MultiUserChat>	groups			= null;
+	private XMPPConnection						mXMPP				= null;
+	private String								mUserID				= null;
+	private String								mServer				= null;
+	private Map<String, MultiUserChat>			groups				= null;
+
+	private final ReentrantLock					mLockMates			= new ReentrantLock();
+	private final List<IMatesUpdateRecipient>	mMatesRecipients	= new ArrayList<IMatesUpdateRecipient>();
+
+	private final IBinder						mBinder				= new LocalBinder();
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -240,5 +248,50 @@ public class XMPPService extends Service {
 		for (MultiUserChat muc : groups.values()) {
 			muc.sendMessage(message);
 		}
+	}
+
+	public void updateMate(final Mate mate) {
+		acquireMatesLock();
+		try {
+			if (mate != null) {
+				for (final IMatesUpdateRecipient object : mMatesRecipients) {
+					object.handleMateUpdate(mate);
+				}
+			}
+		} finally {
+			releaseMatesLock();
+		}
+	}
+
+	@Override
+	public void registerMatesUpdates(final IMatesUpdateRecipient object) {
+		// Log.e(CLASS, "registerMatesUpdates(" + object.getClass()
+		// .getSimpleName() + ")");
+		acquireMatesLock();
+		try {
+			mMatesRecipients.add(object);
+		} finally {
+			releaseMatesLock();
+		}
+	}
+
+	@Override
+	public void unregisterMatesUpdates(final IMatesUpdateRecipient object) {
+		// Log.e(CLASS, "unregisterMatesUpdates(" + object.getClass()
+		// .getSimpleName() + ")");
+		acquireMatesLock();
+		try {
+			mMatesRecipients.remove(object);
+		} finally {
+			releaseMatesLock();
+		}
+	}
+
+	private void acquireMatesLock() {
+		mLockMates.lock();
+	}
+
+	private void releaseMatesLock() {
+		mLockMates.unlock();
 	}
 }

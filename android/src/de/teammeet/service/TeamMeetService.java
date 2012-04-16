@@ -20,8 +20,10 @@
 
 package de.teammeet.service;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import android.app.Service;
 import android.content.Context;
@@ -30,18 +32,23 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Criteria;
 import android.location.LocationManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
-import de.teammeet.helper.ToastDisposerSingleton;
 
-public class TeamMeetService extends Service {
+import com.google.android.maps.GeoPoint;
+
+import de.teammeet.helper.ToastDisposerSingleton;
+import de.teammeet.interfaces.ILocationService;
+import de.teammeet.interfaces.ILocationUpdateRecipient;
+
+public class TeamMeetService extends Service implements ILocationService {
 	private static final String							CLASS				= TeamMeetService.class
 																					.getSimpleName();
 	private TeamMeetLocationListener					mLocationListener	= null;
-	private ServiceInterfaceImpl						mServiceInterface	= null;
 	private Handler										mMessageHandler		= null;
 	private de.teammeet.helper.ToastDisposerSingleton	mTostSingleton		= null;
 
@@ -49,11 +56,21 @@ public class TeamMeetService extends Service {
 	private final boolean								mSensorRunning		= false;
 	private SensorManager								mSensorManager		= null;
 
+	private final ReentrantLock							mLockLocation		= new ReentrantLock();
+	private final List<ILocationUpdateRecipient>		mLocationRecipients	= new ArrayList<ILocationUpdateRecipient>();
+
+	private final IBinder								mBinder				= new LocalBinder();
+
+	public class LocalBinder extends Binder {
+		public TeamMeetService getService() {
+			return TeamMeetService.this;
+		}
+	}
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		// Log.e(CLASS, "TeamMeetService.onCreate() called.");
-		mServiceInterface = new ServiceInterfaceImpl();
 		mMessageHandler = new Handler() {
 			@Override
 			public void handleMessage(final Message msg) {
@@ -75,7 +92,7 @@ public class TeamMeetService extends Service {
 	}
 
 	private void startLocationListener() {
-		mLocationListener = new TeamMeetLocationListener(mServiceInterface, mMessageHandler, getResources());
+		mLocationListener = new TeamMeetLocationListener(this, mMessageHandler, getResources());
 		Log.e(CLASS, "TeamMeetLocationListener started...");
 	}
 
@@ -146,7 +163,7 @@ public class TeamMeetService extends Service {
 	@Override
 	public IBinder onBind(final Intent intent) {
 		Log.e(CLASS, "TeamMeetService.onBind() done");
-		return mServiceInterface;
+		return mBinder;
 	}
 
 	@Override
@@ -162,6 +179,62 @@ public class TeamMeetService extends Service {
 		deactivateCompass();
 		Log.e(CLASS, "TeamMeetService.onDestroy() called");
 		super.onDestroy();
+	}
+
+	@Override
+	public void registerLocationUpdates(final ILocationUpdateRecipient object) {
+		// Log.e(CLASS, "registerLocationUpdates(" + object.getClass()
+		// .getSimpleName() + ")");
+		acquireLocationLock();
+		try {
+			mLocationRecipients.add(object);
+		} finally {
+			releaseLocationLock();
+		}
+	}
+
+	@Override
+	public void unregisterLocationUpdates(final ILocationUpdateRecipient object) {
+		// Log.e(CLASS, "unregisterLocationUpdates(" + object.getClass()
+		// .getSimpleName() + ")");
+		acquireLocationLock();
+		try {
+			mLocationRecipients.remove(object);
+		} finally {
+			releaseLocationLock();
+		}
+	}
+
+	public void setLocation(final GeoPoint geopoint, float accuracy) {
+		acquireLocationLock();
+		try {
+			if (geopoint != null) {
+				for (final ILocationUpdateRecipient locationRecipient : mLocationRecipients) {
+					locationRecipient.handleLocationUpdate(geopoint, accuracy);
+				}
+			}
+		} finally {
+			releaseLocationLock();
+		}
+	}
+
+	public void setDirection(final float direction) {
+		acquireLocationLock();
+		try {
+			for (final ILocationUpdateRecipient locationRecipient : mLocationRecipients) {
+				locationRecipient.handleDirectionUpdate(direction);
+			}
+		} finally {
+			releaseLocationLock();
+		}
+	}
+
+	private void acquireLocationLock() {
+		mLockLocation.lock();
+	}
+
+	private void releaseLocationLock() {
+		mLockLocation.unlock();
 	}
 
 	private void showToast(final String message) {
