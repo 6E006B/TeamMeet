@@ -43,7 +43,7 @@ import com.google.android.maps.Overlay;
 import de.teammeet.helper.LocationFollower;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.ILocationService;
-import de.teammeet.service.LocationService;
+import de.teammeet.location.LocationService;
 
 public class TeamMeetActivity extends MapActivity {
 

@@ -40,7 +40,7 @@
         <service android:name=".service.LocationService"></service>
         <service android:name=".xmpp.XMPPService"></service>
         <activity android:name="TeamMeetActivity"></activity>
-        <activity android:name="SettingsActivity"></activity>
+        <activity android:name=".SettingsActivity"></activity>
 
         <uses-library android:name="com.google.android.maps" />
     </application>

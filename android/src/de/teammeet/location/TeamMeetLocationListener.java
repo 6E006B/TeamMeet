@@ -18,7 +18,7 @@
  *
  */
 
-package de.teammeet.service;
+package de.teammeet.location;
 
 import java.util.Timer;
 import java.util.TimerTask;
