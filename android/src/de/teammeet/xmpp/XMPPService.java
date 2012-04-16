@@ -25,27 +25,14 @@ import com.google.android.maps.GeoPoint;
 
 public class XMPPService extends Service {
 
-	private static final String			CLASS			= XMPPService.class.getSimpleName();
+	private static final String			CLASS	= XMPPService.class.getSimpleName();
 
-	public static final String			ACTION			= "action";
-	public static final String			USER_ID			= "userID";
-	public static final String			SERVER			= "server";
-	public static final String			PASSWORD		= "password";
-	public static final String			GROUP_NAME		= "groupName";
+	private final IBinder				mBinder	= new LocalBinder();
 
-	public static final int				NO_ACTION		= -1;
-	public static final int				CONNECT			= 0;
-	public static final int				DISCONNECT		= 1;
-	public static final int				CREATE_GROUP	= 2;
-	public static final int				INVITE_CONTACT	= 3;
-	public static final int				SEND_INDICATOR	= 4;
-
-	private final IBinder				mBinder			= new LocalBinder();
-
-	private XMPPConnection				mXMPP			= null;
-	private String						mUserID			= null;
-	private String						mServer			= null;
-	private Map<String, MultiUserChat>	groups			= null;
+	private XMPPConnection				mXMPP	= null;
+	private String						mUserID	= null;
+	private String						mServer	= null;
+	private Map<String, MultiUserChat>	groups	= null;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -59,58 +46,6 @@ public class XMPPService extends Service {
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
 		groups = new HashMap<String, MultiUserChat>();
-	}
-
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		String userID;
-		String server;
-		String password;
-		String groupName;
-		int action = intent.getIntExtra(ACTION, NO_ACTION);
-		switch (action) {
-			case CONNECT:
-				userID = intent.getStringExtra(USER_ID);
-				server = intent.getStringExtra(SERVER);
-				password = intent.getStringExtra(PASSWORD);
-				try {
-					connect(userID, server, password);
-				} catch (XMPPException e) {
-					e.printStackTrace();
-					Log.e(CLASS, "Failed to connect: " + e.toString());
-				}
-				break;
-			case DISCONNECT:
-				disconnect();
-				break;
-			case CREATE_GROUP:
-				groupName = intent.getStringExtra(GROUP_NAME);
-				try {
-					createGroup(groupName);
-				} catch (XMPPException e) {
-					e.printStackTrace();
-					Log.e(CLASS, "Failed to create group: " + e.toString());
-				}
-				break;
-			case INVITE_CONTACT:
-				userID = intent.getStringExtra(USER_ID);
-				groupName = intent.getStringExtra(GROUP_NAME);
-				invite(userID, groupName);
-				break;
-			case SEND_INDICATOR:
-				GeoPoint location = null;
-				try {
-					sendIndicator(location);
-				} catch (XMPPException e) {
-					e.printStackTrace();
-					Log.e(CLASS, "Failed to sendIndicator: " + e.toString());
-				}
-				break;
-			case NO_ACTION:
-			default:
-				break;
-		}
-		return START_STICKY;
 	}
 
 	@Override
