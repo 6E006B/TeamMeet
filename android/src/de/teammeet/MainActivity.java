@@ -20,8 +20,6 @@
 
 package de.teammeet;
 
-import org.jivesoftware.smack.XMPPException;
-
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -33,6 +31,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import de.teammeet.helper.ToastDisposerSingleton;
+import de.teammeet.tasks.ConnectTask;
 import de.teammeet.xmpp.XMPPService;
 
 public class MainActivity extends Activity {
@@ -90,12 +89,7 @@ public class MainActivity extends Activity {
 		b = (Button) findViewById(R.id.buttonXMPP);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(final View arg0) {
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						sendXMPPMessage();
-					}
-				}).start();
+				connectToXMPP();
 			}
 		});
 
@@ -157,22 +151,15 @@ public class MainActivity extends Activity {
 		startActivity(intent);
 	}
 
-	protected void sendXMPPMessage() {
-		Log.d(CLASS, "MainActivity.sendXMPPMessage()");
-
+	protected void connectToXMPP() {
+		Log.d(CLASS, "MainActivity.connectToXMPP()");
+		Button connectButton = (Button) findViewById(R.id.buttonXMPP);
+		
 		if (!mXMPPService.isAuthenticated()) {
-			SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-			try {
-				mXMPPService.connect(settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, ""),
-						settings.getString(SettingsActivity.SETTING_XMPP_SERVER, ""),
-						settings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, ""));
-			} catch (XMPPException e) {
-				e.printStackTrace();
-				Log.e(CLASS, "Failed to login: " + e.toString());
-				mToastSingleton.showError("Failed to login: " + e.toString());
-			}
+			new ConnectTask(connectButton).execute(mXMPPService); 
 		} else {
 			mXMPPService.disconnect();
+			connectButton.setText("Reconnect");
 			Log.d(CLASS, "Disconnected from XMPP");
 		}
 	}
