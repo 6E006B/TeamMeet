@@ -151,7 +151,7 @@ public class MainActivity extends Activity {
 		Button connectButton = (Button) findViewById(R.id.buttonXMPP);
 		
 		if (!mXMPPService.isAuthenticated()) {
-			new ConnectTask(connectButton).execute(mXMPPService); 
+			new ConnectTask(mXMPPService, connectButton).execute(); 
 		} else {
 			mXMPPService.disconnect();
 			connectButton.setText("Reconnect");

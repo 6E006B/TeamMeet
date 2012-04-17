@@ -10,26 +10,27 @@ import de.teammeet.SettingsActivity;
 import de.teammeet.xmpp.XMPPService;
 
 
-
-public class ConnectTask extends AsyncTask<XMPPService, Void, Boolean>
+public class ConnectTask extends AsyncTask<Void, Void, Boolean>
 {
 	private static final String CLASS = ConnectTask.class.getSimpleName();
-	private Button mconnectButton;
+	private XMPPService mService;
+	private Button mConnectButton;
 	
-	public ConnectTask(Button button) {
-		mconnectButton = button;
+	
+	public ConnectTask(XMPPService service, Button button) {
+		mService = service;
+		mConnectButton = button;
 	}
 	
 	@Override
-	protected Boolean doInBackground(XMPPService... params) {
-		XMPPService service = params[0];
+	protected Boolean doInBackground(Void... params) {
 		Boolean success = true;
 		
-		SharedPreferences settings = service.getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+		SharedPreferences settings = mService.getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
 		try {
-			service.connect(settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, ""),
-					settings.getString(SettingsActivity.SETTING_XMPP_SERVER, ""),
-					settings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, ""));
+			mService.connect(settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, ""),
+							 settings.getString(SettingsActivity.SETTING_XMPP_SERVER, ""),
+							 settings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, ""));
 		} catch (XMPPException e) {
 			success = false;
 			e.printStackTrace();
@@ -43,11 +44,11 @@ public class ConnectTask extends AsyncTask<XMPPService, Void, Boolean>
 	@Override
 	protected void onPostExecute (Boolean result) {
 		if (result) {
-			mconnectButton.setText("disconnect");
+			mConnectButton.setText("disconnect");
 			Log.d(CLASS, "successfully logged in");
 		} else {
 			Log.d(CLASS, "login failed");
 		}
 	}
-	
+
 }
