@@ -135,7 +135,7 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 
 	@Override
 	public void onProviderDisabled(final String provider) {
-		// TODO handle if provider gets disabled and probably also if provided
+		// TODO handle if provider gets disabled and also if provider
 		// isn't enabled in the first place
 		Log.e(CLASS, "TeamMeetLocationListener.onProviderDisabled() called.");
 		showError("Please enable your GPS.");
