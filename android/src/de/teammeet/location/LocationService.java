@@ -71,8 +71,8 @@ public class LocationService extends Service implements ILocationService {
 		}
 	}
 
-	private XMPPService			mXMPPService		= null;
-	private ServiceConnection	mServiceConnection	= new XMPPServiceConnection();
+	private XMPPService			mXMPPService			= null;
+	private ServiceConnection	mXMPPServiceConnection	= new XMPPServiceConnection();
 
 	private class XMPPServiceConnection implements ServiceConnection {
 		@Override
@@ -119,7 +119,7 @@ public class LocationService extends Service implements ILocationService {
 		startService(intent);
 
 		// now connect to the service
-		final boolean bindSuccess = bindService(intent, mServiceConnection, 0);
+		final boolean bindSuccess = bindService(intent, mXMPPServiceConnection, 0);
 		if (bindSuccess) {
 			Log.d(CLASS, "LocationService.bindToXMPP() succeeded");
 		} else {
