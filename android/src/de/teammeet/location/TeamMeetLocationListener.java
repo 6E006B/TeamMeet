@@ -124,7 +124,7 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 	@Override
 	public void onLocationChanged(final Location location) {
 
-		// Log.e(CLASS, "GpsLocationListener.onLocationChanged(" + location
+		// Log.d(CLASS, "GpsLocationListener.onLocationChanged(" + location
 		// .toString() + ")");
 		final GeoPoint geopoint = new GeoPoint((int) (location.getLatitude() * 1E6),
 				(int) (location.getLongitude() * 1E6));
@@ -137,20 +137,20 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 	public void onProviderDisabled(final String provider) {
 		// TODO handle if provider gets disabled and also if provider
 		// isn't enabled in the first place
-		Log.e(CLASS, "TeamMeetLocationListener.onProviderDisabled() called.");
+		Log.d(CLASS, "TeamMeetLocationListener.onProviderDisabled() called.");
 		showError("Please enable your GPS.");
 	}
 
 	@Override
 	public void onProviderEnabled(final String provider) {
 		// TODO handle activation of provider?
-		Log.e(CLASS, "TeamMeetLocationListener.onProviderEnabled() called.");
+		Log.d(CLASS, "TeamMeetLocationListener.onProviderEnabled() called.");
 	}
 
 	@Override
 	public void onStatusChanged(final String provider, final int status, final Bundle extras) {
 		// TODO handle status changes
-		Log.e(CLASS, "TeamMeetLocationListener.onStatusChange(" + status + ") called.");
+		Log.d(CLASS, "TeamMeetLocationListener.onStatusChange(" + status + ") called.");
 	}
 
 	@Override
@@ -160,7 +160,7 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 
 	@Override
 	public void onSensorChanged(final SensorEvent event) {
-		// Log.e(CLASS, "new mLocation set: " + direction);
+		// Log.d(CLASS, "new mLocation set: " + direction);
 		mLocationService.setDirection(event.values[0]);
 	}
 }
