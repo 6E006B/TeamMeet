@@ -27,6 +27,7 @@
 <string name="button_show_settings">Edit Settings</string>
 <string name="button_connect">Connect</string>
 <string name="button_create">Create Group</string>
+<string name="button_invite">Invite Mate</string>
 <string name="text_xmpp_section">XMPP</string>
 <string name="text_xmpp_account">XMPP Account Details</string>
 <string name="text_user_id">User ID:</string>

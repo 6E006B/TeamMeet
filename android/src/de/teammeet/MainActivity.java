@@ -34,6 +34,7 @@ import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
+import de.teammeet.tasks.InviteTask;
 import de.teammeet.xmpp.XMPPService;
 
 public class MainActivity extends Activity {
@@ -95,6 +96,13 @@ public class MainActivity extends Activity {
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(final View arg0) {
 				createGroup("teammeettestroom");
+			}
+		});
+
+		b = (Button) findViewById(R.id.buttonInvite);
+		b.setOnClickListener(new View.OnClickListener() {
+			public void onClick(final View arg0) {
+				inviteMate("teammeetmate@jabber.de", "teammeettestroom");
 			}
 		});
 
@@ -173,4 +181,12 @@ public class MainActivity extends Activity {
 
 		new CreateGroupTask(mXMPPService, createButton).execute(groupName);
 	}
+
+	private void inviteMate(String contact, String group) {
+		Log.d(CLASS, "MainActivity.inviteMate()");
+		Button inviteButton = (Button) findViewById(R.id.buttonInvite);
+
+		new InviteTask(mXMPPService, inviteButton).execute(contact, group);
+	}
+
 }
