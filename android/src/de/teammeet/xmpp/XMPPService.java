@@ -167,8 +167,9 @@ public class XMPPService extends Service implements IXMPPService {
 		if (mXMPP != null) {
 			if (mXMPP.isAuthenticated()) {
 				Message message = new Message();
-				GeolocPacketExtension geoloc = new GeolocPacketExtension(location.getLatitudeE6(),
-						location.getLongitudeE6(), accuracy);
+				GeolocPacketExtension geoloc = new GeolocPacketExtension(location.getLongitudeE6(),
+				                                                         location.getLatitudeE6(),
+				                                                         accuracy);
 				message.addExtension(geoloc);
 				sendAllGroups(message);
 			} else {
