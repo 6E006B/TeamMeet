@@ -99,10 +99,13 @@ public class MainActivity extends Activity {
 			public void onClick(final View arg0) {
 				String groupName = mSettings.getString(SettingsActivity.SETTING_XMPP_GROUP_NAME,
 				                                       "");
-				if (groupName.equals("")) {
-					mToastSingleton.showError("You need to configure a group name in the settings");
+				String conferenceServer = mSettings.getString(
+				        SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
+				if (groupName.equals("") || conferenceServer.equals("")) {
+					mToastSingleton.showError("You need to configure a group name and a " +
+											  "conference server in the settings");
 				} else {
-					createGroup(groupName);
+					createGroup(groupName, conferenceServer);
 				}
 			}
 		});
@@ -188,11 +191,11 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private void createGroup(String groupName) {
+	private void createGroup(String groupName, String conferenceServer) {
 		Log.d(CLASS, "MainActivity.createGroup()");
 		Button createButton = (Button) findViewById(R.id.buttonCreate);
 
-		new CreateGroupTask(mXMPPService, createButton).execute(groupName);
+		new CreateGroupTask(mXMPPService, createButton).execute(groupName, conferenceServer);
 	}
 
 	private void inviteMate(String contact, String group) {

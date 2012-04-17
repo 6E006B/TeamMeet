@@ -149,8 +149,9 @@ public class XMPPService extends Service implements IXMPPService {
 		roster.createEntry(userID, identifier, null);
 	}
 
-	public void createGroup(String groupName) throws XMPPException {
-		MultiUserChat muc = new MultiUserChat(mXMPP, String.format("%s@conference.%s", groupName, mServer));
+	public void createGroup(String groupName, String conferenceServer) throws XMPPException {
+		MultiUserChat muc = new MultiUserChat(mXMPP, String.format("%s@%s", groupName,
+		                                                           conferenceServer));
 		muc.create(mUserID);
 		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
 		muc.addMessageListener(new GroupMessageListener(this));
