@@ -146,9 +146,6 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		if (mXMPPService != null) {
-			mXMPPService.disconnect();
-		}
 		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
 		stopService(intent);
 		super.onDestroy();

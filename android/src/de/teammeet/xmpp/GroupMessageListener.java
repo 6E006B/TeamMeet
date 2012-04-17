@@ -16,7 +16,12 @@ public class GroupMessageListener implements PacketListener {
 	public void processPacket(Packet packet) {
 		String from = packet.getFrom();
 		String xml = packet.toXML();
+		GeolocPacketExtension geoloc = (GeolocPacketExtension) packet
+				.getExtension(GeolocPacketExtension.NAMESPACE);
+		if (geoloc != null) {
+			Log.d(CLASS,
+					"geoloc - latitude: " + geoloc.getLatitude() + " longitude: " + geoloc.getLongitude());
+		}
 		Log.d(CLASS, from + " sent " + xml);
 	}
-
 }
