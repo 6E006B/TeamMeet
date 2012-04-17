@@ -128,10 +128,10 @@ public class MainActivity extends Activity {
 		// now connect to the service
 		final boolean bindSuccess = bindService(intent, mServiceConnection, 0);
 		if (bindSuccess) {
-			Log.e(CLASS, "bind succeeded");
+			Log.d(CLASS, "bind to XMPP service succeeded");
 		} else {
-			Log.e(CLASS, "bind failed");
-			mToastSingleton.showError("Couldn't connect to service.");
+			Log.e(CLASS, "bind to XMPP service failed");
+			mToastSingleton.showError("Couldn't connect to XMPP service.");
 			this.finish();
 		}
 	}
