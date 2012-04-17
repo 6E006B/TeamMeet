@@ -116,7 +116,9 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 	}
 
 	public void deactivate() {
-		mTimerTask.cancel();
+		if (mTimerTask != null) {
+			mTimerTask.cancel();
+		}
 	}
 
 	@Override
