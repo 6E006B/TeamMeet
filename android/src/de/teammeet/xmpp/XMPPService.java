@@ -153,7 +153,7 @@ public class XMPPService extends Service implements IXMPPService {
 		MultiUserChat muc = new MultiUserChat(mXMPP, String.format("%s@conference.%s", groupName, mServer));
 		muc.create(mUserID);
 		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
-		muc.addMessageListener(new GroupMessageListener());
+		muc.addMessageListener(new GroupMessageListener(this));
 		groups.put(groupName, muc);
 	}
 
