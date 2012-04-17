@@ -44,6 +44,7 @@ public class MainActivity extends Activity {
 	private XMPPService mXMPPService = null;
 
 	private ToastDisposerSingleton mToastSingleton = null;
+	private SharedPreferences mSettings = null;
 
 	private ServiceConnection mServiceConnection = new XMPPServiceConnection();
 
@@ -68,6 +69,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.main);
 
 		mToastSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
+		mSettings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
 
 		Button b;
 
@@ -95,22 +97,36 @@ public class MainActivity extends Activity {
 		b = (Button) findViewById(R.id.buttonCreate);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(final View arg0) {
-				createGroup("teammeettestroom");
+				String groupName = mSettings.getString(SettingsActivity.SETTING_XMPP_GROUP_NAME,
+				                                       "");
+				if (groupName.equals("")) {
+					mToastSingleton.showError("You need to configure a group name in the settings");
+				} else {
+					createGroup(groupName);
+				}
 			}
 		});
 
 		b = (Button) findViewById(R.id.buttonInvite);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(final View arg0) {
-				inviteMate("teammeetmate@jabber.de", "teammeettestroom");
+				String groupName = mSettings.getString(SettingsActivity.SETTING_XMPP_GROUP_NAME,
+				                                       "");
+				String contact = mSettings.getString(
+				        SettingsActivity.SETTING_XMPP_CONTACT_TO_INVITE, "");
+				if (groupName.equals("") || contact.equals("")) {
+					mToastSingleton.showError("You need to configure a group name and a contact " +
+											  "to invite in the settings");
+				} else {
+					inviteMate(contact, groupName);
+				}
 			}
 		});
 
 		// If the user has not yet configured his XMPP settings lead the way
-		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-		if (settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "").equals("") ||
-				settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "").equals("") ||
-				settings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, "").equals("")) {
+		if (mSettings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "").equals("") ||
+				mSettings.getString(SettingsActivity.SETTING_XMPP_SERVER, "").equals("") ||
+				mSettings.getString(SettingsActivity.SETTING_XMPP_PASSWORD, "").equals("")) {
 			mToastSingleton.show("Please configure your XMPP Account.");
 			Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
 			startActivity(settingsIntent);
