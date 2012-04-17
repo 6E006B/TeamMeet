@@ -66,6 +66,7 @@ public class LocationService extends Service implements ILocationService {
 
 	public class LocalBinder extends Binder {
 		public LocationService getService() {
+			Log.d(CLASS, "LocationService.LocalBinder.getService()");
 			return LocationService.this;
 		}
 	}
@@ -90,7 +91,7 @@ public class LocationService extends Service implements ILocationService {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		// Log.e(CLASS, "LocationService.onCreate() called.");
+		Log.d(CLASS, "LocationService.onCreate() called.");
 		mMessageHandler = new Handler() {
 			@Override
 			public void handleMessage(final Message msg) {
@@ -109,7 +110,7 @@ public class LocationService extends Service implements ILocationService {
 		activateGPS();
 		activateCompass();
 
-		// Log.e(CLASS, "LocationService.onCreate() done");
+		Log.d(CLASS, "LocationService.onCreate() done");
 	}
 
 	private void bindToXMPP() {
@@ -120,10 +121,10 @@ public class LocationService extends Service implements ILocationService {
 		// now connect to the service
 		final boolean bindSuccess = bindService(intent, mServiceConnection, 0);
 		if (bindSuccess) {
-			Log.e(CLASS, "bind succeeded");
+			Log.d(CLASS, "LocationService.bindToXMPP() succeeded");
 		} else {
-			Log.e(CLASS, "bind failed");
-			showError("Couldn't connect to service.");
+			Log.e(CLASS, "LocationService.bindToXMPP() failed");
+			showError("Couldn't connect to XMPP service.");
 		}
 	}
 
@@ -136,7 +137,7 @@ public class LocationService extends Service implements ILocationService {
 		if (mLocationListener != null) {
 			mLocationListener.deactivate();
 		} else {
-			Log.e(CLASS, "WARNING: mLocationListener was null!");
+			Log.w(CLASS, "WARNING: mLocationListener was null!");
 		}
 	}
 
@@ -147,13 +148,13 @@ public class LocationService extends Service implements ILocationService {
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
 		final String providerString = mLocationManager.getBestProvider(criteria, false);
 		if (providerString != null) {
-			Log.e(CLASS, "providerString is " + providerString);
+			Log.d(CLASS, "providerString is " + providerString);
 			mLocationManager.requestLocationUpdates(providerString, 0, 0, mLocationListener); // TODO
 			// save
 			// power
 			// Log.e(CLASS, "sucessfully requested location updates...");
 		} else {
-			Log.e(CLASS, "WARNING: providerString is null!");
+			Log.w(CLASS, "WARNING: providerString is null!");
 			showError("You do not have any GPS device.");
 		}
 	}
@@ -164,21 +165,21 @@ public class LocationService extends Service implements ILocationService {
 			if (mLocationListener != null) {
 				mLocationManager.removeUpdates(mLocationListener);
 			} else {
-				Log.e(CLASS, "WARNING: mGpsLocationListener was null!");
+				Log.w(CLASS, "WARNING: mGpsLocationListener was null!");
 			}
 		} else {
-			Log.e(CLASS, "WARNING: mLocationManager was null!");
+			Log.w(CLASS, "WARNING: mLocationManager was null!");
 		}
 		mLocationManager = null;
 	}
 
 	private void activateCompass() {
-		Log.e(CLASS, "activateCompass()");
+		Log.d(CLASS, "activateCompass()");
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ORIENTATION);
 		for (Iterator<Sensor> sensors = sensorList.iterator(); sensors.hasNext();) {
 			Sensor sensor = (Sensor) sensors.next();
-			Log.e(CLASS, "Sensor: " + sensor.getName());
+			Log.d(CLASS, "Sensor: " + sensor.getName());
 		}
 		Sensor m_rotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 
@@ -198,13 +199,13 @@ public class LocationService extends Service implements ILocationService {
 
 	@Override
 	public IBinder onBind(final Intent intent) {
-		Log.e(CLASS, "LocationService.onBind() done");
+		Log.d(CLASS, "LocationService.onBind() called");
 		return mBinder;
 	}
 
 	@Override
 	public boolean onUnbind(final Intent intent) {
-		Log.e(CLASS, "LocationService.onUnbind() called.");
+		Log.d(CLASS, "LocationService.onUnbind() called");
 		return super.onUnbind(intent);
 	}
 
@@ -213,7 +214,7 @@ public class LocationService extends Service implements ILocationService {
 		stopLocationListener();
 		deactivateGPS();
 		deactivateCompass();
-		Log.e(CLASS, "LocationService.onDestroy() called");
+		Log.d(CLASS, "LocationService.onDestroy() called");
 		super.onDestroy();
 	}
 

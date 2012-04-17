@@ -71,13 +71,14 @@ public class TeamMeetActivity extends MapActivity {
 
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder binder) {
-			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceConnected('" + className + "')");
+			Log.d(CLASS, "TeamMeetActivity.LocationServiceConnection.onServiceConnected('" + className + "')");
 			mLocationService = ((LocationService.LocalBinder) binder).getService();
 		}
 
 		@Override
 		public void onServiceDisconnected(ComponentName className) {
-			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceDisconnected('" + className + "')");
+			Log.d(CLASS, "TeamMeetActivity.LocationServiceConnection.onServiceDisconnected('" + className +
+					"')");
 			mLocationService = null;
 		}
 	};
@@ -101,9 +102,13 @@ public class TeamMeetActivity extends MapActivity {
 	protected void onResume() {
 		super.onResume();
 
+		Log.d(CLASS, "TeamMeetActivity.onResume()");
+
 		// create the service (if it isn't already running
 		final Intent intent = new Intent(getApplicationContext(), LocationService.class);
 		startService(intent);
+
+		Log.d(CLASS, "started location service");
 
 		Window w = getWindow();
 		w.setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
@@ -115,7 +120,7 @@ public class TeamMeetActivity extends MapActivity {
 		}
 
 		mMapView = (MapView) findViewById(R.id.mapview);
-		Log.e(CLASS, "mMapView:" + mMapView.toString());
+		Log.d(CLASS, "mMapView:" + mMapView.toString());
 		mMapView.setBuiltInZoomControls(false);
 		mMapView.setSatellite(mSatelliteView);
 		mMapController = mMapView.getController();
@@ -136,11 +141,9 @@ public class TeamMeetActivity extends MapActivity {
 			mLocationFollower.setActive(mFollowingLocation);
 			mLocationService.registerLocationUpdates(mLocationFollower);
 		} else {
-			Log.e(CLASS, "bind failed");
-			mToastSingleton.showError("Couldn't connect to service.");
-			this.finish();
+			Log.e(CLASS, "TeamMeetActivity.onResume() bind to location service failed");
+			mToastSingleton.showError("Couldn't connect to location service.");
 		}
-
 	}
 
 	@Override
