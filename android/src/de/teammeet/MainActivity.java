@@ -155,9 +155,7 @@ public class MainActivity extends Activity {
 		if (!mXMPPService.isAuthenticated()) {
 			new ConnectTask(mXMPPService, connectButton).execute();
 		} else {
-			mXMPPService.disconnect();
-			connectButton.setText("Reconnect");
-			Log.d(CLASS, "Disconnected from XMPP");
+			new DisconnectTask(mXMPPService, connectButton).execute();
 		}
 	}
 }
