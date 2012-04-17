@@ -79,10 +79,7 @@ public class LocationService extends Service implements ILocationService {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
-			// This may only be done after the XMPPService is available
-			startLocationListener();
-			activateGPS();
-			activateCompass();
+			mLocationListener.setXMPPService(mXMPPService);
 		}
 
 		@Override
@@ -109,6 +106,9 @@ public class LocationService extends Service implements ILocationService {
 		};
 		mTostSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
 
+		startLocationListener();
+		activateGPS();
+		activateCompass();
 		bindToXMPP();
 
 		Log.d(CLASS, "LocationService.onCreate() done");

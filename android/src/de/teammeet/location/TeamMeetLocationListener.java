@@ -111,6 +111,10 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 		}
 	}
 
+	public void setXMPPService(XMPPService xmppService) {
+		mXMPPService = xmppService;
+	}
+
 	public void deactivate() {
 		mTimerTask.cancel();
 	}
