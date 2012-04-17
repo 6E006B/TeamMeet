@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Criteria;
@@ -44,6 +46,7 @@ import com.google.android.maps.GeoPoint;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.ILocationService;
 import de.teammeet.interfaces.ILocationUpdateRecipient;
+import de.teammeet.xmpp.XMPPService;
 
 public class LocationService extends Service implements ILocationService {
 	private static final String							CLASS				= LocationService.class
@@ -67,6 +70,23 @@ public class LocationService extends Service implements ILocationService {
 		}
 	}
 
+	private XMPPService			mXMPPService		= null;
+	private ServiceConnection	mServiceConnection	= new XMPPServiceConnection();
+
+	private class XMPPServiceConnection implements ServiceConnection {
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder binder) {
+			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceConnected('" + className + "')");
+			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName className) {
+			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceDisconnected('" + className + "')");
+			mXMPPService = null;
+		}
+	}
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -84,6 +104,7 @@ public class LocationService extends Service implements ILocationService {
 		};
 		mTostSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
 
+		bindToXMPP();
 		startLocationListener();
 		activateGPS();
 		activateCompass();
@@ -91,8 +112,23 @@ public class LocationService extends Service implements ILocationService {
 		// Log.e(CLASS, "LocationService.onCreate() done");
 	}
 
+	private void bindToXMPP() {
+		// create the service (if it isn't already running
+		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
+		startService(intent);
+
+		// now connect to the service
+		final boolean bindSuccess = bindService(intent, mServiceConnection, 0);
+		if (bindSuccess) {
+			Log.e(CLASS, "bind succeeded");
+		} else {
+			Log.e(CLASS, "bind failed");
+			showError("Couldn't connect to service.");
+		}
+	}
+
 	private void startLocationListener() {
-		mLocationListener = new TeamMeetLocationListener(this, mMessageHandler, getResources());
+		mLocationListener = new TeamMeetLocationListener(this, mXMPPService, mMessageHandler, getResources());
 		Log.e(CLASS, "TeamMeetLocationListener started...");
 	}
 

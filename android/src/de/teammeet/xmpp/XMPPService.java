@@ -164,11 +164,19 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	public void sendLocation(GeoPoint location, float accuracy) throws XMPPException {
-		Message message = new Message();
-		GeolocPacketExtension geoloc = new GeolocPacketExtension(location.getLatitudeE6(),
-				location.getLongitudeE6(), accuracy);
-		message.addExtension(geoloc);
-		sendAllGroups(message);
+		if (mXMPP != null) {
+			if (mXMPP.isAuthenticated()) {
+				Message message = new Message();
+				GeolocPacketExtension geoloc = new GeolocPacketExtension(location.getLatitudeE6(),
+						location.getLongitudeE6(), accuracy);
+				message.addExtension(geoloc);
+				sendAllGroups(message);
+			} else {
+				throw new XMPPException("Not authenticated.");
+			}
+		} else {
+			throw new XMPPException("Not connected.");
+		}
 	}
 
 	public void sendIndicator(GeoPoint location) throws XMPPException {
