@@ -32,17 +32,20 @@ import android.view.View;
 import android.widget.Button;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.tasks.ConnectTask;
+import de.teammeet.tasks.CreateGroupTask;
+import de.teammeet.tasks.DisconnectTask;
+import de.teammeet.tasks.InviteTask;
 import de.teammeet.xmpp.XMPPService;
 
 public class MainActivity extends Activity {
 
-	private String					CLASS				= MainActivity.class.getSimpleName();
+	private String CLASS = MainActivity.class.getSimpleName();
 
-	private XMPPService				mXMPPService		= null;
+	private XMPPService mXMPPService = null;
 
-	private ToastDisposerSingleton	mToastSingleton		= null;
+	private ToastDisposerSingleton mToastSingleton = null;
 
-	private ServiceConnection		mServiceConnection	= new XMPPServiceConnection();
+	private ServiceConnection mServiceConnection = new XMPPServiceConnection();
 
 	private class XMPPServiceConnection implements ServiceConnection {
 		@Override
@@ -53,7 +56,8 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onServiceDisconnected(ComponentName className) {
-			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceDisconnected('" + className + "')");
+			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceDisconnected('" + className +
+					"')");
 			mXMPPService = null;
 		}
 	}
@@ -81,10 +85,24 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		b = (Button) findViewById(R.id.buttonXMPP);
+		b = (Button) findViewById(R.id.buttonConnect);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(final View arg0) {
 				connectToXMPP();
+			}
+		});
+
+		b = (Button) findViewById(R.id.buttonCreate);
+		b.setOnClickListener(new View.OnClickListener() {
+			public void onClick(final View arg0) {
+				createGroup("teammeettestroom");
+			}
+		});
+
+		b = (Button) findViewById(R.id.buttonInvite);
+		b.setOnClickListener(new View.OnClickListener() {
+			public void onClick(final View arg0) {
+				inviteMate("teammeetmate@jabber.de", "teammeettestroom");
 			}
 		});
 
@@ -128,7 +146,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		if(mXMPPService != null) {
+		if (mXMPPService != null) {
 			mXMPPService.disconnect();
 		}
 		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
@@ -148,14 +166,27 @@ public class MainActivity extends Activity {
 
 	protected void connectToXMPP() {
 		Log.d(CLASS, "MainActivity.connectToXMPP()");
-		Button connectButton = (Button) findViewById(R.id.buttonXMPP);
-		
+		Button connectButton = (Button) findViewById(R.id.buttonConnect);
+
 		if (!mXMPPService.isAuthenticated()) {
-			new ConnectTask(connectButton).execute(mXMPPService); 
+			new ConnectTask(mXMPPService, connectButton).execute();
 		} else {
-			mXMPPService.disconnect();
-			connectButton.setText("Reconnect");
-			Log.d(CLASS, "Disconnected from XMPP");
+			new DisconnectTask(mXMPPService, connectButton).execute();
 		}
 	}
+
+	private void createGroup(String groupName) {
+		Log.d(CLASS, "MainActivity.createGroup()");
+		Button createButton = (Button) findViewById(R.id.buttonCreate);
+
+		new CreateGroupTask(mXMPPService, createButton).execute(groupName);
+	}
+
+	private void inviteMate(String contact, String group) {
+		Log.d(CLASS, "MainActivity.inviteMate()");
+		Button inviteButton = (Button) findViewById(R.id.buttonInvite);
+
+		new InviteTask(mXMPPService, inviteButton).execute(contact, group);
+	}
+
 }
