@@ -82,7 +82,7 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 					} else {
 						Log.d(CLASS, "cannot send location without XMPPService");
 					}
-					showToast("Location update to: " + mLocation.toString());
+					// showToast("Location update to: " + mLocation.toString());
 					Log.d(CLASS, "Location update to: " + mLocation.toString());
 					mLastLocation = mLocation;
 				}
