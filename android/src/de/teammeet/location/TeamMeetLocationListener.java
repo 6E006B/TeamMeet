@@ -71,11 +71,16 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 			@Override
 			public void run() {
 				if (mLocation != null && mLocation != mLastLocation) {
-					try {
-						mXMPPService.sendLocation(mLocation, mAccuracy);
-					} catch (XMPPException e) {
-						e.printStackTrace();
-						Log.e(CLASS, "Error while sending location: " + e.toString());
+					if (mXMPPService != null) {
+						try {
+							mXMPPService.sendLocation(mLocation, mAccuracy);
+
+						} catch (XMPPException e) {
+							e.printStackTrace();
+							Log.e(CLASS, "Error while sending location: " + e.toString());
+						}
+					} else {
+						Log.d(CLASS, "cannot send location without XMPPService");
 					}
 					showToast("Location update to: " + mLocation.toString());
 					Log.d(CLASS, "Location update to: " + mLocation.toString());
