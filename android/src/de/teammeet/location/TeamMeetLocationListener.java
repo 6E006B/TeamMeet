@@ -23,6 +23,8 @@ package de.teammeet.location;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.jivesoftware.smack.XMPPException;
+
 import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -37,6 +39,7 @@ import android.util.Log;
 import com.google.android.maps.GeoPoint;
 
 import de.teammeet.R;
+import de.teammeet.xmpp.XMPPService;
 
 public class TeamMeetLocationListener implements LocationListener, SensorEventListener {
 
@@ -46,6 +49,7 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 	private int					mTimeout			= 0;
 
 	private LocationService		mLocationService	= null;
+	private XMPPService			mXMPPService		= null;
 	private Handler				mMessageHandler		= null;
 	protected GeoPoint			mLocation			= null;
 	protected GeoPoint			mLastLocation		= null;
@@ -54,9 +58,10 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 	private Timer				mTimer				= null;
 	private TimerTask			mTimerTask			= null;
 
-	public TeamMeetLocationListener(final LocationService serviceInterface, final Handler messageHandler,
-			final Resources res) {
+	public TeamMeetLocationListener(final LocationService serviceInterface, final XMPPService xmppService,
+			final Handler messageHandler, final Resources res) {
 		mLocationService = serviceInterface;
+		mXMPPService = xmppService;
 		mMessageHandler = messageHandler;
 		mResources = res;
 		mTimeout = mResources.getInteger(R.integer.server_timeout);
@@ -66,7 +71,12 @@ public class TeamMeetLocationListener implements LocationListener, SensorEventLi
 			@Override
 			public void run() {
 				if (mLocation != null && mLocation != mLastLocation) {
-					// serviceInterface.sendLocation(mLocation, mAccuracy);
+					try {
+						mXMPPService.sendLocation(mLocation, mAccuracy);
+					} catch (XMPPException e) {
+						e.printStackTrace();
+						Log.e(CLASS, "Error while sending location: " + e.toString());
+					}
 					showToast("Location update to: " + mLocation.toString());
 					Log.d(CLASS, "Location update to: " + mLocation.toString());
 					mLastLocation = mLocation;
