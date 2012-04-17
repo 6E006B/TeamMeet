@@ -150,9 +150,8 @@ public class LocationService extends Service implements ILocationService {
 		final String providerString = mLocationManager.getBestProvider(criteria, false);
 		if (providerString != null) {
 			Log.d(CLASS, "providerString is " + providerString);
-			mLocationManager.requestLocationUpdates(providerString, 0, 0, mLocationListener); // TODO
-			// save
-			// power
+			//TODO save power
+			mLocationManager.requestLocationUpdates(providerString, 0, 0, mLocationListener);
 			// Log.e(CLASS, "sucessfully requested location updates...");
 		} else {
 			Log.w(CLASS, "WARNING: providerString is null!");
