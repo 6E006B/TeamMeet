@@ -99,7 +99,7 @@ public class TeamMeetActivity extends MapActivity {
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.d(CLASS, "TeamMeetActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
-			mLocationService = ((LocationService.LocalBinder) binder).getService();
+			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 
 			// register to get status updates
 			mXMPPService.registerMatesUpdates(mMatesOverlay);
@@ -136,10 +136,10 @@ public class TeamMeetActivity extends MapActivity {
 		Log.d(CLASS, "TeamMeetActivity.onResume()");
 
 		// create the services (if they aren't already running)
-		Intent intent = new Intent(getApplicationContext(), LocationService.class);
-		startService(intent);
-		intent = new Intent(getApplicationContext(), XMPPService.class);
-		startService(intent);
+		final Intent locationIntent = new Intent(getApplicationContext(), LocationService.class);
+		startService(locationIntent);
+		final Intent xmppIntent = new Intent(getApplicationContext(), XMPPService.class);
+		startService(xmppIntent);
 
 		Log.d(CLASS, "started location service");
 
@@ -165,7 +165,7 @@ public class TeamMeetActivity extends MapActivity {
 		addOverlays();
 
 		// now connect to the services
-		boolean bindSuccess = bindService(intent, mLocationServiceConnection, 0);
+		boolean bindSuccess = bindService(locationIntent, mLocationServiceConnection, 0);
 		if (bindSuccess) {
 			Log.d(CLASS, "TeamMeetActivity.onResume() bind to location service succeeded");
 		} else {
@@ -173,7 +173,7 @@ public class TeamMeetActivity extends MapActivity {
 			mToastSingleton.showError("Couldn't connect to location service.");
 		}
 
-		bindSuccess = bindService(intent, mXMPPServiceConnection, 0);
+		bindSuccess = bindService(xmppIntent, mXMPPServiceConnection, 0);
 		if (bindSuccess) {
 			Log.d(CLASS, "TeamMeetActivity.onResume() bind to XMPP service succeeded");
 		} else {
