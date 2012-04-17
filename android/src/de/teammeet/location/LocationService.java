@@ -214,8 +214,17 @@ public class LocationService extends Service implements ILocationService {
 		stopLocationListener();
 		deactivateGPS();
 		deactivateCompass();
+		doUnbindXMPPService();
 		Log.d(CLASS, "LocationService.onDestroy() called");
 		super.onDestroy();
+	}
+
+	private void doUnbindXMPPService() {
+		if (mXMPPServiceConnection != null) {
+			unbindService(mXMPPServiceConnection);
+		} else {
+			Log.w(CLASS, "No XMPPServiceConnection to unbind from.");
+		}
 	}
 
 	@Override
