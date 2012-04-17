@@ -43,7 +43,9 @@ import com.google.android.maps.Overlay;
 import de.teammeet.helper.LocationFollower;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.ILocationService;
+import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.location.LocationService;
+import de.teammeet.xmpp.XMPPService;
 
 public class TeamMeetActivity extends MapActivity {
 
@@ -75,8 +77,6 @@ public class TeamMeetActivity extends MapActivity {
 			mLocationService = ((LocationService.LocalBinder) binder).getService();
 
 			// register to get status updates
-			// TODO
-			// mLocationServiceConnection.registerMatesUpdates(mMatesOverlay);
 			mLocationService.registerLocationUpdates(mSelfOverlay);
 			mLocationService.registerLocationUpdates(mLocationFollower);
 
@@ -86,7 +86,31 @@ public class TeamMeetActivity extends MapActivity {
 		public void onServiceDisconnected(ComponentName className) {
 			Log.d(CLASS, "TeamMeetActivity.LocationServiceConnection.onServiceDisconnected('" + className +
 					"')");
+			unregisterLocationUpdates();
 			mLocationService = null;
+		}
+	};
+
+	private IXMPPService mXMPPService = null;
+	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
+
+	private class XMPPServiceConnection implements ServiceConnection {
+
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder binder) {
+			Log.d(CLASS, "TeamMeetActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
+			mLocationService = ((LocationService.LocalBinder) binder).getService();
+
+			// register to get status updates
+			mXMPPService.registerMatesUpdates(mMatesOverlay);
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName className) {
+			Log.d(CLASS, "TeamMeetActivity.XMPPServiceConnection.onServiceDisconnected('" + className +
+					"')");
+			unregisterMatesUpdates();
+			mXMPPService = null;
 		}
 	};
 
@@ -111,8 +135,10 @@ public class TeamMeetActivity extends MapActivity {
 
 		Log.d(CLASS, "TeamMeetActivity.onResume()");
 
-		// create the service (if it isn't already running
-		final Intent intent = new Intent(getApplicationContext(), LocationService.class);
+		// create the services (if they aren't already running)
+		Intent intent = new Intent(getApplicationContext(), LocationService.class);
+		startService(intent);
+		intent = new Intent(getApplicationContext(), XMPPService.class);
 		startService(intent);
 
 		Log.d(CLASS, "started location service");
@@ -138,21 +164,36 @@ public class TeamMeetActivity extends MapActivity {
 
 		addOverlays();
 
-		// now connect to the service
-		final boolean bindSuccess = bindService(intent, mLocationServiceConnection, 0);
+		// now connect to the services
+		boolean bindSuccess = bindService(intent, mLocationServiceConnection, 0);
 		if (bindSuccess) {
 			Log.d(CLASS, "TeamMeetActivity.onResume() bind to location service succeeded");
 		} else {
 			Log.e(CLASS, "TeamMeetActivity.onResume() bind to location service failed");
 			mToastSingleton.showError("Couldn't connect to location service.");
 		}
+
+		bindSuccess = bindService(intent, mXMPPServiceConnection, 0);
+		if (bindSuccess) {
+			Log.d(CLASS, "TeamMeetActivity.onResume() bind to XMPP service succeeded");
+		} else {
+			Log.e(CLASS, "TeamMeetActivity.onResume() bind to XMPP service failed");
+			mToastSingleton.showError("Couldn't connect to XMPP service.");
+		}
 	}
 
 	@Override
 	protected void onPause() {
+		unregisterLocationUpdates();
+		unregisterMatesUpdates();
 		if (mLocationServiceConnection != null) {
 			unbindService(mLocationServiceConnection);
 		}
+		if (mXMPPServiceConnection != null) {
+			unbindService(mXMPPServiceConnection);
+		}
+		mLocationService = null;
+		mXMPPService = null;
 		mListOfOverlays.clear();
 		super.onPause();
 	}
@@ -168,13 +209,27 @@ public class TeamMeetActivity extends MapActivity {
 		mSelfOverlay = new SelfOverlay(getResources());
 		mMatesOverlay = new MatesOverlay(getResources());
 		mIndicationOverlay = new IndicationOverlay(getResources());
-
 	}
 
 	private void addOverlays() {
 		mListOfOverlays.add(mSelfOverlay);
 		mListOfOverlays.add(mMatesOverlay);
 		mListOfOverlays.add(mIndicationOverlay);
+	}
+
+	private void unregisterLocationUpdates() {
+		if (mSelfOverlay != null) {
+			mLocationService.unregisterLocationUpdates(mSelfOverlay);
+		}
+		if (mLocationFollower != null) {
+			mLocationService.unregisterLocationUpdates(mLocationFollower);
+		}
+	}
+
+	private void unregisterMatesUpdates() {
+		if (mMatesOverlay != null) {
+			mXMPPService.unregisterMatesUpdates(mMatesOverlay);
+		}
 	}
 
 	@Override
