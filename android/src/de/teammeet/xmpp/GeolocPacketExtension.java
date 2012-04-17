@@ -30,6 +30,20 @@ public class GeolocPacketExtension implements PacketExtension {
 
 	@Override
 	public String toXML() {
-		return String.format("<x xmlns=\"%s\"><geoloc><lat>%d</lat><long>%d</long><accuracy>%f</accuracy></geoloc></x>", getNamespace(), mLatitude, mLongitude, mAccuracy);
+		return String.format(
+				"<x xmlns=\"%s\"><geoloc><lat>%d</lat><long>%d</long><accuracy>%f</accuracy></geoloc></x>",
+				getNamespace(), mLatitude, mLongitude, mAccuracy);
+	}
+
+	public int getLatitude() {
+		return mLatitude;
+	}
+
+	public int getLongitude() {
+		return mLongitude;
+	}
+
+	public float getAccuracy() {
+		return mAccuracy;
 	}
 }
