@@ -18,19 +18,24 @@
     along with TeamMeet.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <resources>
-<string name="app_name">TeamMeet</string>
-<string name="menu_auto_center">Auto center position</string>
-<string name="menu_fullscreen">Fullscreen</string>
-<string name="menu_goto_mylocation">Current location</string>
-<string name="menu_satellite_view">Satellite map</string>
-<string name="button_show_map">Show Map</string>
-<string name="button_show_settings">Edit Settings</string>
-<string name="button_connect">Connect</string>
-<string name="button_create">Create Group</string>
-<string name="button_invite">Invite Mate</string>
-<string name="text_xmpp_section">XMPP</string>
-<string name="text_xmpp_account">XMPP Account Details</string>
-<string name="text_user_id">User ID:</string>
-<string name="text_server">Server:</string>
-<string name="text_password">Password:</string>
+
+    <string name="app_name">TeamMeet</string>
+    <string name="menu_auto_center">Auto center position</string>
+    <string name="menu_fullscreen">Fullscreen</string>
+    <string name="menu_goto_mylocation">Current location</string>
+    <string name="menu_satellite_view">Satellite map</string>
+    <string name="button_show_map">Show Map</string>
+    <string name="button_show_settings">Edit Settings</string>
+    <string name="button_connect">Connect</string>
+    <string name="button_create">Create Group</string>
+    <string name="button_invite">Invite Mate</string>
+    <string name="text_xmpp_section">XMPP</string>
+    <string name="text_xmpp_account">XMPP Account Details</string>
+    <string name="text_user_id">User ID:</string>
+    <string name="text_server">Server:</string>
+    <string name="text_password">Password:</string>
+    <string name="text_conference_server">Conference Server:</string>
+    <string name="text_group_name">Group Name:</string>
+    <string name="text_contact_to_invite">Contact to invite:</string>
+
 </resources>
