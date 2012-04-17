@@ -6,17 +6,20 @@ import android.util.Log;
 
 public class GeolocPacketExtension implements PacketExtension {
 
-	private static String CLASS = GeolocPacketExtension.class.getSimpleName();
-	private int mLatitude = 0;
-	private int mLongitude = 0;
-	private float mAccuracy = 0;
-	
+	private static String		CLASS		= GeolocPacketExtension.class.getSimpleName();
+
+	public static final String	NAMESPACE	= "https://teammeet.de/teammeet.ns";
+
+	private int					mLatitude	= 0;
+	private int					mLongitude	= 0;
+	private float				mAccuracy	= 0;
+
 	public GeolocPacketExtension(int latitude, int longitude, float accuracy) {
 		mLatitude = latitude;
 		mLongitude = longitude;
 		mAccuracy = accuracy;
 	}
-	
+
 	@Override
 	public String getElementName() {
 		return "geoloc";
@@ -25,7 +28,7 @@ public class GeolocPacketExtension implements PacketExtension {
 	@Override
 	public String getNamespace() {
 		Log.d(CLASS, "getNamespace() called");
-		return "https://teammeet.de/teammeet.ns";
+		return NAMESPACE;
 	}
 
 	@Override
