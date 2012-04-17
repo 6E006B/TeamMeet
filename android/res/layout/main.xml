@@ -37,13 +37,38 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/buttonShowMap"
         android:text="@string/button_show_settings" />
-    
-    <Button
-        android:id="@+id/buttonXMPP"
-        android:layout_width="fill_parent"
+
+    <TextView
+        android:id="@+id/textXMPPSection"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/buttonShowSettings"
-        android:text="@string/button_xmpp" />
+        android:text="@string/text_xmpp_section"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/buttonConnect"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/textXMPPSection"
+        android:text="@string/button_connect" />
+
+    <Button
+        android:id="@+id/buttonCreate"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/buttonConnect"
+        android:text="@string/button_create" />
+
+    <Button
+        android:id="@+id/buttonInvite"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/buttonCreate"
+        android:text="@string/button_invite" />
 
 </RelativeLayout>
