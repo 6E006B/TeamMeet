@@ -17,131 +17,139 @@
     You should have received a copy of the GNU General Public License
     along with TeamMeet.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/RelativeLayout01"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView1"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="#000044" >
+    android:layout_height="fill_parent" >
 
-    <CheckBox
-        android:id="@+id/CheckBoxFollowPlayer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Auto center on position" >
-    </CheckBox>
-
-    <CheckBox
-        android:id="@+id/CheckBoxFullscreen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/CheckBoxFollowPlayer"
-        android:text="Fullscreen" >
-    </CheckBox>
-
-    <TextView
-        android:id="@+id/TextXMPPAccount"
+    <RelativeLayout
+        android:id="@+id/RelativeLayout01"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/CheckBoxFullscreen"
-        android:text="@string/text_xmpp_account" />
+        android:background="#000000"
+        android:isScrollContainer="true" >
 
-    <TextView
-        android:id="@+id/TextUserID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/TextXMPPAccount"
-        android:text="@string/text_user_id" />
+        <CheckBox
+            android:id="@+id/CheckBoxFollowPlayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Auto center on position" >
+        </CheckBox>
 
-    <EditText
-        android:id="@+id/EditTextUserID"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/TextXMPPAccount"
-        android:layout_toRightOf="@id/TextUserID"
-        android:ems="10"
-        android:inputType="textEmailAddress" >
+        <CheckBox
+            android:id="@+id/CheckBoxFullscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/CheckBoxFollowPlayer"
+            android:text="Fullscreen" >
+        </CheckBox>
 
-        <requestFocus />
-    </EditText>
+        <TextView
+            android:id="@+id/TextXMPPAccount"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/CheckBoxFullscreen"
+            android:text="@string/text_xmpp_account"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TextView
-        android:id="@+id/TextServer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/EditTextUserID"
-        android:text="@string/text_server" />
+        <TextView
+            android:id="@+id/TextUserID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/TextXMPPAccount"
+            android:text="@string/text_user_id" />
 
-    <EditText
-        android:id="@+id/EditTextServer"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/EditTextUserID"
-        android:layout_toRightOf="@id/TextServer"
-        android:ems="10"
-        android:inputType="textUri" />
+        <EditText
+            android:id="@+id/EditTextUserID"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/TextXMPPAccount"
+            android:layout_toRightOf="@id/TextUserID"
+            android:ems="10"
+            android:inputType="textEmailAddress" >
 
-    <TextView
-        android:id="@+id/TextPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/EditTextServer"
-        android:text="@string/text_password" />
+            <requestFocus />
+        </EditText>
 
-    <EditText
-        android:id="@+id/EditTextPassword"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/EditTextServer"
-        android:layout_toRightOf="@id/TextPassword"
-        android:ems="10"
-        android:inputType="textPassword" />
+        <TextView
+            android:id="@+id/TextServer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextUserID"
+            android:text="@string/text_server" />
 
-    <TextView
-        android:id="@+id/TextConferenceServer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/EditTextPassword"
-        android:text="@string/text_conference_server" />
+        <EditText
+            android:id="@+id/EditTextServer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextUserID"
+            android:layout_toRightOf="@id/TextServer"
+            android:ems="10"
+            android:inputType="textUri" />
 
-    <EditText
-        android:id="@+id/EditTextConferenceServer"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/EditTextPassword"
-        android:layout_toRightOf="@id/TextConferenceServer"
-        android:ems="10"
-        android:inputType="textUri" />
+        <TextView
+            android:id="@+id/TextPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextServer"
+            android:text="@string/text_password" />
 
-    <TextView
-        android:id="@+id/TextGroupName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/EditTextConferenceServer"
-        android:text="@string/text_group_name" />
+        <EditText
+            android:id="@+id/EditTextPassword"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextServer"
+            android:layout_toRightOf="@id/TextPassword"
+            android:ems="10"
+            android:inputType="textPassword" />
 
-    <EditText
-        android:id="@+id/EditTextGroupName"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/EditTextConferenceServer"
-        android:layout_toRightOf="@id/TextGroupName"
-        android:ems="10"
-        android:inputType="text" />
+        <TextView
+            android:id="@+id/TextConferenceServer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextPassword"
+            android:text="@string/text_conference_server" />
 
-    <TextView
-        android:id="@+id/TextContactToInvite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/EditTextGroupName"
-        android:text="@string/text_contact_to_invite" />
+        <EditText
+            android:id="@+id/EditTextConferenceServer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextPassword"
+            android:layout_toRightOf="@id/TextConferenceServer"
+            android:ems="10"
+            android:inputType="textUri" />
 
-    <EditText
-        android:id="@+id/EditTextContactToInvite"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/EditTextGroupName"
-        android:layout_toRightOf="@id/TextContactToInvite"
-        android:ems="10"
-        android:inputType="textEmailAddress" />
+        <TextView
+            android:id="@+id/TextGroupName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextConferenceServer"
+            android:text="@string/text_group_name" />
 
-</RelativeLayout>
+        <EditText
+            android:id="@+id/EditTextGroupName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextConferenceServer"
+            android:layout_toRightOf="@id/TextGroupName"
+            android:ems="10"
+            android:inputType="text" />
+
+        <TextView
+            android:id="@+id/TextContactToInvite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextGroupName"
+            android:text="@string/text_contact_to_invite" />
+
+        <EditText
+            android:id="@+id/EditTextContactToInvite"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextGroupName"
+            android:layout_toRightOf="@id/TextContactToInvite"
+            android:ems="10"
+            android:inputType="textEmailAddress" />
+    </RelativeLayout>
+
+</ScrollView>
