@@ -17,17 +17,13 @@
     You should have received a copy of the GNU General Public License
     along with TeamMeet.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<FrameLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	 android:layout_width="fill_parent"
-	 android:layout_height="fill_parent"
-	 android:stretchColumns="1">
-	
-	<com.google.android.maps.MapView
-		android:id="@+id/mapview"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:clickable="true"
-		android:apiKey="0GjPJ6hpTBBR-SqjqrEjBsu4JDnJ8S5o4apvVng"
-	/>
-</FrameLayout>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <com.google.android.maps.MapView
+        android:id="@+id/mapview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:apiKey="0GjPJ6hpTBBR-SqjqrEjBsu4JDnJ8S5o4apvVng"
+        android:clickable="true" />
+
+</merge>
