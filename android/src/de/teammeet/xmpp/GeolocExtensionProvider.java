@@ -27,11 +27,11 @@ public class GeolocExtensionProvider implements PacketExtensionProvider {
 				if (parser.getName().equals(GeolocPacketExtension.GEOLOC)) {
 					Log.d(CLASS, "Found geoloc tag");
 				} else if (parser.getName().equals(GeolocPacketExtension.LON)) {
-					lon = Integer.parseInt(parser.getText());
+					lon = Integer.parseInt(parser.nextText());
 				} else if (parser.getName().equals(GeolocPacketExtension.LAT)) {
-					lat = Integer.parseInt(parser.getText());
+					lat = Integer.parseInt(parser.nextText());
 				} else if (parser.getName().equals(GeolocPacketExtension.ERR)) {
-					err = Float.parseFloat(parser.getText());
+					err = Float.parseFloat(parser.nextText());
 				} else {
 					throw new InvalidProtocolException(String.format("Found invalid opening tag '%s'", parser.getName())); 
 				}
