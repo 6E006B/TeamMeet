@@ -21,6 +21,15 @@ else:
     raw_input = input
 
 
+class GeolocProto:
+    X = 'x'
+    NAMESPACE = 'https://teammeet.de/teammeet.ns'
+    GEOLOC = 'geoloc'
+    LON = 'lon'
+    LAT = 'lat'
+    ERR = 'err'
+
+
 class GeolocTester(ClientXMPP):
 
     def __init__(self, jid, password, room, lon, lat, err, timeout):
@@ -85,15 +94,15 @@ class GeolocTester(ClientXMPP):
             print("from '{}'".format(msg['from'].bare))
 
     def generate_geoloc_package(self, longitude, latitude, error):
-        msg = self.make_message('{}'.format(self.room),
+        msg = self.make_message(self.room,
                                 mtype='groupchat')
-        x = Element('{https://teammeet.de/teammeet.ns}x')
-        geoloc = Element('geoloc')
-        lon = Element('lon')
+        x = Element('{{{}}}{}'.format(GeolocProto.NAMESPACE, GeolocProto.X))
+        geoloc = Element(GeolocProto.GEOLOC)
+        lon = Element(GeolocProto.LON)
         lon.text = unicode(int(longitude * 1E6))
-        lat = Element('lat')
+        lat = Element(GeolocProto.LAT)
         lat.text = unicode(int(latitude * 1E6))
-        err = Element('err')
+        err = Element(GeolocProto.ERR)
         err.text = unicode(error)
 
         geoloc.append(lon)
@@ -101,6 +110,10 @@ class GeolocTester(ClientXMPP):
         geoloc.append(err)
         x.append(geoloc)
         msg.append(x)
+
+        #TODO: ugly workaround: `GroupMessageListener` in `TeamMeet` doesn't get
+        #      triggered by messages not containing a body :(
+        msg.append(Element('body'))
 
         self.send(msg)
 
