@@ -176,6 +176,18 @@ public class XMPPService extends Service implements IXMPPService {
 		releaseGroupsLock();
 	}
 
+	public void leaveGroup(String groupName) {
+		acquireGroupsLock();
+		MultiUserChat muc = groups.get(groupName);
+		if (muc != null) {
+			muc.leave();
+			groups.remove(groupName);
+			//TODO find out if the GroupMessageHandler has to be removed
+			// if there has to be an additional dict of handlers
+		}
+		releaseGroupsLock();
+	}
+
 	public void invite(String contact, String groupName) {
 		MultiUserChat muc = groups.get(groupName);
 		muc.invite(contact, "reason");
