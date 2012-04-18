@@ -18,6 +18,7 @@ import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -25,6 +26,7 @@ import android.util.Log;
 import com.google.android.maps.GeoPoint;
 
 import de.teammeet.Mate;
+import de.teammeet.SettingsActivity;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
 import de.teammeet.interfaces.IXMPPService;
 
@@ -38,9 +40,11 @@ public class XMPPService extends Service implements IXMPPService {
 	private Map<String, MultiUserChat>			groups				= null;
 
 	private final ReentrantLock					mLockMates			= new ReentrantLock();
+	private final ReentrantLock mLockGroups = new ReentrantLock();
 	private final List<IMatesUpdateRecipient>	mMatesRecipients	= new ArrayList<IMatesUpdateRecipient>();
 
 	private final IBinder						mBinder				= new LocalBinder();
+
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -110,7 +114,8 @@ public class XMPPService extends Service implements IXMPPService {
 		mXMPP.connect();
 		SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 		mXMPP.login(userID, password);
-		MultiUserChat.addInvitationListener(mXMPP, new GroupInvitationListener());
+		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+		MultiUserChat.addInvitationListener(mXMPP, new GroupInvitationListener(settings, this));
 	}
 
 	public boolean isAuthenticated() {
@@ -154,8 +159,21 @@ public class XMPPService extends Service implements IXMPPService {
 		                                                           conferenceServer));
 		muc.create(mUserID);
 		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
+		addGroup(groupName, muc);
+	}
+
+	public void joinGroup(String groupName, String userID, String password, String conferenceServer)
+			throws XMPPException {
+		MultiUserChat muc = new MultiUserChat(mXMPP, conferenceServer);
+		muc.join(userID, password);
+		addGroup(groupName, muc);
+	}
+
+	private void addGroup(String groupName, MultiUserChat muc) {
+		acquireGroupsLock();
 		muc.addMessageListener(new GroupMessageListener(this));
 		groups.put(groupName, muc);
+		releaseGroupsLock();
 	}
 
 	public void invite(String contact, String groupName) {
@@ -238,5 +256,13 @@ public class XMPPService extends Service implements IXMPPService {
 
 	private void releaseMatesLock() {
 		mLockMates.unlock();
+	}
+
+	private void acquireGroupsLock() {
+		mLockGroups.lock();
+	}
+
+	private void releaseGroupsLock() {
+		mLockGroups.unlock();
 	}
 }
