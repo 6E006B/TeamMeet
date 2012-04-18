@@ -100,10 +100,10 @@ public class XMPPService extends Service implements IXMPPService {
 		ConnectionConfiguration config = new ConnectionConfiguration(server);
 		config.setSelfSignedCertificateEnabled(true);
 		config.setDebuggerEnabled(true);
+		// TODO: This is the default. Enable for production mode?!
 		config.setCompressionEnabled(false);
 		// config.setExpiredCertificatesCheckEnabled(false);
 		// config.setSASLAuthenticationEnabled(false);
-		config.setReconnectionAllowed(true);
 		// config.setNotMatchingDomainCheckEnabled(false);
 		// config.setSecurityMode(SecurityMode.disabled);
 
