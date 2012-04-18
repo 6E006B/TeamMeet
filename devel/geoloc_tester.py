@@ -4,6 +4,7 @@
 import sys
 import logging
 from xml.etree.cElementTree import Element
+from time import sleep
 
 from sleekxmpp import ClientXMPP
 from sleekxmpp.basexmpp import BaseXMPP
@@ -21,11 +22,12 @@ else:
 
 class GeolocTester(ClientXMPP):
 
-    def __init__(self, jid, password, room, nick):
+    def __init__(self, jid, password, room, nick, timeout):
         ClientXMPP.__init__(self, jid, password)
 
         self.room = room
         self.nick = nick
+        self.generator_cycle = timeout
 
         # The session_start event will be triggered when
         # the bot establishes its connection with the server
@@ -61,7 +63,9 @@ class GeolocTester(ClientXMPP):
                                         # password=the_room_password,
                                         wait=True)
 
-        self.generate_geoloc_package(53.565278, 10.001389, 5.5)
+        while(True):
+            self.generate_geoloc_package(53.565278, 10.001389, 5.5)
+            sleep(self.generator_cycle)
 
     def muc_message(self, msg):
         """
@@ -103,6 +107,7 @@ if __name__ == '__main__':
     password = 'teammeetmatepass'
     room = 'teammeettestroom@conference.jabber.ccc.de'
     nick = 'teammeetmate'
+    timeout = 5
 
     # Setup logging.
     logging.basicConfig(level=logging.DEBUG,
@@ -111,7 +116,7 @@ if __name__ == '__main__':
     # Setup the MUCBot and register plugins. Note that while plugins may
     # have interdependencies, the order in which you register them does
     # not matter.
-    xmpp = GeolocTester(jid, password, room, nick)
+    xmpp = GeolocTester(jid, password, room, nick, timeout)
     xmpp.register_plugin('xep_0030') # Service Discovery
     xmpp.register_plugin('xep_0045') # Multi-User Chat
     xmpp.register_plugin('xep_0199') # XMPP Ping
