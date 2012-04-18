@@ -3,8 +3,9 @@
 
 import sys
 import logging
-from xml.etree.cElementTree import Element
+from argparse import ArgumentParser
 from time import sleep
+from xml.etree.cElementTree import Element
 
 from sleekxmpp import ClientXMPP
 from sleekxmpp.basexmpp import BaseXMPP
@@ -22,11 +23,14 @@ else:
 
 class GeolocTester(ClientXMPP):
 
-    def __init__(self, jid, password, room, nick, timeout):
+    def __init__(self, jid, password, room, lon, lat, err, timeout):
         ClientXMPP.__init__(self, jid, password)
 
         self.room = room
-        self.nick = nick
+        self.nick = jid.split('@')[0]
+        self.lon = lon
+        self.lat = lat
+        self.err = err
         self.generator_cycle = timeout
 
         # The session_start event will be triggered when
@@ -64,7 +68,7 @@ class GeolocTester(ClientXMPP):
                                         wait=True)
 
         while(True):
-            self.generate_geoloc_package(53.565278, 10.001389, 5.5)
+            self.generate_geoloc_package(self.lon, self.lat, self.err)
             sleep(self.generator_cycle)
 
     def muc_message(self, msg):
@@ -103,20 +107,64 @@ class GeolocTester(ClientXMPP):
 
 if __name__ == '__main__':
 
-    jid = 'teammeetmate@jabber.de'
-    password = 'teammeetmatepass'
-    room = 'teammeettestroom@conference.jabber.ccc.de'
-    nick = 'teammeetmate'
-    timeout = 5
+    parser = ArgumentParser(description='Send mock-up and dump geoloc messages')
+
+    xmpp_args = parser.add_argument_group('XMPP')
+    xmpp_args.add_argument('-j', '--jid',
+                           default='teammeetmate@jabber.de',
+                           help="the jabber account to connect to" \
+                                " [default: %(default)s]")
+    xmpp_args.add_argument('-p', '--password',
+                           metavar='PASS',
+                           default='teammeetmatepass',
+                           help="the password of the jabber account" \
+                                " [default: %(default)s]")
+    xmpp_args.add_argument('-r', '--room',
+                           default='teammeettestroom@conference.jabber.ccc.de',
+                           help="the MUC to join" \
+                                " [default: %(default)s]")
+
+    loc_args = parser.add_argument_group('location')
+    loc_args.add_argument('-l', '--lon',
+                          type=float,
+                          default=53.565278,
+                          help="the longitude to use in the mock-up messages" \
+                               " [default: %(default)s]")
+    loc_args.add_argument('-L', '--lat',
+                          type=float,
+                          default=10.001389,
+                          help="the latitude to use in the mock-up messages"
+                               " [default: %(default)s]")
+    loc_args.add_argument('-e', '--err',
+                          type=float,
+                          default=5.5,
+                          help="the error of the GPS signal" \
+                               " [default: %(default)s]")
+    loc_args.add_argument('-t', '--timeout',
+                          type=int,
+                          metavar='SEC',
+                          default=5,
+                          help="the period between mock-up messages" \
+                               " [default: %(default)s]")
+
+    parser.add_argument('--log-level',
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
+                        default='DEBUG',
+                        metavar='LEVEL',
+                        help="the log level [default: %(default)s]")
+
+    args = parser.parse_args()
 
     # Setup logging.
-    logging.basicConfig(level=logging.DEBUG,
+    log_level = getattr(logging, args.log_level, None)
+    logging.basicConfig(level=log_level,
                         format='%(levelname)s:%(module)s: %(message)s')
 
     # Setup the MUCBot and register plugins. Note that while plugins may
     # have interdependencies, the order in which you register them does
     # not matter.
-    xmpp = GeolocTester(jid, password, room, nick, timeout)
+    xmpp = GeolocTester(args.jid, args.password, args.room,
+                        args.lon, args.lat, args.err, args.timeout)
     xmpp.register_plugin('xep_0030') # Service Discovery
     xmpp.register_plugin('xep_0045') # Multi-User Chat
     xmpp.register_plugin('xep_0199') # XMPP Ping
