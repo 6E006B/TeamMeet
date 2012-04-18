@@ -38,6 +38,9 @@ public class SettingsActivity extends Activity {
 	public static final String SETTING_XMPP_USER_ID = "xmppUserID";
 	public static final String SETTING_XMPP_SERVER = "xmppServer";
 	public static final String SETTING_XMPP_PASSWORD = "xmppPassword";
+	public static final String SETTING_XMPP_CONFERENCE_SERVER = "xmppConferenceServer";
+	public static final String SETTING_XMPP_GROUP_NAME = "xmppGroupName";
+	public static final String SETTING_XMPP_CONTACT_TO_INVITE = "xmppContactToInvite";
 
 	private CheckBox			mFullscreenCheck		= null;
 	private CheckBox			mFollowLocationCheck	= null;
@@ -46,6 +49,9 @@ public class SettingsActivity extends Activity {
 	private EditText mTextUserID = null;
 	private EditText mTextServer = null;
 	private EditText mTextPassword = null;
+	private EditText mTextConferenceServer = null;
+	private EditText mTextGroupName = null;
+	private EditText mTextContactToInvite = null;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -81,6 +87,9 @@ public class SettingsActivity extends Activity {
 		mTextUserID = (EditText) findViewById(R.id.EditTextUserID);
 		mTextServer = (EditText) findViewById(R.id.EditTextServer);
 		mTextPassword = (EditText) findViewById(R.id.EditTextPassword);
+		mTextConferenceServer = (EditText) findViewById(R.id.EditTextConferenceServer);
+		mTextGroupName = (EditText) findViewById(R.id.EditTextGroupName);
+		mTextContactToInvite = (EditText) findViewById(R.id.EditTextContactToInvite);
 
 		final boolean follow = mSettings.getBoolean(SETTING_FOLLOW_LOCATION, false);
 		mFollowLocationCheck.setChecked(follow);
@@ -91,6 +100,9 @@ public class SettingsActivity extends Activity {
 		mTextUserID.setText(mSettings.getString(SETTING_XMPP_USER_ID, ""));
 		mTextServer.setText(mSettings.getString(SETTING_XMPP_SERVER, ""));
 		mTextPassword.setText(mSettings.getString(SETTING_XMPP_PASSWORD, ""));
+		mTextConferenceServer.setText(mSettings.getString(SETTING_XMPP_CONFERENCE_SERVER, ""));
+		mTextGroupName.setText(mSettings.getString(SETTING_XMPP_GROUP_NAME, ""));
+		mTextContactToInvite.setText(mSettings.getString(SETTING_XMPP_CONTACT_TO_INVITE, ""));
 	}
 
 	private void setFollowLocation(final boolean follow) {
@@ -108,6 +120,11 @@ public class SettingsActivity extends Activity {
 		mEditor.putString(SETTING_XMPP_USER_ID, mTextUserID.getEditableText().toString());
 		mEditor.putString(SETTING_XMPP_SERVER, mTextServer.getEditableText().toString());
 		mEditor.putString(SETTING_XMPP_PASSWORD, mTextPassword.getEditableText().toString());
+		mEditor.putString(SETTING_XMPP_CONFERENCE_SERVER, mTextConferenceServer.getEditableText().
+		                  toString());
+		mEditor.putString(SETTING_XMPP_GROUP_NAME, mTextGroupName.getEditableText().toString());
+		mEditor.putString(SETTING_XMPP_CONTACT_TO_INVITE, mTextContactToInvite.getEditableText().
+		                  toString());
 		mEditor.apply();
 		super.onPause();
 	}

@@ -24,10 +24,11 @@ public class CreateGroupTask extends AsyncTask<String, Void, Boolean> {
 	protected Boolean doInBackground(String... params) {
 
 		String groupName = params[0];
+		String conferenceServer = params[1];
 		Boolean success = true;
 
 		try {
-			mService.createGroup(groupName);
+			mService.createGroup(groupName, conferenceServer);
 		} catch (XMPPException e) {
 			success = false;
 			e.printStackTrace();

@@ -5,11 +5,17 @@ import org.jivesoftware.smack.packet.Packet;
 
 import android.util.Log;
 
+import com.google.android.maps.GeoPoint;
+
+import de.teammeet.Mate;
+
 public class GroupMessageListener implements PacketListener {
 
-	private static String	CLASS	= GroupMessageListener.class.getSimpleName();
+	private static String CLASS = GroupMessageListener.class.getSimpleName();
+	private XMPPService mXMPPService = null;
 
-	public GroupMessageListener() {
+	public GroupMessageListener(XMPPService xmppService) {
+		mXMPPService  = xmppService;
 	}
 
 	@Override
@@ -19,8 +25,14 @@ public class GroupMessageListener implements PacketListener {
 		GeolocPacketExtension geoloc = (GeolocPacketExtension) packet
 				.getExtension(GeolocPacketExtension.NAMESPACE);
 		if (geoloc != null) {
-			Log.d(CLASS,
-					"geoloc - latitude: " + geoloc.getLatitude() + " longitude: " + geoloc.getLongitude());
+			int lon = geoloc.getLongitude();
+			int lat = geoloc.getLatitude();
+			GeoPoint location = new GeoPoint(lon, lat);
+			float accuracy = geoloc.getAccuracy();
+			Log.d(CLASS, "geoloc - longitude: " + lon + " latitude: " + lat  + " accuracy: " + 
+						 accuracy);
+			Mate mate = new Mate(from, location, accuracy);
+			mXMPPService.updateMate(mate);
 		}
 		Log.d(CLASS, from + " sent " + xml);
 	}

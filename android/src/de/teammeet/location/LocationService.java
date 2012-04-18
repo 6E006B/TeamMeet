@@ -131,7 +131,7 @@ public class LocationService extends Service implements ILocationService {
 
 	private void startLocationListener() {
 		mLocationListener = new TeamMeetLocationListener(this, mXMPPService, mMessageHandler, getResources());
-		Log.e(CLASS, "TeamMeetLocationListener started...");
+		Log.d(CLASS, "TeamMeetLocationListener started...");
 	}
 
 	private void stopLocationListener() {
@@ -143,17 +143,16 @@ public class LocationService extends Service implements ILocationService {
 	}
 
 	private void activateGPS() {
-		// Log.e(CLASS, "activateGPS() called.");
+		// Log.d(CLASS, "activateGPS() called.");
 		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		final Criteria criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
 		final String providerString = mLocationManager.getBestProvider(criteria, false);
 		if (providerString != null) {
 			Log.d(CLASS, "providerString is " + providerString);
-			mLocationManager.requestLocationUpdates(providerString, 0, 0, mLocationListener); // TODO
-			// save
-			// power
-			// Log.e(CLASS, "sucessfully requested location updates...");
+			//TODO save power
+			mLocationManager.requestLocationUpdates(providerString, 0, 0, mLocationListener);
+			// Log.d(CLASS, "sucessfully requested location updates...");
 		} else {
 			Log.w(CLASS, "WARNING: providerString is null!");
 			showError("You do not have any GPS device.");
@@ -161,7 +160,7 @@ public class LocationService extends Service implements ILocationService {
 	}
 
 	private void deactivateGPS() {
-		Log.e(CLASS, "LocationService.deactivateGPS() called.");
+		Log.d(CLASS, "LocationService.deactivateGPS() called.");
 		if (mLocationManager != null) {
 			if (mLocationListener != null) {
 				mLocationManager.removeUpdates(mLocationListener);
@@ -230,7 +229,7 @@ public class LocationService extends Service implements ILocationService {
 
 	@Override
 	public void registerLocationUpdates(final ILocationUpdateRecipient object) {
-		// Log.e(CLASS, "registerLocationUpdates(" + object.getClass()
+		// Log.d(CLASS, "registerLocationUpdates(" + object.getClass()
 		// .getSimpleName() + ")");
 		acquireLocationLock();
 		try {
@@ -242,7 +241,7 @@ public class LocationService extends Service implements ILocationService {
 
 	@Override
 	public void unregisterLocationUpdates(final ILocationUpdateRecipient object) {
-		// Log.e(CLASS, "unregisterLocationUpdates(" + object.getClass()
+		// Log.d(CLASS, "unregisterLocationUpdates(" + object.getClass()
 		// .getSimpleName() + ")");
 		acquireLocationLock();
 		try {
