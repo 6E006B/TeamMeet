@@ -32,9 +32,9 @@ import android.widget.EditText;
 public class SettingsActivity extends Activity {
 
 	private static final String CLASS = SettingsActivity.class.getSimpleName();
-	public static final String	PREFS_NAME				= "de.teammeet";
-	public static final String	SETTING_FULLSCREEN		= "fullscreen";
-	public static final String	SETTING_FOLLOW_LOCATION	= "followLocation";
+	public static final String PREFS_NAME = "de.teammeet";
+	public static final String SETTING_FULLSCREEN = "fullscreen";
+	public static final String SETTING_FOLLOW_LOCATION = "followLocation";
 	public static final String SETTING_XMPP_USER_ID = "xmppUserID";
 	public static final String SETTING_XMPP_SERVER = "xmppServer";
 	public static final String SETTING_XMPP_PASSWORD = "xmppPassword";
