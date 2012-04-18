@@ -111,6 +111,10 @@ class GeolocTester(ClientXMPP):
         x.append(geoloc)
         msg.append(x)
 
+        #TODO: ugly workaround: `GroupMessageListener` in `TeamMeet` doesn't get
+        #      triggered by messages not containing a body :(
+        msg.append(Element('body'))
+
         self.send(msg)
 
 
