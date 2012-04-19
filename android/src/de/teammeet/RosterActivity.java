@@ -33,7 +33,6 @@ public class RosterActivity extends ExpandableListActivity {
 	private static final String AVAILABILITY = "avail";
 
 	private Roster mRoster = null;
-	private ExpandableListAdapter mAdapter = null;
 
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
@@ -128,7 +127,7 @@ public class RosterActivity extends ExpandableListActivity {
 		}
 	
 		// Set up our adapter
-		mAdapter = new SimpleExpandableListAdapter(
+		ExpandableListAdapter mAdapter = new SimpleExpandableListAdapter(
 				this,
 				groupData,
 				android.R.layout.simple_expandable_list_item_1,
