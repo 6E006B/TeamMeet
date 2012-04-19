@@ -9,12 +9,12 @@ import com.google.android.maps.GeoPoint;
 
 import de.teammeet.Mate;
 
-public class GroupMessageListener implements PacketListener {
+public class RoomMessageListener implements PacketListener {
 
-	private static String CLASS = GroupMessageListener.class.getSimpleName();
+	private static String CLASS = RoomMessageListener.class.getSimpleName();
 	private XMPPService mXMPPService = null;
 
-	public GroupMessageListener(XMPPService xmppService) {
+	public RoomMessageListener(XMPPService xmppService) {
 		mXMPPService  = xmppService;
 	}
 

@@ -87,6 +87,7 @@ public class XMPPService extends Service implements IXMPPService {
 		super.onDestroy();
 	}
 
+	@Override
 	public void connect(String userID, String server, String password) throws XMPPException {
 		mUserID = userID;
 		mServer = server;
@@ -113,9 +114,10 @@ public class XMPPService extends Service implements IXMPPService {
 		SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 		mXMPP.login(userID, password);
 		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-		MultiUserChat.addInvitationListener(mXMPP, new GroupInvitationListener(settings, this));
+		MultiUserChat.addInvitationListener(mXMPP, new RoomInvitationListener(settings, this));
 	}
 
+	@Override
 	public boolean isAuthenticated() {
 		boolean authenticated = false;
 		if (mXMPP != null) {
@@ -125,6 +127,7 @@ public class XMPPService extends Service implements IXMPPService {
 		return authenticated;
 	}
 
+	@Override
 	public void disconnect() {
 		Log.d(CLASS, "XMPPService.disconnect()");
 		if (mXMPP != null) {
@@ -133,6 +136,7 @@ public class XMPPService extends Service implements IXMPPService {
 		stopSelf();
 	}
 
+	@Override
 	public Map<String, List<String>> getContacts() throws XMPPException {
 		Map<String, List<String>> contacts = new HashMap<String, List<String>>();
 		if (mXMPP != null) {
@@ -154,34 +158,38 @@ public class XMPPService extends Service implements IXMPPService {
 		return contacts;
 	}
 
+	@Override
 	public void addContact(String userID, String identifier) throws XMPPException {
 		Roster roster = mXMPP.getRoster();
 		roster.createEntry(userID, identifier, null);
 	}
 
-	public void createGroup(String groupName, String conferenceServer) throws XMPPException {
+	@Override
+	public void createRoom(String groupName, String conferenceServer) throws XMPPException {
 		MultiUserChat muc = new MultiUserChat(mXMPP, String.format("%s@%s", groupName,
 		                                                           conferenceServer));
 		muc.create(mUserID);
 		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
-		addGroup(groupName, muc);
+		addRoom(groupName, muc);
 	}
 
-	public void joinGroup(String groupName, String userID, String password, String conferenceServer)
+	@Override
+	public void joinRoom(String roomName, String userID, String password, String conferenceServer)
 			throws XMPPException {
 		MultiUserChat muc = new MultiUserChat(mXMPP, conferenceServer);
 		muc.join(userID, password);
-		addGroup(groupName, muc);
+		addRoom(roomName, muc);
 	}
 
-	private void addGroup(String groupName, MultiUserChat muc) {
+	private void addRoom(String groupName, MultiUserChat muc) {
 		acquireGroupsLock();
-		muc.addMessageListener(new GroupMessageListener(this));
+		muc.addMessageListener(new RoomMessageListener(this));
 		groups.put(groupName, muc);
 		releaseGroupsLock();
 	}
 
-	public void leaveGroup(String groupName) {
+	@Override
+	public void leaveRoom(String groupName) {
 		acquireGroupsLock();
 		MultiUserChat muc = groups.get(groupName);
 		if (muc != null) {
@@ -193,12 +201,14 @@ public class XMPPService extends Service implements IXMPPService {
 		releaseGroupsLock();
 	}
 
+	@Override
 	public void invite(String contact, String groupName) {
 		MultiUserChat muc = groups.get(groupName);
 		muc.invite(contact, "reason");
 		// TODO: there is an InvitationRejectionListener - maybe use it
 	}
 
+	@Override
 	public void sendLocation(GeoPoint location, float accuracy) throws XMPPException {
 		if (mXMPP != null) {
 			if (mXMPP.isAuthenticated()) {
@@ -216,6 +226,7 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
+	@Override
 	public void sendIndicator(GeoPoint location) throws XMPPException {
 		Message message = new Message();
 		IndicatorPacketExtension indication = new IndicatorPacketExtension(location.getLatitudeE6(),
@@ -230,6 +241,7 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
+	@Override
 	public void updateMate(final Mate mate) {
 		acquireMatesLock();
 		try {

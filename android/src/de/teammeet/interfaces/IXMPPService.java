@@ -20,9 +20,43 @@
 
 package de.teammeet.interfaces;
 
+import java.util.List;
+import java.util.Map;
+
+import org.jivesoftware.smack.XMPPException;
+
+import com.google.android.maps.GeoPoint;
+
+import de.teammeet.Mate;
+
 public interface IXMPPService {
 
 	void registerMatesUpdates(IMatesUpdateRecipient object);
 
 	void unregisterMatesUpdates(IMatesUpdateRecipient object);
+
+	void connect(String userID, String server, String password) throws XMPPException;
+
+	boolean isAuthenticated();
+
+	void disconnect();
+
+	Map<String, List<String>> getContacts() throws XMPPException;
+
+	void addContact(String userID, String identifier) throws XMPPException;
+
+	void createRoom(String groupName, String conferenceServer) throws XMPPException;
+
+	void joinRoom(String roomName, String userID, String password, String conferenceServer)
+			throws XMPPException;
+
+	void leaveRoom(String roomName);
+
+	void invite(String contact, String roomName);
+
+	void sendLocation(GeoPoint location, float accuracy) throws XMPPException;
+
+	void sendIndicator(GeoPoint location) throws XMPPException;
+
+	void updateMate(Mate mate);
 }
