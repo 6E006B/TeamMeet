@@ -30,6 +30,7 @@ import de.teammeet.xmpp.XMPPService;
 public class RosterActivity extends ExpandableListActivity {
 	private static final String CLASS = RosterActivity.class.getSimpleName();
 	private static final String NAME = "name";
+	private static final String AVAILABILITY = "avail";
 
 	private Roster mRoster = null;
 	private ExpandableListAdapter mAdapter = null;
@@ -117,7 +118,9 @@ public class RosterActivity extends ExpandableListActivity {
 			List<Map<String, String>> currentChildren = new ArrayList<Map<String, String>>();
 			for (RosterEntry contact : group.getEntries()) {
 				Map<String, String> currentChild = new HashMap<String, String>();
-				currentChild.put(NAME, contact.getUser());
+				String jid = contact.getUser();
+				currentChild.put(NAME, jid);
+				currentChild.put(AVAILABILITY, roster.getPresence(jid).toString());
 				currentChildren.add(currentChild);
 
 			}
@@ -132,9 +135,9 @@ public class RosterActivity extends ExpandableListActivity {
 				new String[] { NAME },
 				new int[] { android.R.id.text1},
 				childData,
-				android.R.layout.simple_expandable_list_item_1,
-				new String[] { NAME },
-				new int[] { android.R.id.text1}
+				android.R.layout.simple_expandable_list_item_2,
+				new String[] { NAME, AVAILABILITY },
+				new int[] { android.R.id.text1, android.R.id.text2}
 				);
 		setListAdapter(mAdapter);
 	}
