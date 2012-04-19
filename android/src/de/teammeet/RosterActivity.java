@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.XMPPException;
 
 import android.app.ExpandableListActivity;
@@ -28,7 +31,7 @@ public class RosterActivity extends ExpandableListActivity {
 	private static final String CLASS = RosterActivity.class.getSimpleName();
 	private static final String NAME = "name";
 
-	private Map<String, List<String>> mContacts = null;
+	private Roster mRoster = null;
 	private ExpandableListAdapter mAdapter = null;
 
 	private IXMPPService mXMPPService = null;
@@ -41,17 +44,17 @@ public class RosterActivity extends ExpandableListActivity {
 			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 			
-			if (mContacts == null) {
+			if (mRoster == null) {
 				try {
-					mContacts = mXMPPService.getContacts();
+					mRoster = mXMPPService.getRoster();
 				} catch (XMPPException e) {
 					e.printStackTrace();
-					String problem = String.format("Could not fetch contacts: %s", e.getMessage());
+					String problem = String.format("Could not fetch roster: %s", e.getMessage());
 					Log.e(CLASS, problem);
 					Toast.makeText(getApplicationContext(), problem, 5);
 				}
 				
-				fillExpandableList(mContacts);
+				fillExpandableList(mRoster);
 			}
 
 		}
@@ -101,25 +104,24 @@ public class RosterActivity extends ExpandableListActivity {
 		super.onPause();
 	}
 	
-	private void fillExpandableList(Map<String, List<String>> contacts) {
+	private void fillExpandableList(Roster roster) {
 
 		List<Map<String, String>> groupData = new ArrayList<Map<String, String>>();
 		List<List<Map<String, String>>> childData = new ArrayList<List<Map<String, String>>>();
 	
-		for (String groupName : contacts.keySet()) {
-			Map<String, String> curGroupMap = new HashMap<String, String>();
-			List<String> groupContacts = contacts.get(groupName);
-			groupData.add(curGroupMap);
-			curGroupMap.put(NAME, groupName);
-	
-	
-			List<Map<String, String>> children = new ArrayList<Map<String, String>>();
-			for (String contact : groupContacts) {
-				Map<String, String> curChildMap = new HashMap<String, String>();
-				children.add(curChildMap);
-				curChildMap.put(NAME, contact);
+		for (RosterGroup group : roster.getGroups()) {
+			Map<String, String> currentGroup = new HashMap<String, String>();
+			currentGroup.put(NAME, group.getName());
+			groupData.add(currentGroup);
+
+			List<Map<String, String>> currentChildren = new ArrayList<Map<String, String>>();
+			for (RosterEntry contact : group.getEntries()) {
+				Map<String, String> currentChild = new HashMap<String, String>();
+				currentChild.put(NAME, contact.getUser());
+				currentChildren.add(currentChild);
+
 			}
-			childData.add(children);
+			childData.add(currentChildren);
 		}
 	
 		// Set up our adapter

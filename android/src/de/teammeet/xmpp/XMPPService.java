@@ -8,8 +8,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -137,25 +135,15 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public Map<String, List<String>> getContacts() throws XMPPException {
-		Map<String, List<String>> contacts = new HashMap<String, List<String>>();
+	public Roster getRoster() throws XMPPException {
+		Roster roster = null;
 		if (mXMPP != null) {
-			Roster roster = mXMPP.getRoster();
-			Log.d(CLASS, String.format("Num of groups in roster: '%d'", roster.getGroupCount()));
-			for (RosterGroup group : roster.getGroups()) {
-				String groupName = group.getName();
-				Log.d(CLASS, String.format("group: %s", groupName));
-				List<String> groupContacts = new ArrayList<String>();
-				for (RosterEntry contact : group.getEntries()) {
-					groupContacts.add(contact.getUser());
-				}
-				contacts.put(groupName, groupContacts);
-			}
+			roster = mXMPP.getRoster();
 		} else {
 			// TODO: define better Exception
 			throw new XMPPException("Connect before getting contacts!");
 		}
-		return contacts;
+		return roster;
 	}
 
 	@Override

@@ -20,9 +20,7 @@
 
 package de.teammeet.interfaces;
 
-import java.util.List;
-import java.util.Map;
-
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPException;
 
 import com.google.android.maps.GeoPoint;
@@ -41,7 +39,7 @@ public interface IXMPPService {
 
 	void disconnect();
 
-	Map<String, List<String>> getContacts() throws XMPPException;
+	Roster getRoster() throws XMPPException;
 
 	void addContact(String userID, String identifier) throws XMPPException;
 
