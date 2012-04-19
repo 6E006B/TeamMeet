@@ -59,4 +59,6 @@ public interface IXMPPService {
 	void sendIndicator(GeoPoint location) throws XMPPException;
 
 	void updateMate(Mate mate);
+
+	void destroyRoom(String roomName) throws XMPPException;
 }

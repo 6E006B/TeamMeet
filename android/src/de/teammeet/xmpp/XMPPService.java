@@ -181,22 +181,43 @@ public class XMPPService extends Service implements IXMPPService {
 		addRoom(roomName, muc);
 	}
 
-	private void addRoom(String groupName, MultiUserChat muc) {
+	private void addRoom(String roomName, MultiUserChat muc) {
 		acquireGroupsLock();
 		muc.addMessageListener(new RoomMessageListener(this));
-		groups.put(groupName, muc);
+		groups.put(roomName, muc);
+		releaseGroupsLock();
+	}
+
+	private void removeRoom(String roomName) {
+		acquireGroupsLock();
+		groups.remove(roomName);
+		//TODO find out if the GroupMessageHandler has to be removed
+		// if there has to be an additional dict of handlers
 		releaseGroupsLock();
 	}
 
 	@Override
-	public void leaveRoom(String groupName) {
+	public void leaveRoom(String roomName) {
 		acquireGroupsLock();
-		MultiUserChat muc = groups.get(groupName);
+		MultiUserChat muc = groups.get(roomName);
 		if (muc != null) {
 			muc.leave();
-			groups.remove(groupName);
-			//TODO find out if the GroupMessageHandler has to be removed
-			// if there has to be an additional dict of handlers
+			removeRoom(roomName);
+		}
+		releaseGroupsLock();
+	}
+
+	@Override
+	public void destroyRoom(String roomName) throws XMPPException {
+		acquireGroupsLock();
+		MultiUserChat muc = groups.get(roomName);
+		if (muc != null) {
+			SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+			String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
+			String server = settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "");
+			String alternateAddress = String.format("%s@%s", userID, server);
+			muc.destroy("reason", alternateAddress);
+			removeRoom(roomName);
 		}
 		releaseGroupsLock();
 	}
