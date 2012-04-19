@@ -28,7 +28,8 @@ public class RosterActivity extends ExpandableListActivity {
 	private static final String CLASS = RosterActivity.class.getSimpleName();
 	private static final String NAME = "name";
 
-	private ExpandableListAdapter mAdapter;
+	private Map<String, List<String>> mContacts = null;
+	private ExpandableListAdapter mAdapter = null;
 
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
@@ -39,6 +40,20 @@ public class RosterActivity extends ExpandableListActivity {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
+			
+			if (mContacts == null) {
+				try {
+					mContacts = mXMPPService.getContacts();
+				} catch (XMPPException e) {
+					e.printStackTrace();
+					String problem = String.format("Could not fetch contacts: %s", e.getMessage());
+					Log.e(CLASS, problem);
+					Toast.makeText(getApplicationContext(), problem, 5);
+				}
+				
+				fillExpandableList(mContacts);
+			}
+
 		}
 
 		@Override
@@ -52,65 +67,7 @@ public class RosterActivity extends ExpandableListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		Map<String, List<String>> contacts = null;
-
-		// create the services (if they aren't already running)
-		final Intent xmppIntent = new Intent(getApplicationContext(), XMPPService.class);
-		startService(xmppIntent);
-
-		Log.d(CLASS, "onCreate(): started XMPP service");
-
-		// now connect to the services
-		boolean bindSuccess = bindService(xmppIntent, mXMPPServiceConnection, 0);
-		if (bindSuccess) {
-			Log.d(CLASS, "onCreate(): bind to XMPP service succeeded");
-		} else {
-			Log.e(CLASS, "onCreate(): bind to XMPP service failed");
-			Toast.makeText(getApplicationContext(), "Couldn't connect to XMPP service.", 3);
-		}
-
-		try {
-			contacts = mXMPPService.getContacts();
-		} catch (XMPPException e) {
-			e.printStackTrace();
-			String problem = String.format("Could not fetch contacts: %s", e.getMessage());
-			Log.e(CLASS, problem);
-			Toast.makeText(getApplicationContext(), problem, 5);
-		}
-
-		List<Map<String, String>> groupData = new ArrayList<Map<String, String>>();
-		List<List<Map<String, String>>> childData = new ArrayList<List<Map<String, String>>>();
-
-		for (String groupName : contacts.keySet()) {
-			Map<String, String> curGroupMap = new HashMap<String, String>();
-			List<String> groupContacts = contacts.get(groupName);
-			groupData.add(curGroupMap);
-			curGroupMap.put(NAME, groupName);
-
-
-			List<Map<String, String>> children = new ArrayList<Map<String, String>>();
-			for (String contact : groupContacts) {
-				Map<String, String> curChildMap = new HashMap<String, String>();
-				children.add(curChildMap);
-				curChildMap.put(NAME, contact);
-			}
-			childData.add(children);
-		}
-
-		// Set up our adapter
-		mAdapter = new SimpleExpandableListAdapter(
-				this,
-				groupData,
-				android.R.layout.simple_expandable_list_item_1,
-				new String[] { NAME },
-				new int[] { android.R.id.text1},
-				childData,
-				android.R.layout.simple_expandable_list_item_1,
-				new String[] { NAME },
-				new int[] { android.R.id.text1}
-				);
-		setListAdapter(mAdapter);
+		Log.d(CLASS, "onCreate(): started roster activity");
 	}
 
 	@Override
@@ -143,4 +100,42 @@ public class RosterActivity extends ExpandableListActivity {
 		mXMPPService = null;
 		super.onPause();
 	}
+	
+	private void fillExpandableList(Map<String, List<String>> contacts) {
+
+		List<Map<String, String>> groupData = new ArrayList<Map<String, String>>();
+		List<List<Map<String, String>>> childData = new ArrayList<List<Map<String, String>>>();
+	
+		for (String groupName : contacts.keySet()) {
+			Map<String, String> curGroupMap = new HashMap<String, String>();
+			List<String> groupContacts = contacts.get(groupName);
+			groupData.add(curGroupMap);
+			curGroupMap.put(NAME, groupName);
+	
+	
+			List<Map<String, String>> children = new ArrayList<Map<String, String>>();
+			for (String contact : groupContacts) {
+				Map<String, String> curChildMap = new HashMap<String, String>();
+				children.add(curChildMap);
+				curChildMap.put(NAME, contact);
+			}
+			childData.add(children);
+		}
+	
+		// Set up our adapter
+		mAdapter = new SimpleExpandableListAdapter(
+				this,
+				groupData,
+				android.R.layout.simple_expandable_list_item_1,
+				new String[] { NAME },
+				new int[] { android.R.id.text1},
+				childData,
+				android.R.layout.simple_expandable_list_item_1,
+				new String[] { NAME },
+				new int[] { android.R.id.text1}
+				);
+		setListAdapter(mAdapter);
+	}
+	
+
 }
