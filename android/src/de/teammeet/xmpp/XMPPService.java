@@ -173,14 +173,34 @@ public class XMPPService extends Service implements IXMPPService {
 		releaseGroupsLock();
 	}
 
+	private void removeGroup(String groupName) {
+		acquireGroupsLock();
+		groups.remove(groupName);
+		//TODO find out if the GroupMessageHandler has to be removed
+		// if there has to be an additional dict of handlers
+		releaseGroupsLock();
+	}
+
 	public void leaveGroup(String groupName) {
 		acquireGroupsLock();
 		MultiUserChat muc = groups.get(groupName);
 		if (muc != null) {
 			muc.leave();
-			groups.remove(groupName);
-			//TODO find out if the GroupMessageHandler has to be removed
-			// if there has to be an additional dict of handlers
+			removeGroup(groupName);
+		}
+		releaseGroupsLock();
+	}
+
+	public void destroyGroup(String groupName) throws XMPPException {
+		acquireGroupsLock();
+		MultiUserChat muc = groups.get(groupName);
+		if (muc != null) {
+			SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+			String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
+			String server = settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "");
+			String alternateAddress = String.format("%s@%s", userID, server);
+			muc.destroy("reason", alternateAddress);
+			removeGroup(groupName);
 		}
 		releaseGroupsLock();
 	}
