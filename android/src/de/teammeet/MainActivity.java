@@ -80,6 +80,13 @@ public class MainActivity extends Activity {
 			}
 		});
 
+		b = (Button) findViewById(R.id.buttonShowRoster);
+		b.setOnClickListener(new View.OnClickListener() {
+			public void onClick(final View arg0) {
+				startRosterActivity();
+			}
+		});
+
 		b = (Button) findViewById(R.id.buttonShowSettings);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(final View arg0) {
@@ -174,7 +181,12 @@ public class MainActivity extends Activity {
 		final Intent intent = new Intent(MainActivity.this, TeamMeetActivity.class);
 		startActivity(intent);
 	}
-
+	
+	protected void startRosterActivity() {
+		final Intent intent = new Intent(MainActivity.this, RosterActivity.class);
+		startActivity(intent);
+	}
+	
 	protected void startSettingsActivity() {
 		final Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
 		startActivity(intent);
