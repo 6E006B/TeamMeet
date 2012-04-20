@@ -9,7 +9,10 @@ import java.util.Map;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
+import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.util.StringUtils;
 
 import android.app.ExpandableListActivity;
 import android.content.ComponentName;
@@ -28,7 +31,7 @@ import de.teammeet.xmpp.XMPPService;
 /**
  * Demonstrates expandable lists backed by a Simple Map-based adapter
  */
-public class RosterActivity extends ExpandableListActivity {
+public class RosterActivity extends ExpandableListActivity implements RosterListener {
 	private static final String CLASS = RosterActivity.class.getSimpleName();
 	private static final String NAME = "name";
 	private static final String AVAILABILITY = "avail";
@@ -49,6 +52,7 @@ public class RosterActivity extends ExpandableListActivity {
 			if (mRoster == null) {
 				try {
 					mRoster = mXMPPService.getRoster();
+					mRoster.addRosterListener(RosterActivity.this);
 				} catch (XMPPException e) {
 					e.printStackTrace();
 					String problem = String.format("Could not fetch roster: %s", e.getMessage());
@@ -162,5 +166,33 @@ public class RosterActivity extends ExpandableListActivity {
 				new int[] { android.R.id.text1, android.R.id.text2}
 				);
 		setListAdapter(mAdapter);
+	}
+
+	@Override
+	public void entriesAdded(Collection<String> arg0) {
+		Log.d(CLASS, "Entries have been added to the roster. No action implemented");
+	}
+
+	@Override
+	public void entriesDeleted(Collection<String> arg0) {
+		Log.d(CLASS, "Entries have been deleted from the roster. No action implemented");
+	}
+
+	@Override
+	public void entriesUpdated(Collection<String> arg0) {
+		Log.d(CLASS, "Entries have been updated in the roster. No action implemented");
+	}
+
+	@Override
+	public void presenceChanged(Presence presence) {
+		String contact = StringUtils.parseBareAddress(presence.getFrom());
+		String groupName = UNFILED_GROUP;
+		RosterEntry entry = mRoster.getEntry(contact);
+		if (entry != null) {
+			groupName = ((RosterGroup)entry.getGroups().toArray()[0]).getName();
+		} else {
+			Log.d(CLASS, String.format("Couldn't get roster entry for '%s'", contact));
+		}
+		Log.d(CLASS, String.format("presence of '%s' in group '%s' has changed in the roster.", contact, groupName));
 	}
 }
