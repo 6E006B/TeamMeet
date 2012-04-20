@@ -48,7 +48,8 @@
 
         <activity
             android:name="TeamMeetActivity"
-            uiOptions="splitActionBarWhenNarrow" >
+            uiOptions="splitActionBarWhenNarrow"
+            android:theme="@style/CustomActivityThemeOverlay" >
         </activity>
         <activity android:name=".RosterActivity" >
         </activity>
