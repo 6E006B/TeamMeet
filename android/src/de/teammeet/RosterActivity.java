@@ -12,7 +12,6 @@ import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.util.StringUtils;
 
 import android.app.ExpandableListActivity;
 import android.content.ComponentName;
@@ -36,12 +35,14 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	private static final String AVAILABILITY = "avail";
 	private static final String UNFILED_GROUP = "Unfiled contacts";
 
-	private Roster mRoster = null;
+	private SimpleExpandableListAdapter mAdapter;
+	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
+	private List<List<Map<String, String>>> mExpandableChildren = new ArrayList<List<Map<String, String>>>();
 
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
-	private List<List<Map<String, String>>> expandableChildren;
-	private SimpleExpandableListAdapter mAdapter;
+	private Roster mRoster = null;
+
 
 	private class XMPPServiceConnection implements ServiceConnection {
 
@@ -63,7 +64,6 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 				
 				fillExpandableList(mRoster);
 			}
-
 		}
 
 		@Override
@@ -92,11 +92,26 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			}
 		}
 	}
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.d(CLASS, "onCreate(): started roster activity");
+		
+		mAdapter = new SimpleExpandableListAdapter(
+				this,
+				mExpandableGroups,
+				android.R.layout.simple_expandable_list_item_1,
+				new String[] { NAME },
+				new int[] { android.R.id.text1},
+				mExpandableChildren,
+				android.R.layout.simple_expandable_list_item_2,
+				new String[] { NAME, AVAILABILITY },
+				new int[] { android.R.id.text1, android.R.id.text2}
+				);
+		
+		setListAdapter(mAdapter);
 	}
 
 	@Override
@@ -105,13 +120,13 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 
 		Log.d(CLASS, "RosterActivity.onResume()");
 
-		// create the services (if they aren't already running)
+		// create the service (if it isn't already running)
 		final Intent xmppIntent = new Intent(getApplicationContext(), XMPPService.class);
 		startService(xmppIntent);
 
 		Log.d(CLASS, "started XMPP service");
 
-		// now connect to the services
+		// now connect to the service
 		boolean bindSuccess = bindService(xmppIntent, mXMPPServiceConnection, 0);
 		if (bindSuccess) {
 			Log.d(CLASS, "onResume(): bind to XMPP service succeeded");
@@ -138,34 +153,21 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	private void fillExpandableList(Roster roster) {
 
 		ExpandableContactEntry newEntry = null;
-		List<Map<String, String>> expandableGroups = new ArrayList<Map<String, String>>();
-		expandableChildren = new ArrayList<List<Map<String, String>>>();
+		mExpandableGroups.clear();
+		mExpandableChildren.clear();
 	
 		for (RosterGroup group : roster.getGroups()) {
 			newEntry = new ExpandableContactEntry(group.getName(), group.getEntries(), roster);
-			expandableGroups.add(newEntry.mGroup);
-			expandableChildren.add(newEntry.mChildren);
+			mExpandableGroups.add(newEntry.mGroup);
+			mExpandableChildren.add(newEntry.mChildren);
 			
 		}
 
 		if (roster.getUnfiledEntryCount() > 0) {
 			newEntry = new ExpandableContactEntry(UNFILED_GROUP, roster.getUnfiledEntries(), roster);
-			expandableGroups.add(newEntry.mGroup);
-			expandableChildren.add(newEntry.mChildren);
+			mExpandableGroups.add(newEntry.mGroup);
+			mExpandableChildren.add(newEntry.mChildren);
 		}
-		
-		mAdapter = new SimpleExpandableListAdapter(
-				this,
-				expandableGroups,
-				android.R.layout.simple_expandable_list_item_1,
-				new String[] { NAME },
-				new int[] { android.R.id.text1},
-				expandableChildren,
-				android.R.layout.simple_expandable_list_item_2,
-				new String[] { NAME, AVAILABILITY },
-				new int[] { android.R.id.text1, android.R.id.text2}
-				);
-		setListAdapter(mAdapter);
 	}
 
 	@Override
@@ -185,6 +187,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 
 	@Override
 	public void presenceChanged(Presence presence) {
+		/*
 		String contact = StringUtils.parseBareAddress(presence.getFrom());
 		String groupName = UNFILED_GROUP;
 		RosterEntry entry = mRoster.getEntry(contact);
@@ -194,8 +197,15 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			Log.d(CLASS, String.format("Couldn't get roster entry for '%s'", contact));
 		}
 		Log.d(CLASS, String.format("presence of '%s' in group '%s' has changed in the roster.", contact, groupName));
-
-		expandableChildren.get(0).get(1).put(AVAILABILITY, "foo!!");
-		mAdapter.notifyDataSetChanged();
+		*/
+		
+		fillExpandableList(mRoster);
+		getExpandableListView().post(new Runnable() {
+			
+			@Override
+			public void run() {
+				mAdapter.notifyDataSetChanged();	
+			}
+		});
 	}
 }
