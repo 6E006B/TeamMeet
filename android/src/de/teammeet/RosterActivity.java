@@ -20,6 +20,8 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
 import de.teammeet.interfaces.IXMPPService;
@@ -144,6 +146,14 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		mXMPPService = null;
 		super.onPause();
 	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(final Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.roster, menu);
+		return true;
+	}
+
 	
 	/**
 	 * Fill the contact list with data from the roster.
