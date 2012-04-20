@@ -1,6 +1,7 @@
 package de.teammeet;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class RosterActivity extends ExpandableListActivity {
 	private static final String CLASS = RosterActivity.class.getSimpleName();
 	private static final String NAME = "name";
 	private static final String AVAILABILITY = "avail";
+	private static final String UNFILED_GROUP = "Unfiled contacts";
 
 	private Roster mRoster = null;
 
@@ -66,6 +68,25 @@ public class RosterActivity extends ExpandableListActivity {
 		}
 	};
 
+	private class ExpandableContactEntry {
+		protected Map<String, String> mGroup = null;
+		protected List<Map<String, String>> mChildren = null;
+	
+		public ExpandableContactEntry(String groupName, Collection<RosterEntry> contacts, Roster roster) {
+			mGroup = new HashMap<String, String>();
+			mChildren = new ArrayList<Map<String, String>>();
+			
+			mGroup.put(NAME, groupName);
+
+			for (RosterEntry contact : contacts) {
+				Map<String, String> newChild = new HashMap<String, String>();
+				String jid = contact.getUser();
+				newChild.put(NAME, jid);
+				newChild.put(AVAILABILITY, roster.getPresence(jid).toString());
+				mChildren.add(newChild);
+			}
+		}
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -104,42 +125,42 @@ public class RosterActivity extends ExpandableListActivity {
 		super.onPause();
 	}
 	
+	/**
+	 * Fill the contact list with data from the roster.
+	 * 
+	 * @param roster The roster containing all contact information
+	 */
 	private void fillExpandableList(Roster roster) {
 
-		List<Map<String, String>> groupData = new ArrayList<Map<String, String>>();
-		List<List<Map<String, String>>> childData = new ArrayList<List<Map<String, String>>>();
+		ExpandableContactEntry newEntry = null;
+		List<Map<String, String>> expandableGroups = new ArrayList<Map<String, String>>();
+		List<List<Map<String, String>>> expandableChildren = new ArrayList<List<Map<String, String>>>();
 	
 		for (RosterGroup group : roster.getGroups()) {
-			Map<String, String> currentGroup = new HashMap<String, String>();
-			currentGroup.put(NAME, group.getName());
-			groupData.add(currentGroup);
-
-			List<Map<String, String>> currentChildren = new ArrayList<Map<String, String>>();
-			for (RosterEntry contact : group.getEntries()) {
-				Map<String, String> currentChild = new HashMap<String, String>();
-				String jid = contact.getUser();
-				currentChild.put(NAME, jid);
-				currentChild.put(AVAILABILITY, roster.getPresence(jid).toString());
-				currentChildren.add(currentChild);
-
-			}
-			childData.add(currentChildren);
+			newEntry = new ExpandableContactEntry(group.getName(), group.getEntries(), roster);
+			expandableGroups.add(newEntry.mGroup);
+			expandableChildren.add(newEntry.mChildren);
+			
 		}
-	
+
+		if (roster.getUnfiledEntryCount() > 0) {
+			newEntry = new ExpandableContactEntry(UNFILED_GROUP, roster.getUnfiledEntries(), roster);
+			expandableGroups.add(newEntry.mGroup);
+			expandableChildren.add(newEntry.mChildren);
+		}
+		
 		// Set up our adapter
 		ExpandableListAdapter mAdapter = new SimpleExpandableListAdapter(
 				this,
-				groupData,
+				expandableGroups,
 				android.R.layout.simple_expandable_list_item_1,
 				new String[] { NAME },
 				new int[] { android.R.id.text1},
-				childData,
+				expandableChildren,
 				android.R.layout.simple_expandable_list_item_2,
 				new String[] { NAME, AVAILABILITY },
 				new int[] { android.R.id.text1, android.R.id.text2}
 				);
 		setListAdapter(mAdapter);
 	}
-	
-
 }
