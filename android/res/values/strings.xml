@@ -25,6 +25,7 @@
     <string name="menu_goto_mylocation">Current location</string>
     <string name="menu_satellite_view">Satellite map</string>
     <string name="button_show_map">Show Map</string>
+    <string name="button_show_roster">Show Roster</string>
     <string name="button_show_settings">Edit Settings</string>
     <string name="button_connect">Connect</string>
     <string name="button_create">Create Group</string>

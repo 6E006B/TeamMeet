@@ -9,14 +9,14 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import de.teammeet.SettingsActivity;
 
-public class GroupInvitationListener implements InvitationListener {
+public class RoomInvitationListener implements InvitationListener {
 
-	private static final String CLASS = GroupInvitationListener.class.getSimpleName();
+	private static final String CLASS = RoomInvitationListener.class.getSimpleName();
 
 	private SharedPreferences mSettings = null;
 	private XMPPService mXMPPService = null;
 
-	public GroupInvitationListener(SharedPreferences settings, XMPPService xmppService) {
+	public RoomInvitationListener(SharedPreferences settings, XMPPService xmppService) {
 		mSettings = settings;
 		mXMPPService = xmppService;
 	}
@@ -30,7 +30,7 @@ public class GroupInvitationListener implements InvitationListener {
 		// TODO inform user about invite and let him decide whether to join or not
 		String userID = mSettings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
 		try {
-			mXMPPService.joinGroup(room, userID, password, message.getFrom());
+			mXMPPService.joinRoom(room, userID, password, message.getFrom());
 		} catch (XMPPException e) {
 			Log.e(CLASS, "GroupInvitationListener.invitationReceived() failed to join group");
 			e.printStackTrace();

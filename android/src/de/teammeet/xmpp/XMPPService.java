@@ -8,7 +8,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -86,6 +85,7 @@ public class XMPPService extends Service implements IXMPPService {
 		super.onDestroy();
 	}
 
+	@Override
 	public void connect(String userID, String server, String password) throws XMPPException {
 		mUserID = userID;
 		mServer = server;
@@ -112,9 +112,10 @@ public class XMPPService extends Service implements IXMPPService {
 		SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 		mXMPP.login(userID, password);
 		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-		MultiUserChat.addInvitationListener(mXMPP, new GroupInvitationListener(settings, this));
+		MultiUserChat.addInvitationListener(mXMPP, new RoomInvitationListener(settings, this));
 	}
 
+	@Override
 	public boolean isAuthenticated() {
 		boolean authenticated = false;
 		if (mXMPP != null) {
@@ -124,6 +125,7 @@ public class XMPPService extends Service implements IXMPPService {
 		return authenticated;
 	}
 
+	@Override
 	public void disconnect() {
 		Log.d(CLASS, "XMPPService.disconnect()");
 		if (mXMPP != null) {
@@ -132,85 +134,90 @@ public class XMPPService extends Service implements IXMPPService {
 		stopSelf();
 	}
 
-	public List<String> getContacts() throws Exception {
-		List<String> contacts = new ArrayList<String>();
+	@Override
+	public Roster getRoster() throws XMPPException {
+		Roster roster = null;
 		if (mXMPP != null) {
-			Roster roster = mXMPP.getRoster();
-			for (RosterEntry r : roster.getEntries()) {
-				contacts.add(r.getUser());
-			}
+			roster = mXMPP.getRoster();
 		} else {
 			// TODO: define better Exception
-			throw new Exception("Connect before getting contacts!");
+			throw new XMPPException("Connect before getting contacts!");
 		}
-		return contacts;
+		return roster;
 	}
 
+	@Override
 	public void addContact(String userID, String identifier) throws XMPPException {
 		Roster roster = mXMPP.getRoster();
 		roster.createEntry(userID, identifier, null);
 	}
 
-	public void createGroup(String groupName, String conferenceServer) throws XMPPException {
+	@Override
+	public void createRoom(String groupName, String conferenceServer) throws XMPPException {
 		MultiUserChat muc = new MultiUserChat(mXMPP, String.format("%s@%s", groupName,
 		                                                           conferenceServer));
 		muc.create(mUserID);
 		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
-		addGroup(groupName, muc);
+		addRoom(groupName, muc);
 	}
 
-	public void joinGroup(String groupName, String userID, String password, String conferenceServer)
+	@Override
+	public void joinRoom(String roomName, String userID, String password, String conferenceServer)
 			throws XMPPException {
 		MultiUserChat muc = new MultiUserChat(mXMPP, conferenceServer);
 		muc.join(userID, password);
-		addGroup(groupName, muc);
+		addRoom(roomName, muc);
 	}
 
-	private void addGroup(String groupName, MultiUserChat muc) {
+	private void addRoom(String roomName, MultiUserChat muc) {
 		acquireGroupsLock();
-		muc.addMessageListener(new GroupMessageListener(this));
-		groups.put(groupName, muc);
+		muc.addMessageListener(new RoomMessageListener(this));
+		groups.put(roomName, muc);
 		releaseGroupsLock();
 	}
 
-	private void removeGroup(String groupName) {
+	private void removeRoom(String roomName) {
 		acquireGroupsLock();
-		groups.remove(groupName);
+		groups.remove(roomName);
 		//TODO find out if the GroupMessageHandler has to be removed
 		// if there has to be an additional dict of handlers
 		releaseGroupsLock();
 	}
 
-	public void leaveGroup(String groupName) {
+	@Override
+	public void leaveRoom(String roomName) {
 		acquireGroupsLock();
-		MultiUserChat muc = groups.get(groupName);
+		MultiUserChat muc = groups.get(roomName);
 		if (muc != null) {
 			muc.leave();
-			removeGroup(groupName);
+			removeRoom(roomName);
 		}
 		releaseGroupsLock();
 	}
 
-	public void destroyGroup(String groupName) throws XMPPException {
+	@Override
+	public void destroyRoom(String roomName) throws XMPPException {
 		acquireGroupsLock();
-		MultiUserChat muc = groups.get(groupName);
+		MultiUserChat muc = groups.get(roomName);
 		if (muc != null) {
 			SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
 			String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
 			String server = settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "");
 			String alternateAddress = String.format("%s@%s", userID, server);
 			muc.destroy("reason", alternateAddress);
-			removeGroup(groupName);
+			removeRoom(roomName);
 		}
 		releaseGroupsLock();
 	}
 
+	@Override
 	public void invite(String contact, String groupName) {
 		MultiUserChat muc = groups.get(groupName);
 		muc.invite(contact, "reason");
 		// TODO: there is an InvitationRejectionListener - maybe use it
 	}
 
+	@Override
 	public void sendLocation(GeoPoint location, float accuracy) throws XMPPException {
 		if (mXMPP != null) {
 			if (mXMPP.isAuthenticated()) {
@@ -228,6 +235,7 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
+	@Override
 	public void sendIndicator(GeoPoint location) throws XMPPException {
 		Message message = new Message();
 		IndicatorPacketExtension indication = new IndicatorPacketExtension(location.getLatitudeE6(),
@@ -242,6 +250,7 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
+	@Override
 	public void updateMate(final Mate mate) {
 		acquireMatesLock();
 		try {
