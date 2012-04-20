@@ -23,7 +23,7 @@
         android:id="@+id/mapview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:apiKey="0GjPJ6hpTBBR-SqjqrEjBsu4JDnJ8S5o4apvVng"
+        android:apiKey="@string/maps_api_key"
         android:clickable="true" />
 
 </merge>

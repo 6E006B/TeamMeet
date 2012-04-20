@@ -60,8 +60,8 @@ public class TeamMeetActivity extends MapActivity {
 	private LocationFollower			mLocationFollower			= null;
 	private List<Overlay>				mListOfOverlays				= null;
 
+	private MyDirectionLocationOverlay	mMyLocationOverlay			= null;
 	private MatesOverlay				mMatesOverlay				= null;
-	private SelfOverlay					mSelfOverlay				= null;
 	private IndicationOverlay			mIndicationOverlay			= null;
 
 	private boolean						mFollowingLocation			= false;
@@ -79,9 +79,7 @@ public class TeamMeetActivity extends MapActivity {
 			mLocationService = ((LocationService.LocalBinder) binder).getService();
 
 			// register to get status updates
-			mLocationService.registerLocationUpdates(mSelfOverlay);
 			mLocationService.registerLocationUpdates(mLocationFollower);
-
 		}
 
 		@Override
@@ -174,6 +172,8 @@ public class TeamMeetActivity extends MapActivity {
 		mLocationFollower = new LocationFollower(mMapController);
 		mLocationFollower.setActive(mFollowingLocation);
 
+		mMyLocationOverlay.enableMyLocation();
+		mMyLocationOverlay.enableCompass();
 		addOverlays();
 
 		// now connect to the services
@@ -196,6 +196,8 @@ public class TeamMeetActivity extends MapActivity {
 
 	@Override
 	protected void onPause() {
+		mMyLocationOverlay.disableMyLocation();
+		mMyLocationOverlay.disableCompass();
 		unregisterLocationUpdates();
 		unregisterMatesUpdates();
 		if (mLocationServiceConnection != null) {
@@ -218,21 +220,19 @@ public class TeamMeetActivity extends MapActivity {
 	}
 
 	private void createOverlays() {
-		mSelfOverlay = new SelfOverlay(getResources());
 		mMatesOverlay = new MatesOverlay(getResources());
 		mIndicationOverlay = new IndicationOverlay(getResources());
+		mMyLocationOverlay = new MyDirectionLocationOverlay(getApplicationContext(),
+		                                             (MapView) findViewById(R.id.mapview));
 	}
 
 	private void addOverlays() {
-		mListOfOverlays.add(mSelfOverlay);
 		mListOfOverlays.add(mMatesOverlay);
 		mListOfOverlays.add(mIndicationOverlay);
+		mListOfOverlays.add(mMyLocationOverlay);
 	}
 
 	private void unregisterLocationUpdates() {
-		if (mSelfOverlay != null) {
-			mLocationService.unregisterLocationUpdates(mSelfOverlay);
-		}
 		if (mLocationFollower != null) {
 			mLocationService.unregisterLocationUpdates(mLocationFollower);
 		}
