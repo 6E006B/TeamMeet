@@ -21,7 +21,6 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.ExpandableListAdapter;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
 import de.teammeet.interfaces.IXMPPService;
@@ -41,6 +40,8 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
+	private List<List<Map<String, String>>> expandableChildren;
+	private SimpleExpandableListAdapter mAdapter;
 
 	private class XMPPServiceConnection implements ServiceConnection {
 
@@ -138,7 +139,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 
 		ExpandableContactEntry newEntry = null;
 		List<Map<String, String>> expandableGroups = new ArrayList<Map<String, String>>();
-		List<List<Map<String, String>>> expandableChildren = new ArrayList<List<Map<String, String>>>();
+		expandableChildren = new ArrayList<List<Map<String, String>>>();
 	
 		for (RosterGroup group : roster.getGroups()) {
 			newEntry = new ExpandableContactEntry(group.getName(), group.getEntries(), roster);
@@ -153,8 +154,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			expandableChildren.add(newEntry.mChildren);
 		}
 		
-		// Set up our adapter
-		ExpandableListAdapter mAdapter = new SimpleExpandableListAdapter(
+		mAdapter = new SimpleExpandableListAdapter(
 				this,
 				expandableGroups,
 				android.R.layout.simple_expandable_list_item_1,
@@ -194,5 +194,8 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			Log.d(CLASS, String.format("Couldn't get roster entry for '%s'", contact));
 		}
 		Log.d(CLASS, String.format("presence of '%s' in group '%s' has changed in the roster.", contact, groupName));
+
+		expandableChildren.get(0).get(1).put(AVAILABILITY, "foo!!");
+		mAdapter.notifyDataSetChanged();
 	}
 }
