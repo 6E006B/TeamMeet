@@ -28,7 +28,7 @@ public class CreateGroupTask extends AsyncTask<String, Void, Boolean> {
 		Boolean success = true;
 
 		try {
-			mService.createGroup(groupName, conferenceServer);
+			mService.createRoom(groupName, conferenceServer);
 		} catch (XMPPException e) {
 			success = false;
 			e.printStackTrace();
