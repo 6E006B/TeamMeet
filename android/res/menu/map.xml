@@ -17,18 +17,27 @@
     You should have received a copy of the GNU General Public License
     along with TeamMeet.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<menu
-  xmlns:android="http://schemas.android.com/apk/res/android">
- <item android:id="@+id/auto_center"
-          android:icon="@drawable/ic_launcher"
-          android:title="@string/menu_auto_center" />
- <item android:id="@+id/goto_mylocation"
-          android:icon="@drawable/ic_launcher"
-          android:title="@string/menu_goto_mylocation" />
- <item android:id="@+id/satellite_view"
-          android:icon="@drawable/ic_launcher"
-          android:title="@string/menu_satellite_view" />
-  <item android:id="@+id/fullscreen"
-          android:icon="@drawable/ic_launcher"
-          android:title="@string/menu_fullscreen" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/auto_center"
+        android:icon="@drawable/ic_launcher"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_auto_center"/>
+    <item
+        android:id="@+id/goto_mylocation"
+        android:icon="@drawable/ic_launcher"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_goto_mylocation"/>
+    <item
+        android:id="@+id/satellite_view"
+        android:icon="@drawable/ic_launcher"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_satellite_view"/>
+    <item
+        android:id="@+id/fullscreen"
+        android:icon="@drawable/ic_launcher"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_fullscreen"/>
+
 </menu>
