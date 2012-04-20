@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
 import de.teammeet.interfaces.IXMPPService;
@@ -153,7 +154,25 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		inflater.inflate(R.menu.roster, menu);
 		return true;
 	}
+	
+	@Override
+	public boolean onOptionsItemSelected(final MenuItem item) {
 
+		switch (item.getItemId()) {
+			case R.id.roster_menu_connect:
+				Log.d(CLASS, "User clicked 'connect' in menu");
+				break;
+
+			case R.id.roster_menu_form_team:
+				Log.d(CLASS, "User clicked 'form team' in menu");
+				break;
+
+			default:
+				break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
 	
 	/**
 	 * Fill the contact list with data from the roster.
