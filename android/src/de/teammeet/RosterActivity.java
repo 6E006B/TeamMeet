@@ -198,22 +198,22 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	 * @param roster The roster containing all contact information
 	 */
 	private void fillExpandableList(Roster roster) {
+		if (roster != null) {
+			ExpandableContactEntry newEntry = null;
+			mExpandableGroups.clear();
+			mExpandableChildren.clear();
 
-		ExpandableContactEntry newEntry = null;
-		mExpandableGroups.clear();
-		mExpandableChildren.clear();
+			for (RosterGroup group : roster.getGroups()) {
+				newEntry = new ExpandableContactEntry(group.getName(), group.getEntries(), roster);
+				mExpandableGroups.add(newEntry.mGroup);
+				mExpandableChildren.add(newEntry.mChildren);
+			}
 	
-		for (RosterGroup group : roster.getGroups()) {
-			newEntry = new ExpandableContactEntry(group.getName(), group.getEntries(), roster);
-			mExpandableGroups.add(newEntry.mGroup);
-			mExpandableChildren.add(newEntry.mChildren);
-			
-		}
-
-		if (roster.getUnfiledEntryCount() > 0) {
-			newEntry = new ExpandableContactEntry(UNFILED_GROUP, roster.getUnfiledEntries(), roster);
-			mExpandableGroups.add(newEntry.mGroup);
-			mExpandableChildren.add(newEntry.mChildren);
+			if (roster.getUnfiledEntryCount() > 0) {
+				newEntry = new ExpandableContactEntry(UNFILED_GROUP, roster.getUnfiledEntries(), roster);
+				mExpandableGroups.add(newEntry.mGroup);
+				mExpandableChildren.add(newEntry.mChildren);
+			}
 		}
 	}
 
