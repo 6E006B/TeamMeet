@@ -2,8 +2,13 @@
 <resources>
 
     <!-- the theme applied to the application or activity -->
-    <style name="CustomActivityTheme" parent="@android:style/Theme.Holo">
+    <style name="CustomActivityThemeOverlay" parent="@android:style/Theme.Holo">
         <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:background">#66000000</item>
+    </style>
+
+    <style name="CustomActivityTheme" parent="@android:style/Theme.Holo">
+        <item name="android:windowActionBarOverlay">false</item>
         <item name="android:background">#66000000</item>
     </style>
 
