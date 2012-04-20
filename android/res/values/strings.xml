@@ -24,6 +24,12 @@
     <string name="menu_fullscreen">Fullscreen</string>
     <string name="menu_goto_mylocation">Current location</string>
     <string name="menu_satellite_view">Satellite map</string>
+    <string name="roster_menu_connect">Connect to server</string>
+    <string name="roster_menu_connect_condensed">Connect</string>
+    <string name="roster_menu_disconnect">Disconnect from server</string>
+    <string name="roster_menu_disconnect_condensed">Disconnect</string>
+    <string name="roster_menu_form_team">From a new team</string>
+    <string name="roster_menu_form_team_condensed">Form team</string>
     <string name="button_show_map">Show Map</string>
     <string name="button_show_roster">Show Roster</string>
     <string name="button_show_settings">Edit Settings</string>
@@ -38,5 +44,6 @@
     <string name="text_conference_server">Conference Server:</string>
     <string name="text_group_name">Group Name:</string>
     <string name="text_contact_to_invite">Contact to invite:</string>
+    
 
 </resources>
