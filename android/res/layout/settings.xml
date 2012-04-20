@@ -31,14 +31,14 @@
             android:id="@+id/CheckBoxFollowPlayer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Auto center on position" >
+            android:text="@string/menu_auto_center" >
         </CheckBox>
 
         <CheckBox
             android:id="@+id/CheckBoxFullscreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Fullscreen" >
+            android:text="@string/menu_fullscreen" >
         </CheckBox>
 
         <TextView
