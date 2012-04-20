@@ -22,10 +22,12 @@ package de.teammeet;
 
 import java.util.List;
 
+import android.app.ActionBar;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -134,6 +136,16 @@ public class TeamMeetActivity extends MapActivity {
 		super.onResume();
 
 		Log.d(CLASS, "TeamMeetActivity.onResume()");
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD_MR1) {
+            Log.d(CLASS, "Before Honeycomb - therefore no action bar");
+        } else {
+            Log.d(CLASS, "Honeycomb or newer - configuring action bar");
+            ActionBar actionBar = getActionBar();
+            actionBar.setDisplayHomeAsUpEnabled(true);
+//    		actionBar.setDisplayShowHomeEnabled(false);
+//    		actionBar.setDisplayShowTitleEnabled(true);
+        }
 
 		// create the services (if they aren't already running)
 		final Intent locationIntent = new Intent(getApplicationContext(), LocationService.class);
@@ -251,24 +263,31 @@ public class TeamMeetActivity extends MapActivity {
 		switch (item.getItemId()) {
 			case R.id.goto_mylocation:
 				focusCurrentLocation();
-				break;
+				return true;
 
 			case R.id.auto_center:
 				toggleFollowingLocation();
-				break;
+				return true;
 
 			case R.id.satellite_view:
 				toggleSatelliteView();
-				break;
+				return true;
 
 			case R.id.fullscreen:
 				toggleFullscreen();
-				break;
+				return true;
 
-			default:
-				break;
-		}
-		return super.onOptionsItemSelected(item);
+	        case android.R.id.home:
+	            // app icon in action bar clicked; go home
+	            Intent intent = new Intent(this, MainActivity.class);
+	            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	            startActivity(intent);
+	            Log.d(CLASS, "home icon clicked");
+	            return true;
+
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 
 	private void toggleFollowingLocation() {
