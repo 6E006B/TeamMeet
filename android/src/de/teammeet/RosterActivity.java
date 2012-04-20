@@ -17,6 +17,7 @@ import android.app.ExpandableListActivity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -173,6 +174,23 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		return super.onOptionsItemSelected(item);
 	}
 	
+	@Override
+	public boolean onPrepareOptionsMenu (Menu menu) {
+		Log.d(CLASS, "preparing roster options menu");
+		Resources res = getResources();
+		MenuItem connect_menu = menu.findItem(R.id.roster_menu_connect);
+		if (mXMPPService.isAuthenticated()) {
+			Log.d(CLASS, "setting menu option to 'disconnect'");
+			connect_menu.setTitle(R.string.roster_menu_disconnect);
+			connect_menu.setTitleCondensed(res.getString(R.string.roster_menu_disconnect_condensed));
+		} else {
+			connect_menu.setTitle(R.string.roster_menu_connect);
+			connect_menu.setTitleCondensed(res.getString(R.string.roster_menu_connect_condensed));
+		}
+		return true;
+	}
+
+
 	
 	/**
 	 * Fill the contact list with data from the roster.
