@@ -22,22 +22,22 @@
     <item
         android:id="@+id/auto_center"
         android:icon="@drawable/ic_launcher"
-        android:showAsAction="ifRoom|withText"
+        android:showAsAction="always|withText"
         android:title="@string/menu_auto_center"/>
     <item
         android:id="@+id/goto_mylocation"
-        android:icon="@drawable/ic_launcher"
-        android:showAsAction="ifRoom|withText"
+        android:icon="@drawable/ic_home"
+        android:showAsAction="always|withText"
         android:title="@string/menu_goto_mylocation"/>
     <item
         android:id="@+id/satellite_view"
         android:icon="@drawable/ic_launcher"
-        android:showAsAction="ifRoom|withText"
+        android:showAsAction="always|withText"
         android:title="@string/menu_satellite_view"/>
     <item
         android:id="@+id/fullscreen"
         android:icon="@drawable/ic_launcher"
-        android:showAsAction="ifRoom|withText"
+        android:showAsAction="always|withText"
         android:title="@string/menu_fullscreen"/>
 
 </menu>
