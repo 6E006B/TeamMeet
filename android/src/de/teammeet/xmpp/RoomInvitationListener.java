@@ -22,10 +22,10 @@ public class RoomInvitationListener implements InvitationListener {
 	}
 
 	@Override
-	public void invitationReceived(Connection xmppConnection, String room, String inviter,
-			String reason, String password, Message message) {
-		Log.d(CLASS, String.format("GroupInvitationListener.invitationReceived(... '%s', '%s', " + 
-			"'%s', '%s', '%s' ...) from %s", room, inviter, reason, password, message.getFrom()));
+    public void invitationReceived(Connection conn, String room, String inviter, String reason, String password, Message message) {
+        Log.d(CLASS, "GroupInvitationListener.invitationReceived(... '" + room + "', '" + inviter +
+                     "', '" + reason + "', '" +  password + "' ...) from " + message.getFrom());
+
 		// automatically join when invited
 		// TODO inform user about invite and let him decide whether to join or not
 		String userID = mSettings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
@@ -36,5 +36,4 @@ public class RoomInvitationListener implements InvitationListener {
 			e.printStackTrace();
 		}
 	}
-
 }
