@@ -54,6 +54,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private final List<IInvitationHandler> mInvitationHandlers = new ArrayList<IInvitationHandler>();
 
 	private final IBinder mBinder = new LocalBinder();
+	private int mBindCounter = 0;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -67,11 +68,11 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
 		groups = new HashMap<String, MultiUserChat>();
-		showXMPPServiceNotification();
 	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
+		mBindCounter++;
 		return mBinder;
 	}
 
@@ -82,6 +83,11 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public boolean onUnbind(Intent intent) {
+		mBindCounter--;
+		if (mBindCounter == 0 && !isAuthenticated()) {
+			Log.d(CLASS, "XMPPService: No one bound and not connected -> selfdestruction!");
+			stopSelf();
+		}
 		return super.onUnbind(intent);
 	}
 
@@ -124,6 +130,8 @@ public class XMPPService extends Service implements IXMPPService {
 		SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 		mXMPP.login(userID, password);
 		MultiUserChat.addInvitationListener(mXMPP, new RoomInvitationListener(this));
+
+		showXMPPServiceNotification();
 	}
 
 	@Override
@@ -142,7 +150,7 @@ public class XMPPService extends Service implements IXMPPService {
 		if (mXMPP != null) {
 			mXMPP.disconnect();
 		}
-		stopSelf();
+//		stopSelf();
 	}
 
 	@Override
