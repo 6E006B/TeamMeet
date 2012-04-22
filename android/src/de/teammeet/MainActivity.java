@@ -20,8 +20,12 @@
 
 package de.teammeet;
 
+import org.jivesoftware.smack.XMPPException;
+
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -41,6 +45,16 @@ public class MainActivity extends Activity {
 
 	private String CLASS = MainActivity.class.getSimpleName();
 
+	public static final String TYPE = "type";
+	public static final String ROOM = "room";
+	public static final String INVITER = "inviter";
+	public static final String REASON = "reason";
+	public static final String PASSWORD = "password";
+	public static final String FROM = "from";
+
+	public static final int TYPE_NONE = 0;
+	public static final int TYPE_JOIN = 1;
+
 	private XMPPService mXMPPService = null;
 
 	private ToastDisposerSingleton mToastSingleton = null;
@@ -53,6 +67,7 @@ public class MainActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
+			handleIntent(getIntent());
 		}
 
 		@Override
@@ -159,6 +174,69 @@ public class MainActivity extends Activity {
 			Log.e(CLASS, "bind to XMPP service failed");
 			mToastSingleton.showError("Couldn't connect to XMPP service.");
 			this.finish();
+		}
+	}
+
+	private void handleIntent(Intent intent) {
+		Log.d(CLASS, "MainActivity.handleIntent()");
+		final int type = intent.getIntExtra(TYPE, TYPE_NONE);
+		intent.removeExtra(TYPE);
+		switch (type) {
+		case TYPE_JOIN:
+			Log.d(CLASS, "Intent to join a group");
+			handleJoinIntent(intent);
+			break;
+		default:
+			Log.d(CLASS, "Intent of unknown type");
+			break;
+		}
+	}
+
+	private void handleJoinIntent(Intent intent) {
+		final String room = intent.getStringExtra(ROOM);
+		final String inviter = intent.getStringExtra(INVITER);
+		final String reason = intent.getStringExtra(REASON);
+		final String password = intent.getStringExtra(PASSWORD);
+		final String from = intent.getStringExtra(FROM);
+		// cleanup the extras so that this is only executed once, not every time the activity is
+		// brought to foreground again
+		intent.removeExtra(ROOM);
+		intent.removeExtra(INVITER);
+		intent.removeExtra(REASON);
+		intent.removeExtra(PASSWORD);
+		intent.removeExtra(FROM);
+		Log.d(CLASS, String.format("room: '%s' inviter: '%s' reason: '%s' password: '%s' from: '%s'", room, inviter, reason, password, from));
+		if (room != null && inviter != null && reason != null && from != null) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Group Invitation");
+			builder.setMessage(String.format("%s wants you to join '%s':\n%s", from, room, reason));
+			builder.setCancelable(false);
+			builder.setPositiveButton("Join", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			                dialog.dismiss();
+			                SharedPreferences settings =
+			                		getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+			                final String userID =
+			                		settings.getString(SettingsActivity.SETTING_XMPP_USER_ID,
+			                		                   "anonymous");
+			                try {
+								mXMPPService.joinRoom(room, userID, password);
+							} catch (XMPPException e) {
+								e.printStackTrace();
+								Log.e(CLASS, "Unable to join room.");
+								// TODO show the user
+							}
+			           }
+			       });
+			builder.setNegativeButton("Decline", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			                dialog.dismiss();
+			           }
+			       });
+			final AlertDialog alert = builder.create();
+			alert.show();
+		} else {
+			Log.e(CLASS, "Cannot handle invite: Missing parameters.");
 		}
 	}
 

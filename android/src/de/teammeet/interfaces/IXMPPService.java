@@ -33,6 +33,10 @@ public interface IXMPPService {
 
 	void unregisterMatesUpdates(IMatesUpdateRecipient object);
 
+	void registerInvitationHandler(IInvitationHandler object);
+
+	void unregisterInvitationHandler(IInvitationHandler object);
+
 	void connect(String userID, String server, String password) throws XMPPException;
 
 	boolean isAuthenticated();
@@ -44,6 +48,8 @@ public interface IXMPPService {
 	void addContact(String userID, String identifier) throws XMPPException;
 
 	void createRoom(String groupName, String conferenceServer) throws XMPPException;
+
+	void joinRoom(String room, String userID, String password) throws XMPPException;
 
 	void joinRoom(String roomName, String userID, String password, String conferenceServer)
 			throws XMPPException;
