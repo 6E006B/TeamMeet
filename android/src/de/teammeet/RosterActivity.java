@@ -214,14 +214,15 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		Log.d(CLASS, "preparing roster options menu");
 		Resources res = getResources();
 		MenuItem connect_menu = menu.findItem(R.id.roster_menu_connect);
-		if (mXMPPService.isAuthenticated()) {
+		int connectTitle = R.string.roster_menu_connect;
+		CharSequence connectTitleCondensed = res.getString(R.string.roster_menu_connect_condensed);
+		if (mXMPPService != null && mXMPPService.isAuthenticated()) {
 			Log.d(CLASS, "setting menu option to 'disconnect'");
-			connect_menu.setTitle(R.string.roster_menu_disconnect);
-			connect_menu.setTitleCondensed(res.getString(R.string.roster_menu_disconnect_condensed));
-		} else {
-			connect_menu.setTitle(R.string.roster_menu_connect);
-			connect_menu.setTitleCondensed(res.getString(R.string.roster_menu_connect_condensed));
+			connectTitle = R.string.roster_menu_disconnect;
+			connectTitleCondensed = res.getString(R.string.roster_menu_disconnect_condensed);
 		}
+		connect_menu.setTitle(connectTitle);
+		connect_menu.setTitleCondensed(connectTitleCondensed);
 		return true;
 	}
 
