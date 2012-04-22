@@ -25,7 +25,9 @@ public class DisconnectTask extends AsyncTask<Void, Void, Void> {
 
 	@Override
 	protected void onPostExecute(Void v) {
-		mDisconnectButton.setText("Connect");
+		if (mDisconnectButton != null) {
+			mDisconnectButton.setText("Connect");
+		}
 		Log.d(CLASS, "Disconnected from XMPP");
 	}
 
