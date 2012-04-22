@@ -44,7 +44,8 @@ public class XMPPService extends Service implements IXMPPService {
 	private XMPPConnection						mXMPP				= null;
 	private String								mUserID				= null;
 	private String								mServer				= null;
-	private Map<String, MultiUserChat>			groups				= null;
+	private Map<String, MultiUserChat>			mGroups				= null;
+	private RoomInvitationListener mRoomInvitationListener = null;
 
 	private final ReentrantLock mLockMates = new ReentrantLock();
 	private final ReentrantLock mLockGroups = new ReentrantLock();
@@ -54,6 +55,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private final List<IInvitationHandler> mInvitationHandlers = new ArrayList<IInvitationHandler>();
 
 	private final IBinder mBinder = new LocalBinder();
+	private int mBindCounter = 0;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -66,12 +68,11 @@ public class XMPPService extends Service implements IXMPPService {
 		super.onCreate();
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
-		groups = new HashMap<String, MultiUserChat>();
-		showXMPPServiceNotification();
 	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
+		mBindCounter++;
 		return mBinder;
 	}
 
@@ -82,6 +83,11 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public boolean onUnbind(Intent intent) {
+		mBindCounter--;
+		if (mBindCounter == 0 && !isAuthenticated()) {
+			Log.d(CLASS, "XMPPService: No one bound and not connected -> selfdestruction!");
+			stopSelf();
+		}
 		return super.onUnbind(intent);
 	}
 
@@ -99,6 +105,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void connect(String userID, String server, String password) throws XMPPException {
+		mGroups = new HashMap<String, MultiUserChat>();
 		mUserID = userID;
 		mServer = server;
 
@@ -123,7 +130,10 @@ public class XMPPService extends Service implements IXMPPService {
 		mXMPP.connect();
 		SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 		mXMPP.login(userID, password);
-		MultiUserChat.addInvitationListener(mXMPP, new RoomInvitationListener(this));
+		mRoomInvitationListener  = new RoomInvitationListener(this);
+		MultiUserChat.addInvitationListener(mXMPP, mRoomInvitationListener);
+
+		showXMPPServiceNotification();
 	}
 
 	@Override
@@ -140,9 +150,15 @@ public class XMPPService extends Service implements IXMPPService {
 	public void disconnect() {
 		Log.d(CLASS, "XMPPService.disconnect()");
 		if (mXMPP != null) {
+			if (mRoomInvitationListener != null) {
+				MultiUserChat.removeInvitationListener(mXMPP, mRoomInvitationListener);
+			}
 			mXMPP.disconnect();
 		}
-		stopSelf();
+		mGroups = null;
+		mRoomInvitationListener = null;
+		mXMPP = null;
+//		stopSelf();
 	}
 
 	@Override
@@ -195,13 +211,13 @@ public class XMPPService extends Service implements IXMPPService {
 	private void addRoom(String roomName, MultiUserChat muc) {
 		acquireGroupsLock();
 		muc.addMessageListener(new RoomMessageListener(this));
-		groups.put(roomName, muc);
+		mGroups.put(roomName, muc);
 		releaseGroupsLock();
 	}
 
 	private void removeRoom(String roomName) {
 		acquireGroupsLock();
-		groups.remove(roomName);
+		mGroups.remove(roomName);
 		//TODO find out if the GroupMessageHandler has to be removed
 		// if there has to be an additional dict of handlers
 		releaseGroupsLock();
@@ -210,7 +226,7 @@ public class XMPPService extends Service implements IXMPPService {
 	@Override
 	public void leaveRoom(String roomName) {
 		acquireGroupsLock();
-		MultiUserChat muc = groups.get(roomName);
+		MultiUserChat muc = mGroups.get(roomName);
 		if (muc != null) {
 			muc.leave();
 			removeRoom(roomName);
@@ -221,7 +237,7 @@ public class XMPPService extends Service implements IXMPPService {
 	@Override
 	public void destroyRoom(String roomName) throws XMPPException {
 		acquireGroupsLock();
-		MultiUserChat muc = groups.get(roomName);
+		MultiUserChat muc = mGroups.get(roomName);
 		if (muc != null) {
 			SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
 			String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
@@ -235,7 +251,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void invite(String contact, String groupName) {
-		MultiUserChat muc = groups.get(groupName);
+		MultiUserChat muc = mGroups.get(groupName);
 		muc.invite(contact, "reason");
 		// TODO: there is an InvitationRejectionListener - maybe use it
 	}
@@ -268,7 +284,7 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	private void sendAllGroups(Message message) throws XMPPException {
-		for (MultiUserChat muc : groups.values()) {
+		for (MultiUserChat muc : mGroups.values()) {
 			muc.sendMessage(message);
 		}
 	}
