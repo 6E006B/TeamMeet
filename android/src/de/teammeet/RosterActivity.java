@@ -176,10 +176,22 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 				Log.d(CLASS, "User clicked 'form team' in menu");
 				break;
 
+			case R.id.roster_menu_exit:
+				Log.d(CLASS, "User clicked 'exit' in menu");
+				performExit();
+				break;
+
 			default:
 				break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void performExit() {
+		mXMPPService.disconnect();
+		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
+		stopService(intent);
+		finish();
 	}
 
 	private void startMapActvity() {

@@ -13,5 +13,9 @@
         android:id="@+id/roster_menu_form_team"
         android:title="@string/roster_menu_form_team"
         android:titleCondensed="@string/roster_menu_form_team_condensed"/>
+    <item
+        android:id="@+id/roster_menu_exit"
+        android:title="@string/roster_menu_exit"
+        android:titleCondensed="@string/roster_menu_exit_condensed"/>
 
 </menu>
