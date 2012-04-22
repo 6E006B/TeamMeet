@@ -68,6 +68,7 @@ public class MainActivity extends Activity {
 			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 			handleIntent(getIntent());
+			fixConnectButton();
 		}
 
 		@Override
@@ -155,6 +156,25 @@ public class MainActivity extends Activity {
 			mToastSingleton.show("Please configure your XMPP Account.");
 			Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
 			startActivity(settingsIntent);
+		}
+	}
+
+	public void fixConnectButton() {
+		final Button b = (Button) findViewById(R.id.buttonConnect);
+		if (mXMPPService.isAuthenticated()) {
+			b.post(new Runnable() {
+				@Override
+				public void run() {
+					b.setText(getText(R.string.roster_menu_disconnect_condensed));
+				}
+			});
+		} else {
+			b.post(new Runnable() {
+				@Override
+				public void run() {
+					b.setText(getText(R.string.roster_menu_connect_condensed));		
+				}
+			});
 		}
 	}
 
