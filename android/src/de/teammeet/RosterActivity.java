@@ -27,6 +27,8 @@ import android.view.MenuItem;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
 import de.teammeet.interfaces.IXMPPService;
+import de.teammeet.tasks.ConnectTask;
+import de.teammeet.tasks.DisconnectTask;
 import de.teammeet.xmpp.XMPPService;
 
 
@@ -162,10 +164,21 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		switch (item.getItemId()) {
 			case R.id.roster_menu_connect:
 				Log.d(CLASS, "User clicked 'connect' in menu");
+				performConnectButtonAction();
+				break;
+
+			case R.id.roster_menu_show_map:
+				Log.d(CLASS, "User clicked 'map' in menu");
+				startMapActvity();
 				break;
 
 			case R.id.roster_menu_form_team:
 				Log.d(CLASS, "User clicked 'form team' in menu");
+				break;
+
+			case R.id.roster_menu_exit:
+				Log.d(CLASS, "User clicked 'exit' in menu");
+				performExit();
 				break;
 
 			default:
@@ -173,7 +186,29 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
+	private void performExit() {
+		mXMPPService.disconnect();
+		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
+		stopService(intent);
+		finish();
+	}
+
+	private void startMapActvity() {
+		final Intent intent = new Intent(getApplicationContext(), TeamMeetActivity.class);
+		startActivity(intent);
+	}
+
+	private void performConnectButtonAction() {
+		if (mXMPPService.isAuthenticated()) {
+			final DisconnectTask task = new DisconnectTask((XMPPService)mXMPPService, null);
+			task.execute();
+		} else {
+			final ConnectTask task = new ConnectTask((XMPPService)mXMPPService, null);
+			task.execute();
+		}
+	}
+
 	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) {
 		Log.d(CLASS, "preparing roster options menu");

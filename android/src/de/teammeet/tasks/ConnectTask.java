@@ -43,7 +43,9 @@ public class ConnectTask extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean result) {
 		if (result) {
-			mConnectButton.setText("Disconnect");
+			if (mConnectButton != null) {
+				mConnectButton.setText("Disconnect");
+			}
 			Log.d(CLASS, "successfully logged in");
 		} else {
 			Log.d(CLASS, "login failed");
