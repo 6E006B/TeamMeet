@@ -41,6 +41,16 @@ public class XMPPService extends Service implements IXMPPService {
 
 	private static final String					CLASS				= XMPPService.class.getSimpleName();
 
+	public static final String TYPE = "type";
+	public static final String ROOM = "room";
+	public static final String INVITER = "inviter";
+	public static final String REASON = "reason";
+	public static final String PASSWORD = "password";
+	public static final String FROM = "from";
+
+	public static final int TYPE_NONE = 0;
+	public static final int TYPE_JOIN = 1;
+
 	private XMPPConnection						mXMPP				= null;
 	private String								mUserID				= null;
 	private String								mServer				= null;
@@ -84,6 +94,7 @@ public class XMPPService extends Service implements IXMPPService {
 	@Override
 	public boolean onUnbind(Intent intent) {
 		mBindCounter--;
+		Log.d(CLASS, "XMPPService.onUnbind() still " + mBindCounter + " connected");
 		if (mBindCounter == 0 && !isAuthenticated()) {
 			Log.d(CLASS, "XMPPService: No one bound and not connected -> selfdestruction!");
 			stopSelf();
@@ -93,6 +104,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void onDestroy() {
+		Log.d(CLASS, "XMPPService.onDestroy()");
 		removeNotifications();
 		new Thread(new Runnable() {
 			@Override
@@ -383,13 +395,13 @@ public class XMPPService extends Service implements IXMPPService {
 		Context context = getApplicationContext();
 		CharSequence contentTitle = "Group Invitation received";
 		Intent notificationIntent = new Intent(this, MainActivity.class);
-		notificationIntent.putExtra(MainActivity.TYPE, MainActivity.TYPE_JOIN);
-		notificationIntent.putExtra(MainActivity.ROOM, room);
-		notificationIntent.putExtra(MainActivity.INVITER, inviter);
-		notificationIntent.putExtra(MainActivity.REASON, reason);
-		notificationIntent.putExtra(MainActivity.PASSWORD, password);
-		notificationIntent.putExtra(MainActivity.FROM, message.getFrom());
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+		notificationIntent.putExtra(TYPE, TYPE_JOIN);
+		notificationIntent.putExtra(ROOM, room);
+		notificationIntent.putExtra(INVITER, inviter);
+		notificationIntent.putExtra(REASON, reason);
+		notificationIntent.putExtra(PASSWORD, password);
+		notificationIntent.putExtra(FROM, message.getFrom());
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
 		notification.setLatestEventInfo(context, contentTitle, tickerText, contentIntent);
 	    notification.defaults = Notification.DEFAULT_ALL;
