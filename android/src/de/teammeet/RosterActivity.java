@@ -164,6 +164,10 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 				Log.d(CLASS, "User clicked 'connect' in menu");
 				break;
 
+			case R.id.roster_menu_show_map:
+				Log.d(CLASS, "User clicked 'map' in menu");
+				break;
+
 			case R.id.roster_menu_form_team:
 				Log.d(CLASS, "User clicked 'form team' in menu");
 				break;
