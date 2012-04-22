@@ -172,8 +172,6 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
-		stopService(intent);
 		super.onDestroy();
 	}
 
@@ -181,12 +179,12 @@ public class MainActivity extends Activity {
 		final Intent intent = new Intent(MainActivity.this, TeamMeetActivity.class);
 		startActivity(intent);
 	}
-	
+
 	protected void startRosterActivity() {
 		final Intent intent = new Intent(MainActivity.this, RosterActivity.class);
 		startActivity(intent);
 	}
-	
+
 	protected void startSettingsActivity() {
 		final Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
 		startActivity(intent);
@@ -216,5 +214,4 @@ public class MainActivity extends Activity {
 
 		new InviteTask(mXMPPService, inviteButton).execute(contact, group);
 	}
-
 }

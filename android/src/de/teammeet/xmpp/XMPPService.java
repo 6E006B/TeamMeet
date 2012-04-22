@@ -15,7 +15,11 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
@@ -24,7 +28,9 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
+import de.teammeet.MainActivity;
 import de.teammeet.Mate;
+import de.teammeet.R;
 import de.teammeet.SettingsActivity;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
 import de.teammeet.interfaces.IXMPPService;
@@ -57,6 +63,7 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
 		groups = new HashMap<String, MultiUserChat>();
+		showXMPPServiceNotification();
 	}
 
 	@Override
@@ -76,6 +83,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void onDestroy() {
+		removeNotifications();
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -286,6 +294,34 @@ public class XMPPService extends Service implements IXMPPService {
 		} finally {
 			releaseMatesLock();
 		}
+	}
+
+	private void showXMPPServiceNotification() {
+		String ns = Context.NOTIFICATION_SERVICE;
+		NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
+
+		CharSequence title = getText(R.string.notification_service_title);
+        CharSequence text = getText(R.string.notification_service_text);
+		int icon = R.drawable.group_invitation_icon;
+		CharSequence tickerText = String.format("%s %s", title, text);
+		long when = System.currentTimeMillis();
+
+		Notification notification = new Notification(icon, tickerText, when);
+		
+		Context context = getApplicationContext();
+		Intent notificationIntent = new Intent(this, MainActivity.class);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+		notification.setLatestEventInfo(context, title, text, contentIntent);
+		notification.flags |= Notification.FLAG_NO_CLEAR;
+
+		notificationManager.notify(R.integer.NOTIFICATION_XMPP_SERVICE_ID, notification);
+	}
+
+	private void removeNotifications() {
+		String ns = Context.NOTIFICATION_SERVICE;
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
+		mNotificationManager.cancelAll();
 	}
 
 	private void acquireMatesLock() {
