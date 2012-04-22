@@ -45,6 +45,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private String								mUserID				= null;
 	private String								mServer				= null;
 	private Map<String, MultiUserChat>			mGroups				= null;
+	private RoomInvitationListener mRoomInvitationListener = null;
 
 	private final ReentrantLock mLockMates = new ReentrantLock();
 	private final ReentrantLock mLockGroups = new ReentrantLock();
@@ -129,7 +130,8 @@ public class XMPPService extends Service implements IXMPPService {
 		mXMPP.connect();
 		SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 		mXMPP.login(userID, password);
-		MultiUserChat.addInvitationListener(mXMPP, new RoomInvitationListener(this));
+		mRoomInvitationListener  = new RoomInvitationListener(this);
+		MultiUserChat.addInvitationListener(mXMPP, mRoomInvitationListener);
 
 		showXMPPServiceNotification();
 	}
@@ -148,8 +150,14 @@ public class XMPPService extends Service implements IXMPPService {
 	public void disconnect() {
 		Log.d(CLASS, "XMPPService.disconnect()");
 		if (mXMPP != null) {
+			if (mRoomInvitationListener != null) {
+				MultiUserChat.removeInvitationListener(mXMPP, mRoomInvitationListener);
+			}
 			mXMPP.disconnect();
 		}
+		mGroups = null;
+		mRoomInvitationListener = null;
+		mXMPP = null;
 //		stopSelf();
 	}
 
