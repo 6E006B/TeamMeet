@@ -201,11 +201,9 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 
 	private void performConnectButtonAction() {
 		if (mXMPPService.isAuthenticated()) {
-			final DisconnectTask task = new DisconnectTask((XMPPService)mXMPPService, null);
-			task.execute();
+			new DisconnectTask((XMPPService)mXMPPService, null).execute();
 		} else {
-			final ConnectTask task = new ConnectTask((XMPPService)mXMPPService, null);
-			task.execute();
+			new ConnectTask((XMPPService)mXMPPService, null).execute();
 		}
 	}
 
