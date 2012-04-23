@@ -32,6 +32,7 @@ import com.google.android.maps.GeoPoint;
 import de.teammeet.MainActivity;
 import de.teammeet.Mate;
 import de.teammeet.R;
+import de.teammeet.RosterActivity;
 import de.teammeet.SettingsActivity;
 import de.teammeet.interfaces.IInvitationHandler;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
