@@ -10,9 +10,9 @@ public class DisconnectTask extends AsyncTask<Void, Void, Void> {
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private XMPPService mService;
-	private AsyncTaskCallback mCallback;
+	private AsyncTaskCallback<Void> mCallback;
 
-	public DisconnectTask(XMPPService service, AsyncTaskCallback callback) {
+	public DisconnectTask(XMPPService service, AsyncTaskCallback<Void> callback) {
 		mService = service;
 		mCallback = callback;
 	}
@@ -26,7 +26,7 @@ public class DisconnectTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected void onPostExecute(Void v) {
 		if (mCallback != null) {
-			mCallback.onTaskCompleted();
+			mCallback.onTaskCompleted(v);
 		}
 		Log.d(CLASS, "Disconnected from XMPP");
 	}

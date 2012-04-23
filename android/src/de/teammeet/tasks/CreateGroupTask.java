@@ -12,9 +12,9 @@ public class CreateGroupTask extends AsyncTask<String, Void, Boolean> {
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private XMPPService mService;
-	private AsyncTaskCallback mCallback;
+	private AsyncTaskCallback<Boolean> mCallback;
 
-	public CreateGroupTask(XMPPService service, AsyncTaskCallback callback) {
+	public CreateGroupTask(XMPPService service, AsyncTaskCallback<Boolean> callback) {
 		assert mService != null : "Cannot create group without a service";
 		mService = service;
 		mCallback = callback;
@@ -41,7 +41,7 @@ public class CreateGroupTask extends AsyncTask<String, Void, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean result) {
 		if (result) {
-			mCallback.onTaskCompleted();
+			mCallback.onTaskCompleted(result);
 		}
 	}
 

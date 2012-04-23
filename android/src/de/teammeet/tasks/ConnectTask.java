@@ -14,9 +14,9 @@ public class ConnectTask extends AsyncTask<Void, Void, Boolean> {
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private XMPPService mService;
-	private AsyncTaskCallback mCallback;
+	private AsyncTaskCallback<Boolean> mCallback;
 
-	public ConnectTask(XMPPService service, AsyncTaskCallback callback) {
+	public ConnectTask(XMPPService service, AsyncTaskCallback<Boolean> callback) {
 		mService = service;
 		mCallback = callback;
 	}
@@ -44,7 +44,7 @@ public class ConnectTask extends AsyncTask<Void, Void, Boolean> {
 	protected void onPostExecute(Boolean result) {
 		if (result) {
 			if (mCallback != null) {
-				mCallback.onTaskCompleted();
+				mCallback.onTaskCompleted(result);
 			}
 			Log.d(CLASS, "successfully logged in");
 		} else {
