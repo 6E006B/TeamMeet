@@ -51,6 +51,9 @@ public class XMPPService extends Service implements IXMPPService {
 	public static final int TYPE_NONE = 0;
 	public static final int TYPE_JOIN = 1;
 
+	private static final int NOTIFICATION_XMPP_SERVICE_ID = 0;
+	private static final int NOTIFICATION_GROUP_INVITATION_ID = 1;
+
 	private XMPPConnection						mXMPP				= null;
 	private String								mUserID				= null;
 	private String								mServer				= null;
@@ -358,7 +361,7 @@ public class XMPPService extends Service implements IXMPPService {
 		notification.setLatestEventInfo(context, title, text, contentIntent);
 		notification.flags |= Notification.FLAG_NO_CLEAR;
 
-		notificationManager.notify(R.integer.NOTIFICATION_XMPP_SERVICE_ID, notification);
+		notificationManager.notify(NOTIFICATION_XMPP_SERVICE_ID, notification);
 	}
 
 	private void removeNotifications() {
@@ -407,7 +410,7 @@ public class XMPPService extends Service implements IXMPPService {
 	    notification.defaults = Notification.DEFAULT_ALL;
 	    notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
-		mNotificationManager.notify(R.integer.NOTIFICATION_GROUP_INVITATION_ID, notification);
+		notificationManager.notify(NOTIFICATION_GROUP_INVITATION_ID, notification);
 	}
 
 	@Override
