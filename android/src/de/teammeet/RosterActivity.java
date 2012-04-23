@@ -10,7 +10,6 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.app.ExpandableListActivity;
@@ -21,14 +20,17 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
+import de.teammeet.interfaces.AsyncTaskCallback;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.DisconnectTask;
+import de.teammeet.tasks.FetchRosterTask;
 import de.teammeet.xmpp.XMPPService;
 
 
@@ -58,17 +60,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 			
 			if (mXMPPService.isAuthenticated() && mRoster == null) {
-				try {
-					mRoster = mXMPPService.getRoster();
-					mRoster.addRosterListener(RosterActivity.this);
-				} catch (XMPPException e) {
-					e.printStackTrace();
-					String problem = String.format("Could not fetch roster: %s", e.getMessage());
-					Log.e(CLASS, problem);
-					Toast.makeText(getApplicationContext(), problem, 5);
-				}
-				
-				fillExpandableList(mRoster);
+				new FetchRosterTask(mXMPPService, new FetchRosterHandler());
 			}
 		}
 
@@ -99,7 +91,36 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 	
+	private class ConnectHandler implements AsyncTaskCallback<Boolean> {
+		@Override
+		public void onTaskCompleted(Boolean result) {
+			Log.d(CLASS, "connect task completed!!");
+			new FetchRosterTask(mXMPPService, new FetchRosterHandler()).execute();
+		}
+	}
 
+	private class FetchRosterHandler implements AsyncTaskCallback<Roster> {
+		@Override
+		public void onTaskCompleted(Roster roster) {
+			if (roster != null) {
+				mRoster = roster;
+				Log.d(CLASS, "roster is " + mRoster);
+				mRoster.addRosterListener(RosterActivity.this);
+				fillExpandableList(mRoster);
+				Log.d(CLASS, "list has been filled");
+				
+				mAdapter.notifyDataSetChanged();
+			} else {
+				//TODO Error handling. Inform user in dialog.
+				final String error = "Could not fetch roster. Because!!";
+				final Toast toast = Toast.makeText(RosterActivity.this, error, Toast.LENGTH_LONG);
+				toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+				toast.show();
+				Log.e(CLASS, error);
+			}
+		}
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -205,7 +226,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		if (mXMPPService.isAuthenticated()) {
 			new DisconnectTask((XMPPService)mXMPPService, null).execute();
 		} else {
-			new ConnectTask((XMPPService)mXMPPService, null).execute();
+			new ConnectTask((XMPPService)mXMPPService, new ConnectHandler()).execute();
 		}
 	}
 
@@ -234,25 +255,24 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	 * @param roster The roster containing all contact information
 	 */
 	private void fillExpandableList(Roster roster) {
-		if (roster != null) {
-			ExpandableContactEntry newEntry = null;
-			mExpandableGroups.clear();
-			mExpandableChildren.clear();
+		ExpandableContactEntry newEntry = null;
+		mExpandableGroups.clear();
+		mExpandableChildren.clear();
 
-			for (RosterGroup group : roster.getGroups()) {
-				newEntry = new ExpandableContactEntry(group.getName(), group.getEntries(), roster);
-				mExpandableGroups.add(newEntry.mGroup);
-				mExpandableChildren.add(newEntry.mChildren);
-			}
-	
-			if (roster.getUnfiledEntryCount() > 0) {
-				newEntry = new ExpandableContactEntry(UNFILED_GROUP, roster.getUnfiledEntries(), roster);
-				mExpandableGroups.add(newEntry.mGroup);
-				mExpandableChildren.add(newEntry.mChildren);
-			}
+		for (RosterGroup group : roster.getGroups()) {
+			newEntry = new ExpandableContactEntry(group.getName(), group.getEntries(), roster);
+			mExpandableGroups.add(newEntry.mGroup);
+			mExpandableChildren.add(newEntry.mChildren);
+		}
+
+		if (roster.getUnfiledEntryCount() > 0) {
+			newEntry = new ExpandableContactEntry(UNFILED_GROUP, roster.getUnfiledEntries(), roster);
+			mExpandableGroups.add(newEntry.mGroup);
+			mExpandableChildren.add(newEntry.mChildren);
 		}
 	}
 
+	
 	@Override
 	public void entriesAdded(Collection<String> arg0) {
 		Log.d(CLASS, "Entries have been added to the roster. No action implemented");
@@ -282,11 +302,11 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		Log.d(CLASS, String.format("presence of '%s' in group '%s' has changed in the roster.", contact, groupName));
 		*/
 		
-		fillExpandableList(mRoster);
 		getExpandableListView().post(new Runnable() {
 			
 			@Override
 			public void run() {
+				fillExpandableList(mRoster);
 				mAdapter.notifyDataSetChanged();	
 			}
 		});
