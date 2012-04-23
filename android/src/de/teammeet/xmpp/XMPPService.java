@@ -390,25 +390,29 @@ public class XMPPService extends Service implements IXMPPService {
 		final String ns = Context.NOTIFICATION_SERVICE;
 		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
 
-		int icon = R.drawable.group_invitation_icon;
-		CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
+		final int icon = R.drawable.group_invitation_icon;
+		final CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
 		                                        room, inviter, reason);
-		long when = System.currentTimeMillis();
+		final long when = System.currentTimeMillis();
 
-		Notification notification = new Notification(icon, tickerText, when);
+		final Notification notification = new Notification(icon, tickerText, when);
 
-		Context context = getApplicationContext();
-		CharSequence contentTitle = "Group Invitation received";
-		Intent notificationIntent = new Intent(this, MainActivity.class);
+		final CharSequence contentTitle = "Group Invitation received";
+		final Intent notificationIntent = new Intent(this, MainActivity.class);
 		notificationIntent.putExtra(TYPE, TYPE_JOIN);
 		notificationIntent.putExtra(ROOM, room);
 		notificationIntent.putExtra(INVITER, inviter);
 		notificationIntent.putExtra(REASON, reason);
 		notificationIntent.putExtra(PASSWORD, password);
 		notificationIntent.putExtra(FROM, message.getFrom());
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+		notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+		                            Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		final PendingIntent contentIntent =
+				PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-		notification.setLatestEventInfo(context, contentTitle, tickerText, contentIntent);
+		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
+
+		notification.setLatestEventInfo(this, contentTitle, tickerText, contentIntent);
 	    notification.defaults = Notification.DEFAULT_ALL;
 	    notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
