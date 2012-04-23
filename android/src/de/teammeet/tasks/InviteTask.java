@@ -2,35 +2,35 @@ package de.teammeet.tasks;
 
 import android.os.AsyncTask;
 import de.teammeet.interfaces.AsyncTaskCallback;
-import de.teammeet.xmpp.XMPPService;
+import de.teammeet.interfaces.IXMPPService;
 
-public class InviteTask extends AsyncTask<String, Void, Void> {
+public class InviteTask extends AsyncTask<String, Void, String[]> {
 
 	// private static final String CLASS = ConnectTask.class.getSimpleName();
 
-	private XMPPService mService;
-	private AsyncTaskCallback<Void> mCallback;
+	private IXMPPService mService;
+	private AsyncTaskCallback<String[]> mCallback;
 
-	public InviteTask(XMPPService service, AsyncTaskCallback<Void> callback) {
+	public InviteTask(IXMPPService service, AsyncTaskCallback<String[]> callback) {
 		assert mService != null : "Cannot create group without a service";
 		mService = service;
 		mCallback = callback;
 	}
 
 	@Override
-	protected Void doInBackground(String... params) {
+	protected String[] doInBackground(String... params) {
 
 		String contact = params[0];
 		String groupName = params[1];
 
 		mService.invite(contact, groupName);
 
-		return null;
+		return params;
 	}
 
 	@Override
-	protected void onPostExecute(Void v) {
-		mCallback.onTaskCompleted(v);
+	protected void onPostExecute(String[] params) {
+		mCallback.onTaskCompleted(params);
 	}
 
 }

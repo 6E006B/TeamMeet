@@ -94,11 +94,11 @@ public class MainActivity extends Activity {
 		}
 	}
 	
-	private class InviteMateHandler implements AsyncTaskCallback<Void> {
+	private class InviteMateHandler implements AsyncTaskCallback<String[]> {
 		@Override
-		public void onTaskCompleted(Void result) {
+		public void onTaskCompleted(String[] params) {
 			Button inviteButton = (Button) findViewById(R.id.buttonInvite);
-			inviteButton.setText("Invited!");
+			inviteButton.setText(String.format("invited %s", params[0]));
 		}
 	}
 	

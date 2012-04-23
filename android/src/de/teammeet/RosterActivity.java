@@ -16,6 +16,7 @@ import android.app.ExpandableListActivity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -36,6 +37,7 @@ import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.DisconnectTask;
 import de.teammeet.tasks.FetchRosterTask;
+import de.teammeet.tasks.InviteTask;
 import de.teammeet.xmpp.XMPPService;
 
 
@@ -123,6 +125,15 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 				toast.show();
 				Log.e(CLASS, error);
 			}
+		}
+	}
+	
+	private class InviteMateHandler implements AsyncTaskCallback<String[]> {
+		@Override
+		public void onTaskCompleted(String[] params) {
+			Toast.makeText(RosterActivity.this,
+						   String.format("You invited %s to %s", params[0], params[1]),
+						   Toast.LENGTH_LONG).show();
 		}
 	}
 	
@@ -243,14 +254,16 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		switch(item.getItemId()) {
 			case R.id.roster_list_context_invite:
 				Log.d(CLASS, String.format("clicked contact '%s'", child.get(NAME)));
+				SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+				String teamName = settings.getString(SettingsActivity.SETTING_XMPP_GROUP_NAME, "");
+				new InviteTask(mXMPPService, new InviteMateHandler()).execute(child.get(NAME), teamName);
 				return true;
 			default:
 				return super.onContextItemSelected(item);
 		}
 	}
 
-	
-	
+
 	private void performExit() {
 		mXMPPService.disconnect();
 		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
