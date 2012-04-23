@@ -2,7 +2,7 @@ package de.teammeet.tasks;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Button;
+import de.teammeet.interfaces.AsyncTaskCallback;
 import de.teammeet.xmpp.XMPPService;
 
 public class DisconnectTask extends AsyncTask<Void, Void, Void> {
@@ -10,11 +10,11 @@ public class DisconnectTask extends AsyncTask<Void, Void, Void> {
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private XMPPService mService;
-	private Button mDisconnectButton;
+	private AsyncTaskCallback mCallback;
 
-	public DisconnectTask(XMPPService service, Button button) {
+	public DisconnectTask(XMPPService service, AsyncTaskCallback callback) {
 		mService = service;
-		mDisconnectButton = button;
+		mCallback = callback;
 	}
 
 	@Override
@@ -25,8 +25,8 @@ public class DisconnectTask extends AsyncTask<Void, Void, Void> {
 
 	@Override
 	protected void onPostExecute(Void v) {
-		if (mDisconnectButton != null) {
-			mDisconnectButton.setText("Connect");
+		if (mCallback != null) {
+			mCallback.onTaskCompleted();
 		}
 		Log.d(CLASS, "Disconnected from XMPP");
 	}

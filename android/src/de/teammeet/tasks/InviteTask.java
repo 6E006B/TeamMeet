@@ -1,7 +1,7 @@
 package de.teammeet.tasks;
 
 import android.os.AsyncTask;
-import android.widget.Button;
+import de.teammeet.interfaces.AsyncTaskCallback;
 import de.teammeet.xmpp.XMPPService;
 
 public class InviteTask extends AsyncTask<String, Void, Void> {
@@ -9,12 +9,12 @@ public class InviteTask extends AsyncTask<String, Void, Void> {
 	// private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private XMPPService mService;
-	private Button mInviteButton;
+	private AsyncTaskCallback mCallback;
 
-	public InviteTask(XMPPService service, Button button) {
+	public InviteTask(XMPPService service, AsyncTaskCallback callback) {
 		assert mService != null : "Cannot create group without a service";
 		mService = service;
-		mInviteButton = button;
+		mCallback = callback;
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class InviteTask extends AsyncTask<String, Void, Void> {
 
 	@Override
 	protected void onPostExecute(Void v) {
-		mInviteButton.setText("Invited!");
+		mCallback.onTaskCompleted();
 	}
 
 }

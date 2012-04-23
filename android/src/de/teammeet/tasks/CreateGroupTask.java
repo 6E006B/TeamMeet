@@ -4,7 +4,7 @@ import org.jivesoftware.smack.XMPPException;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Button;
+import de.teammeet.interfaces.AsyncTaskCallback;
 import de.teammeet.xmpp.XMPPService;
 
 public class CreateGroupTask extends AsyncTask<String, Void, Boolean> {
@@ -12,12 +12,12 @@ public class CreateGroupTask extends AsyncTask<String, Void, Boolean> {
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private XMPPService mService;
-	private Button mCreateButton;
+	private AsyncTaskCallback mCallback;
 
-	public CreateGroupTask(XMPPService service, Button button) {
+	public CreateGroupTask(XMPPService service, AsyncTaskCallback callback) {
 		assert mService != null : "Cannot create group without a service";
 		mService = service;
-		mCreateButton = button;
+		mCallback = callback;
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class CreateGroupTask extends AsyncTask<String, Void, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean result) {
 		if (result) {
-			mCreateButton.setText("Joined!");
+			mCallback.onTaskCompleted();
 		}
 	}
 
