@@ -27,6 +27,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
 import de.teammeet.interfaces.AsyncTaskCallback;
@@ -216,16 +218,35 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
-	                                ContextMenuInfo menuInfo) {
-	    super.onCreateContextMenu(menu, v, menuInfo);
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.roster_context, menu);
+									ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.roster_context, menu);
 	}
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-	    Log.d(CLASS, String.format("Context item '%s' clicked", item.getTitleCondensed()));
-	    return true;
+		Log.d(CLASS, String.format("Context item '%s' clicked", item.getTitleCondensed()));
+		ExpandableListContextMenuInfo info = ((ExpandableListContextMenuInfo)item.getMenuInfo());
+		Map<String, String> child = null;
+		
+		if(ExpandableListView.getPackedPositionType(info.packedPosition) ==
+		   ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+			int group_position = ExpandableListView.getPackedPositionGroup(info.packedPosition);
+			int child_position = ExpandableListView.getPackedPositionChild(info.packedPosition);
+			child = (Map<String, String>) getExpandableListAdapter().getChild(group_position, child_position) ;
+		} else {
+			Log.e(CLASS, "Can't invite group of contacts");
+			return super.onContextItemSelected(item);
+		}
+		
+		switch(item.getItemId()) {
+			case R.id.roster_list_context_invite:
+				Log.d(CLASS, String.format("clicked contact '%s'", child.get(NAME)));
+				return true;
+			default:
+				return super.onContextItemSelected(item);
+		}
 	}
 
 	
