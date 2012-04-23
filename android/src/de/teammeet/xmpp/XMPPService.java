@@ -279,6 +279,7 @@ public class XMPPService extends Service implements IXMPPService {
 				                                                         location.getLatitudeE6(),
 				                                                         accuracy);
 				message.addExtension(geoloc);
+				message.addBody("", "");
 				sendAllGroups(message);
 			} else {
 				throw new XMPPException("Not authenticated.");
