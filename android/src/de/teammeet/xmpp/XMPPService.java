@@ -441,25 +441,32 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
-	public void newGroupMessage(String group, String from, String message) {
+	public void newGroupMessage(GroupChatMessage message) {
 		boolean handled = false;
-		Log.d(CLASS, String.format("newGroupMessage('%s', '%s', '%s')", group, from, message));
+		Log.d(CLASS, String.format("newGroupMessage('%s', '%s', '%d', '%s')",
+		                           message.getFrom(), message.getGroup(),
+		                           message.getTimestamp(), message.getMessage()));
 		acquireGroupMessageLock();
 		try {
 			for (IGroupMessageHandler handler : mGroupMessageHandlers) {
-				handled |= handler.handleGroupMessage(group, from, message);
+				handled |= handler.handleGroupMessage(message);
 			}
 		} finally {
 			releaseGroupMessageLock();
 		}
 		if (!handled) {
-			notifyGroupMessage(group, from, message);
+			notifyGroupMessage(message);
 		}
 	}
 
-	private void notifyGroupMessage(String group, String from, String message) {
+	private void notifyGroupMessage(GroupChatMessage message) {
+		String notificationText = String.format("%s (%s) : %s",
+		                                        message.getFrom(),
+		                                        message.getGroup(),
+		                                        message.getMessage());
+		Log.d(CLASS, notificationText);
 		Toast toast = Toast.makeText(getApplicationContext(),
-		                             from + " (" + group + ") : " + message,
+		                             notificationText,
 		                             Toast.LENGTH_LONG);
 		toast.setGravity(Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
 		toast.show();
