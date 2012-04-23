@@ -35,6 +35,7 @@ import android.widget.Toast;
 import de.teammeet.interfaces.AsyncTaskCallback;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.tasks.ConnectTask;
+import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
 import de.teammeet.tasks.FetchRosterTask;
 import de.teammeet.tasks.InviteTask;
@@ -137,6 +138,19 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 	
+	private class FormTeamHandler implements AsyncTaskCallback<String[]> {
+		@Override
+		public void onTaskCompleted(String[] connection_data) {
+			String user_feedback;
+			if (connection_data.length > 0) {
+				user_feedback = String.format("Founded team '%s'", connection_data[0]);
+			} else {
+				user_feedback = "Failed to form team!";
+			}
+			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+		}
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -214,6 +228,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 
 			case R.id.roster_menu_form_team:
 				Log.d(CLASS, "User clicked 'form team' in menu");
+				formTeamAction();
 				break;
 
 			case R.id.roster_menu_exit:
@@ -284,6 +299,13 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 
+	private void formTeamAction() {
+		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+		String teamName = settings.getString(SettingsActivity.SETTING_XMPP_GROUP_NAME, "");
+		String conferenceSrv = settings.getString(SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
+		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
+	}
+	
 	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) {
 		Log.d(CLASS, "preparing roster options menu");

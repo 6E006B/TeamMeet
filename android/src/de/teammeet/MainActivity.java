@@ -34,6 +34,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.AsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
@@ -86,11 +87,15 @@ public class MainActivity extends Activity {
 		}
 	}
 	
-	private class CreateTeamHandler implements AsyncTaskCallback<Boolean> {
+	private class CreateTeamHandler implements AsyncTaskCallback<String[]> {
 		@Override
-		public void onTaskCompleted(Boolean result) {
-			Button createButton = (Button) findViewById(R.id.buttonCreate);
-			createButton.setText("Joined!");
+		public void onTaskCompleted(String[] connection_data) {
+			if (connection_data.length > 0) {
+				Button createButton = (Button) findViewById(R.id.buttonCreate);
+				createButton.setText("Joined!");
+			} else {
+				Toast.makeText(MainActivity.this, "Could not form team", Toast.LENGTH_LONG).show();
+			}
 		}
 	}
 	
