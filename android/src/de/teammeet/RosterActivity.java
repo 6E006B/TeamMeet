@@ -20,10 +20,13 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
 import de.teammeet.interfaces.AsyncTaskCallback;
@@ -141,6 +144,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 				);
 		
 		setListAdapter(mAdapter);
+		registerForContextMenu(getExpandableListView());
 	}
 
 	@Override
@@ -210,6 +214,22 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+	                                ContextMenuInfo menuInfo) {
+	    super.onCreateContextMenu(menu, v, menuInfo);
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.roster_context, menu);
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+	    Log.d(CLASS, String.format("Context item '%s' clicked", item.getTitleCondensed()));
+	    return true;
+	}
+
+	
+	
 	private void performExit() {
 		mXMPPService.disconnect();
 		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
