@@ -372,14 +372,17 @@ public class XMPPService extends Service implements IXMPPService {
 
 	public void newInvitation(Connection connection, String room, String inviter, String reason,
 							  String password, Message message) {
-		notifyNewInvitation(room, inviter, reason, password, message);
+		boolean handled = false;
 		acquireInvitationsLock();
 		try {
 			for (final IInvitationHandler object : mInvitationHandlers) {
-				object.handleInvitation(connection, room, inviter, reason, password, message);
+				handled |= object.handleInvitation(connection, room, inviter, reason, password, message);
 			}
 		} finally {
 			releaseInvitationsLock();
+		}
+		if (!handled) {
+			notifyNewInvitation(room, inviter, reason, password, message);
 		}
 	}
 
@@ -438,16 +441,19 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	public void newGroupMessage(String group, String from, String message) {
+		boolean handled = false;
 		Log.d(CLASS, String.format("newGroupMessage('%s', '%s', '%s')", group, from, message));
 		acquireGroupMessageLock();
 		try {
 			for (IGroupMessageHandler handler : mGroupMessageHandlers) {
-				handler.handleGroupMessage(group, from, message);
+				handled |= handler.handleGroupMessage(group, from, message);
 			}
 		} finally {
 			releaseGroupMessageLock();
 		}
-		notifyGroupMessage(group, from, message);
+		if (!handled) {
+			notifyGroupMessage(group, from, message);
+		}
 	}
 
 	private void notifyGroupMessage(String group, String from, String message) {
