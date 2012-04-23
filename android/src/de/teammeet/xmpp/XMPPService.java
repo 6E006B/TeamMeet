@@ -26,6 +26,8 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 
@@ -34,6 +36,7 @@ import de.teammeet.Mate;
 import de.teammeet.R;
 import de.teammeet.RosterActivity;
 import de.teammeet.SettingsActivity;
+import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IInvitationHandler;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
 import de.teammeet.interfaces.IXMPPService;
@@ -64,9 +67,15 @@ public class XMPPService extends Service implements IXMPPService {
 	private final ReentrantLock mLockMates = new ReentrantLock();
 	private final ReentrantLock mLockGroups = new ReentrantLock();
 	private final ReentrantLock mLockInvitations = new ReentrantLock();
+	private final ReentrantLock mLockGroupMessages = new ReentrantLock();
 
-	private final List<IMatesUpdateRecipient> mMatesRecipients = new ArrayList<IMatesUpdateRecipient>();
-	private final List<IInvitationHandler> mInvitationHandlers = new ArrayList<IInvitationHandler>();
+
+	private final List<IMatesUpdateRecipient> mMatesRecipients =
+			new ArrayList<IMatesUpdateRecipient>();
+	private final List<IInvitationHandler> mInvitationHandlers =
+			new ArrayList<IInvitationHandler>();
+	private final List<IGroupMessageHandler> mGroupMessageHandlers =
+			new ArrayList<IGroupMessageHandler>();
 
 	private final IBinder mBinder = new LocalBinder();
 	private int mBindCounter = 0;
@@ -206,28 +215,17 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void joinRoom(String room, String userID, String password) throws XMPPException {
-		String[] roomSplit = room.split("@", 2);
-		if (roomSplit.length == 2) {
-			joinRoom(roomSplit[0], userID, password, roomSplit[1]);
-		} else {
-			Log.e(CLASS, "Malformed room identifier: '" + room + "'.");
-		}
-	}
-
-	@Override
-	public void joinRoom(String roomName, String userID, String password, String conferenceServer)
-			throws XMPPException {
-		Log.d(CLASS, String.format("joinRoom('%s', '%s', '%s', '%s')",
-		                           roomName, userID, password, conferenceServer));
-		MultiUserChat muc = new MultiUserChat(mXMPP, conferenceServer);
+		Log.d(CLASS, String.format("joinRoom('%s', '%s', '%s')",
+		                           room, userID, password));
+		MultiUserChat muc = new MultiUserChat(mXMPP, room);
 		muc.join(userID, password);
-		addRoom(roomName, muc);
+		addRoom(room, muc);
 	}
 
-	private void addRoom(String roomName, MultiUserChat muc) {
+	private void addRoom(String room, MultiUserChat muc) {
 		acquireGroupsLock();
-		muc.addMessageListener(new RoomMessageListener(this));
-		mGroups.put(roomName, muc);
+		muc.addMessageListener(new RoomMessageListener(this, room));
+		mGroups.put(room, muc);
 		releaseGroupsLock();
 	}
 
@@ -374,14 +372,17 @@ public class XMPPService extends Service implements IXMPPService {
 
 	public void newInvitation(Connection connection, String room, String inviter, String reason,
 							  String password, Message message) {
-		notifyNewInvitation(room, inviter, reason, password, message);
+		boolean handled = false;
 		acquireInvitationsLock();
 		try {
 			for (final IInvitationHandler object : mInvitationHandlers) {
-				object.handleInvitation(connection, room, inviter, reason, password, message);
+				handled |= object.handleInvitation(connection, room, inviter, reason, password, message);
 			}
 		} finally {
 			releaseInvitationsLock();
+		}
+		if (!handled) {
+			notifyNewInvitation(room, inviter, reason, password, message);
 		}
 	}
 
@@ -390,25 +391,29 @@ public class XMPPService extends Service implements IXMPPService {
 		final String ns = Context.NOTIFICATION_SERVICE;
 		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
 
-		int icon = R.drawable.group_invitation_icon;
-		CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
+		final int icon = R.drawable.group_invitation_icon;
+		final CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
 		                                        room, inviter, reason);
-		long when = System.currentTimeMillis();
+		final long when = System.currentTimeMillis();
 
-		Notification notification = new Notification(icon, tickerText, when);
+		final Notification notification = new Notification(icon, tickerText, when);
 
-		Context context = getApplicationContext();
-		CharSequence contentTitle = "Group Invitation received";
-		Intent notificationIntent = new Intent(this, MainActivity.class);
+		final CharSequence contentTitle = "Group Invitation received";
+		final Intent notificationIntent = new Intent(this, MainActivity.class);
 		notificationIntent.putExtra(TYPE, TYPE_JOIN);
 		notificationIntent.putExtra(ROOM, room);
 		notificationIntent.putExtra(INVITER, inviter);
 		notificationIntent.putExtra(REASON, reason);
 		notificationIntent.putExtra(PASSWORD, password);
 		notificationIntent.putExtra(FROM, message.getFrom());
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+		notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+		                            Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		final PendingIntent contentIntent =
+				PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-		notification.setLatestEventInfo(context, contentTitle, tickerText, contentIntent);
+		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
+
+		notification.setLatestEventInfo(this, contentTitle, tickerText, contentIntent);
 	    notification.defaults = Notification.DEFAULT_ALL;
 	    notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
@@ -435,6 +440,50 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
+	public void newGroupMessage(String group, String from, String message) {
+		boolean handled = false;
+		Log.d(CLASS, String.format("newGroupMessage('%s', '%s', '%s')", group, from, message));
+		acquireGroupMessageLock();
+		try {
+			for (IGroupMessageHandler handler : mGroupMessageHandlers) {
+				handled |= handler.handleGroupMessage(group, from, message);
+			}
+		} finally {
+			releaseGroupMessageLock();
+		}
+		if (!handled) {
+			notifyGroupMessage(group, from, message);
+		}
+	}
+
+	private void notifyGroupMessage(String group, String from, String message) {
+		Toast toast = Toast.makeText(getApplicationContext(),
+		                             from + " (" + group + ") : " + message,
+		                             Toast.LENGTH_LONG);
+		toast.setGravity(Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
+		toast.show();
+	}
+
+	@Override
+	public void registerGroupMessageHandler(IGroupMessageHandler object) {
+		acquireGroupMessageLock();
+		try {
+			mGroupMessageHandlers.add(object);
+		} finally {
+			releaseGroupMessageLock();
+		}
+	}
+
+	@Override
+	public void unregisterGroupMessageHandler(IGroupMessageHandler object) {
+		acquireGroupMessageLock();
+		try {
+			mGroupMessageHandlers.remove(object);
+		} finally {
+			releaseGroupMessageLock();
+		}
+	}
+
 	private void acquireMatesLock() {
 		mLockMates.lock();
 	}
@@ -457,5 +506,13 @@ public class XMPPService extends Service implements IXMPPService {
 
 	private void acquireInvitationsLock() {
 		mLockInvitations.lock();
+	}
+
+	private void releaseGroupMessageLock() {
+		mLockGroupMessages.unlock();
+	}
+
+	private void acquireGroupMessageLock() {
+		mLockGroupMessages.lock();
 	}
 }

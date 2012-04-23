@@ -58,8 +58,8 @@ public class MainActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
-			handleIntent(getIntent());
 			fixConnectButton();
+			handleIntent(getIntent());
 		}
 
 		@Override
@@ -225,6 +225,8 @@ public class MainActivity extends Activity {
 		Bundle extras = intent.getExtras();
 		if (extras != null) {
 			Log.d(CLASS, "extras: " + extras.toString());
+		} else {
+			Log.d(CLASS, "no extras");
 		}
 		final int type = intent.getIntExtra(XMPPService.TYPE, XMPPService.TYPE_NONE);
 		intent.removeExtra(XMPPService.TYPE);
@@ -289,6 +291,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onPause() {
+		Log.d(CLASS, "MainActivity.onPause()");
 		if (mServiceConnection != null) {
 			unbindService(mServiceConnection);
 		}
@@ -297,6 +300,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		Log.d(CLASS, "MainActivity.onDestroy()");
 		super.onDestroy();
 	}
 
