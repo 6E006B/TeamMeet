@@ -355,8 +355,9 @@ public class XMPPService extends Service implements IXMPPService {
 		Notification notification = new Notification(icon, tickerText, when);
 		
 		Context context = getApplicationContext();
-		Intent notificationIntent = new Intent(this, MainActivity.class);
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+		Intent notificationIntent = new Intent(this, RosterActivity.class);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+		                                                        PendingIntent.FLAG_CANCEL_CURRENT);
 
 		notification.setLatestEventInfo(context, title, text, contentIntent);
 		notification.flags |= Notification.FLAG_NO_CLEAR;
@@ -385,8 +386,8 @@ public class XMPPService extends Service implements IXMPPService {
 
 	private void notifyNewInvitation(String room, String inviter, String reason,
 			  String password, Message message) {
-		String ns = Context.NOTIFICATION_SERVICE;
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
+		final String ns = Context.NOTIFICATION_SERVICE;
+		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
 
 		int icon = R.drawable.group_invitation_icon;
 		CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
