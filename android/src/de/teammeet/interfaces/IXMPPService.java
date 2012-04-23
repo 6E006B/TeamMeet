@@ -51,9 +51,6 @@ public interface IXMPPService {
 
 	void joinRoom(String room, String userID, String password) throws XMPPException;
 
-	void joinRoom(String roomName, String userID, String password, String conferenceServer)
-			throws XMPPException;
-
 	void leaveRoom(String roomName);
 
 	void invite(String contact, String roomName);

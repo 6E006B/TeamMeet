@@ -206,22 +206,11 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void joinRoom(String room, String userID, String password) throws XMPPException {
-		String[] roomSplit = room.split("@", 2);
-		if (roomSplit.length == 2) {
-			joinRoom(roomSplit[0], userID, password, roomSplit[1]);
-		} else {
-			Log.e(CLASS, "Malformed room identifier: '" + room + "'.");
-		}
-	}
-
-	@Override
-	public void joinRoom(String roomName, String userID, String password, String conferenceServer)
-			throws XMPPException {
-		Log.d(CLASS, String.format("joinRoom('%s', '%s', '%s', '%s')",
-		                           roomName, userID, password, conferenceServer));
-		MultiUserChat muc = new MultiUserChat(mXMPP, conferenceServer);
+		Log.d(CLASS, String.format("joinRoom('%s', '%s', '%s')",
+		                           room, userID, password));
+		MultiUserChat muc = new MultiUserChat(mXMPP, room);
 		muc.join(userID, password);
-		addRoom(roomName, muc);
+		addRoom(room, muc);
 	}
 
 	private void addRoom(String roomName, MultiUserChat muc) {
