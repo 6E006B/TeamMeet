@@ -35,6 +35,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import de.teammeet.helper.ToastDisposerSingleton;
+import de.teammeet.interfaces.AsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
@@ -69,6 +70,38 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	private class ConnectHandler implements AsyncTaskCallback {
+		@Override
+		public void onTaskCompleted() {
+			Button connectButton = (Button) findViewById(R.id.buttonConnect);
+			connectButton.setText(R.string.button_disconnect);
+		}
+	}
+	
+	private class DisconnectHandler implements AsyncTaskCallback {
+		@Override
+		public void onTaskCompleted() {
+			Button connectButton = (Button) findViewById(R.id.buttonConnect);
+			connectButton.setText(R.string.button_connect);
+		}
+	}
+	
+	private class CreateTeamHandler implements AsyncTaskCallback {
+		@Override
+		public void onTaskCompleted() {
+			Button createButton = (Button) findViewById(R.id.buttonCreate);
+			createButton.setText("Joined!");
+		}
+	}
+	
+	private class InviteMateHandler implements AsyncTaskCallback {
+		@Override
+		public void onTaskCompleted() {
+			Button inviteButton = (Button) findViewById(R.id.buttonInvite);
+			inviteButton.setText("Invited!");
+		}
+	}
+	
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -288,26 +321,21 @@ public class MainActivity extends Activity {
 
 	protected void connectToXMPP() {
 		Log.d(CLASS, "MainActivity.connectToXMPP()");
-		Button connectButton = (Button) findViewById(R.id.buttonConnect);
-
+		
 		if (!mXMPPService.isAuthenticated()) {
-			new ConnectTask(mXMPPService, connectButton).execute();
+			new ConnectTask(mXMPPService, new ConnectHandler()).execute();
 		} else {
-			new DisconnectTask(mXMPPService, connectButton).execute();
+			new DisconnectTask(mXMPPService, new DisconnectHandler()).execute();
 		}
 	}
 
 	private void createGroup(String groupName, String conferenceServer) {
 		Log.d(CLASS, "MainActivity.createGroup()");
-		Button createButton = (Button) findViewById(R.id.buttonCreate);
-
-		new CreateGroupTask(mXMPPService, createButton).execute(groupName, conferenceServer);
+		new CreateGroupTask(mXMPPService, new CreateTeamHandler()).execute(groupName, conferenceServer);
 	}
 
 	private void inviteMate(String contact, String group) {
 		Log.d(CLASS, "MainActivity.inviteMate()");
-		Button inviteButton = (Button) findViewById(R.id.buttonInvite);
-
-		new InviteTask(mXMPPService, inviteButton).execute(contact, group);
+		new InviteTask(mXMPPService, new InviteMateHandler()).execute(contact, group);
 	}
 }

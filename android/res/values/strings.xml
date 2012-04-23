@@ -34,11 +34,13 @@
     <string name="roster_menu_form_team_condensed">Form team</string>
     <string name="roster_menu_exit">Exit</string>
     <string name="roster_menu_exit_condensed">Exit</string>
+    <string name="roster_text_offline">You\'re offline</string>
     <string name="button_show_map">Show Map</string>
     <string name="button_show_roster">Show Roster</string>
     <string name="button_show_settings">Edit Settings</string>
     <string name="button_connect">Connect</string>
-    <string name="button_create">Create Group</string>
+    <string name="button_disconnect">Disconnect</string>
+    <string name="button_create">Create Team</string>
     <string name="button_invite">Invite Mate</string>
     <string name="text_xmpp_section">XMPP</string>
     <string name="text_xmpp_account">XMPP Account Details</string>
@@ -46,7 +48,7 @@
     <string name="text_server">Server:</string>
     <string name="text_password">Password:</string>
     <string name="text_conference_server">Conference Server:</string>
-    <string name="text_group_name">Group Name:</string>
+    <string name="text_group_name">Team Name:</string>
     <string name="text_contact_to_invite">Contact to invite:</string>
     <string name="notification_service_title">TeamMeet is running.</string>
     <string name="notification_service_text">Click to bring to front.</string>

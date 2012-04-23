@@ -57,7 +57,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 			
-			if (mRoster == null) {
+			if (mXMPPService.isAuthenticated() && mRoster == null) {
 				try {
 					mRoster = mXMPPService.getRoster();
 					mRoster.addRosterListener(RosterActivity.this);
@@ -104,6 +104,8 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.d(CLASS, "onCreate(): started roster activity");
+		
+		setContentView(R.layout.roster);
 		
 		mAdapter = new SimpleExpandableListAdapter(
 				this,

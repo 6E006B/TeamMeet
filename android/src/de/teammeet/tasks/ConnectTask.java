@@ -5,8 +5,8 @@ import org.jivesoftware.smack.XMPPException;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Button;
 import de.teammeet.SettingsActivity;
+import de.teammeet.interfaces.AsyncTaskCallback;
 import de.teammeet.xmpp.XMPPService;
 
 public class ConnectTask extends AsyncTask<Void, Void, Boolean> {
@@ -14,11 +14,11 @@ public class ConnectTask extends AsyncTask<Void, Void, Boolean> {
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private XMPPService mService;
-	private Button mConnectButton;
+	private AsyncTaskCallback mCallback;
 
-	public ConnectTask(XMPPService service, Button button) {
+	public ConnectTask(XMPPService service, AsyncTaskCallback callback) {
 		mService = service;
-		mConnectButton = button;
+		mCallback = callback;
 	}
 
 	@Override
@@ -43,8 +43,8 @@ public class ConnectTask extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean result) {
 		if (result) {
-			if (mConnectButton != null) {
-				mConnectButton.setText("Disconnect");
+			if (mCallback != null) {
+				mCallback.onTaskCompleted();
 			}
 			Log.d(CLASS, "successfully logged in");
 		} else {
