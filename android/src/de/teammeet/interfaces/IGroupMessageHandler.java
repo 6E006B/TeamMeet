@@ -1,6 +1,8 @@
 package de.teammeet.interfaces;
 
+import de.teammeet.xmpp.GroupChatMessage;
+
 public interface IGroupMessageHandler {
 
-	boolean handleGroupMessage(String group, String from, String message);
+	boolean handleGroupMessage(GroupChatMessage message);
 }
