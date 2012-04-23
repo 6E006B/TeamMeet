@@ -45,16 +45,6 @@ public class MainActivity extends Activity {
 
 	private String CLASS = MainActivity.class.getSimpleName();
 
-	public static final String TYPE = "type";
-	public static final String ROOM = "room";
-	public static final String INVITER = "inviter";
-	public static final String REASON = "reason";
-	public static final String PASSWORD = "password";
-	public static final String FROM = "from";
-
-	public static final int TYPE_NONE = 0;
-	public static final int TYPE_JOIN = 1;
-
 	private XMPPService mXMPPService = null;
 
 	private ToastDisposerSingleton mToastSingleton = null;
@@ -67,8 +57,8 @@ public class MainActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.d(CLASS, "MainActivity.ServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
-			handleIntent(getIntent());
 			fixConnectButton();
+			handleIntent(getIntent());
 		}
 
 		@Override
@@ -198,33 +188,39 @@ public class MainActivity extends Activity {
 	}
 
 	private void handleIntent(Intent intent) {
-		Log.d(CLASS, "MainActivity.handleIntent()");
-		final int type = intent.getIntExtra(TYPE, TYPE_NONE);
-		intent.removeExtra(TYPE);
+		Log.d(CLASS, "MainActivity.handleIntent() ");
+		Bundle extras = intent.getExtras();
+		if (extras != null) {
+			Log.d(CLASS, "extras: " + extras.toString());
+		} else {
+			Log.d(CLASS, "no extras");
+		}
+		final int type = intent.getIntExtra(XMPPService.TYPE, XMPPService.TYPE_NONE);
+		intent.removeExtra(XMPPService.TYPE);
 		switch (type) {
-		case TYPE_JOIN:
+		case XMPPService.TYPE_JOIN:
 			Log.d(CLASS, "Intent to join a group");
 			handleJoinIntent(intent);
 			break;
 		default:
-			Log.d(CLASS, "Intent of unknown type");
+			Log.d(CLASS, "Intent of unknown type: " + type);
 			break;
 		}
 	}
 
 	private void handleJoinIntent(Intent intent) {
-		final String room = intent.getStringExtra(ROOM);
-		final String inviter = intent.getStringExtra(INVITER);
-		final String reason = intent.getStringExtra(REASON);
-		final String password = intent.getStringExtra(PASSWORD);
-		final String from = intent.getStringExtra(FROM);
+		final String room = intent.getStringExtra(XMPPService.ROOM);
+		final String inviter = intent.getStringExtra(XMPPService.INVITER);
+		final String reason = intent.getStringExtra(XMPPService.REASON);
+		final String password = intent.getStringExtra(XMPPService.PASSWORD);
+		final String from = intent.getStringExtra(XMPPService.FROM);
 		// cleanup the extras so that this is only executed once, not every time the activity is
 		// brought to foreground again
-		intent.removeExtra(ROOM);
-		intent.removeExtra(INVITER);
-		intent.removeExtra(REASON);
-		intent.removeExtra(PASSWORD);
-		intent.removeExtra(FROM);
+		intent.removeExtra(XMPPService.ROOM);
+		intent.removeExtra(XMPPService.INVITER);
+		intent.removeExtra(XMPPService.REASON);
+		intent.removeExtra(XMPPService.PASSWORD);
+		intent.removeExtra(XMPPService.FROM);
 		Log.d(CLASS, String.format("room: '%s' inviter: '%s' reason: '%s' password: '%s' from: '%s'", room, inviter, reason, password, from));
 		if (room != null && inviter != null && reason != null && from != null) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -262,6 +258,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onPause() {
+		Log.d(CLASS, "MainActivity.onPause()");
 		if (mServiceConnection != null) {
 			unbindService(mServiceConnection);
 		}
@@ -270,6 +267,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		Log.d(CLASS, "MainActivity.onDestroy()");
 		super.onDestroy();
 	}
 
