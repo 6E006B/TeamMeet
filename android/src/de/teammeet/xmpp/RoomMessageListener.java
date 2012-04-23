@@ -1,6 +1,7 @@
 package de.teammeet.xmpp;
 
 import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 
 import android.util.Log;
@@ -13,9 +14,11 @@ public class RoomMessageListener implements PacketListener {
 
 	private static String CLASS = RoomMessageListener.class.getSimpleName();
 	private XMPPService mXMPPService = null;
+	private String mGroup = null;
 
-	public RoomMessageListener(XMPPService xmppService) {
+	public RoomMessageListener(XMPPService xmppService, String group) {
 		mXMPPService  = xmppService;
+		mGroup = group;
 	}
 
 	@Override
@@ -33,6 +36,12 @@ public class RoomMessageListener implements PacketListener {
 						 accuracy);
 			Mate mate = new Mate(from, location, accuracy);
 			mXMPPService.updateMate(mate);
+		}
+		final Message message = (Message)packet;
+		final String text = message.getBody();
+		Log.d(CLASS, "Message body: " + text);
+		if (!text.equals("")) {
+			mXMPPService.newGroupMessage(mGroup, from, text);
 		}
 		Log.d(CLASS, from + " sent " + xml);
 	}

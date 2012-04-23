@@ -37,6 +37,10 @@ public interface IXMPPService {
 
 	void unregisterInvitationHandler(IInvitationHandler object);
 
+	void registerGroupMessageHandler(IGroupMessageHandler object);
+
+	void unregisterGroupMessageHandler(IGroupMessageHandler object);
+
 	void connect(String userID, String server, String password) throws XMPPException;
 
 	boolean isAuthenticated();
