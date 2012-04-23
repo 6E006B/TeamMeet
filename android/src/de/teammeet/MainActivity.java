@@ -70,33 +70,33 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private class ConnectHandler implements AsyncTaskCallback {
+	private class ConnectHandler implements AsyncTaskCallback<Boolean> {
 		@Override
-		public void onTaskCompleted() {
+		public void onTaskCompleted(Boolean result) {
 			Button connectButton = (Button) findViewById(R.id.buttonConnect);
 			connectButton.setText(R.string.button_disconnect);
 		}
 	}
 	
-	private class DisconnectHandler implements AsyncTaskCallback {
+	private class DisconnectHandler implements AsyncTaskCallback<Void> {
 		@Override
-		public void onTaskCompleted() {
+		public void onTaskCompleted(Void result) {
 			Button connectButton = (Button) findViewById(R.id.buttonConnect);
 			connectButton.setText(R.string.button_connect);
 		}
 	}
 	
-	private class CreateTeamHandler implements AsyncTaskCallback {
+	private class CreateTeamHandler implements AsyncTaskCallback<Boolean> {
 		@Override
-		public void onTaskCompleted() {
+		public void onTaskCompleted(Boolean result) {
 			Button createButton = (Button) findViewById(R.id.buttonCreate);
 			createButton.setText("Joined!");
 		}
 	}
 	
-	private class InviteMateHandler implements AsyncTaskCallback {
+	private class InviteMateHandler implements AsyncTaskCallback<Void> {
 		@Override
-		public void onTaskCompleted() {
+		public void onTaskCompleted(Void result) {
 			Button inviteButton = (Button) findViewById(R.id.buttonInvite);
 			inviteButton.setText("Invited!");
 		}
