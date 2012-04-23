@@ -34,6 +34,7 @@
     <string name="roster_menu_form_team_condensed">Form team</string>
     <string name="roster_menu_exit">Exit</string>
     <string name="roster_menu_exit_condensed">Exit</string>
+    <string name="roster_text_offline">You\'re offline</string>
     <string name="button_show_map">Show Map</string>
     <string name="button_show_roster">Show Roster</string>
     <string name="button_show_settings">Edit Settings</string>
