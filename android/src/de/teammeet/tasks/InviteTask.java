@@ -9,9 +9,9 @@ public class InviteTask extends AsyncTask<String, Void, Void> {
 	// private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private XMPPService mService;
-	private AsyncTaskCallback mCallback;
+	private AsyncTaskCallback<Void> mCallback;
 
-	public InviteTask(XMPPService service, AsyncTaskCallback callback) {
+	public InviteTask(XMPPService service, AsyncTaskCallback<Void> callback) {
 		assert mService != null : "Cannot create group without a service";
 		mService = service;
 		mCallback = callback;
@@ -30,7 +30,7 @@ public class InviteTask extends AsyncTask<String, Void, Void> {
 
 	@Override
 	protected void onPostExecute(Void v) {
-		mCallback.onTaskCompleted();
+		mCallback.onTaskCompleted(v);
 	}
 
 }
