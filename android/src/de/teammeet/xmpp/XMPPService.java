@@ -84,7 +84,8 @@ public class XMPPService extends Service implements IXMPPService {
 	private final IBinder mBinder = new LocalBinder();
 	private int mBindCounter = 0;
 
-	private TimerTask mTimerTask;
+	private TimerTask mTimerTask = null;
+	private MyLocationOverlay mLocationOverlay = null;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -287,6 +288,11 @@ public class XMPPService extends Service implements IXMPPService {
 		if (mTimerTask != null) {
 			mTimerTask.cancel();
 		}
+		if (mLocationOverlay != null) {
+			mLocationOverlay.disableMyLocation();
+		}
+		mLocationOverlay = locationOverlay;
+		locationOverlay.enableMyLocation();
 		final int timeout = getResources().getInteger(R.integer.location_message_delay);
 		final Timer timer = new Timer(CLASS, true);
 		mTimerTask = new TimerTask() {
@@ -313,6 +319,9 @@ public class XMPPService extends Service implements IXMPPService {
 		if (mTimerTask != null) {
 			mTimerTask.cancel();
 			mTimerTask = null;
+		}
+		if (mLocationOverlay != null) {
+			mLocationOverlay.disableMyLocation();
 		}
 	}
 
