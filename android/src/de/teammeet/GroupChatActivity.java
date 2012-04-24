@@ -8,11 +8,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import de.teammeet.helper.GroupChatOpenHelper;
 import de.teammeet.interfaces.IGroupMessageHandler;
@@ -57,28 +57,14 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 		
 		mChatTextView = (TextView)findViewById(R.id.chatTextView);
 		mChatEditText = (EditText)findViewById(R.id.chatInput);
-		mChatEditText.addTextChangedListener(new TextWatcher() {
+		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				
-			}
-			
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				
-			}
-			
-			@Override
-			public void afterTextChanged(Editable s) {
-				String text = s.toString();
-				int index = text.indexOf("\n");
-				if (index != -1) {
-					String sendText = text.substring(0, index);
-					String spareText = text.substring(index, text.length());
-//					mXMPPService.sendGroupMessage(mGroup, sendText);
-					s.clear();
-					s.insert(0, spareText);
-				}
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				String sendText = v.getText().toString();
+				Log.d(CLASS, "sending: " + sendText);
+//				mXMPPService.sendGroupMessage(mGroup, sendText);
+				v.setText("");
+				return false;
 			}
 		});
 
@@ -121,7 +107,8 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 			String chatText = "";
 			List<GroupChatMessage> messages = mDatabase.getMessages(mGroup);
 			for (GroupChatMessage message : messages) {
-				chatText += String.format("%s: %s", message.getFrom(), message.getMessage());
+				final String from = message.getFrom().split("@", 2)[0];
+				chatText += String.format("%s: %s\n", from, message.getMessage());
 			}
 			mChatTextView.setText(chatText);
 		} else {
