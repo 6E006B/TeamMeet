@@ -12,8 +12,11 @@ import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.packet.Presence;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ExpandableListActivity;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -24,10 +27,12 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.SimpleExpandableListAdapter;
@@ -50,6 +55,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	private static final String NAME = "name";
 	private static final String AVAILABILITY = "avail";
 	private static final String UNFILED_GROUP = "Unfiled contacts";
+	private static final int DIALOG_FORM_TEAM_ID = 0;
 
 	private SimpleExpandableListAdapter mAdapter;
 	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
@@ -284,7 +290,38 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		Dialog dialog;
+		switch(id) {
+		case DIALOG_FORM_TEAM_ID:
+			dialog = buildFormTeamDialog();
+			break;
+		default:
+			dialog = null;
+		}
+		return dialog;
+	}
 
+	private Dialog buildFormTeamDialog() {
+		final LayoutInflater factory = LayoutInflater.from(this);
+		final View formTeamView = factory.inflate(R.layout.form_team_dialog, null);
+		final AlertDialog.Builder builder = new AlertDialog.Builder(RosterActivity.this);
+		builder.setTitle(R.string.form_team_dialog_title);
+		builder.setView(formTeamView);
+		builder.setPositiveButton(R.string.button_create, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					EditText teamNameView = (EditText) formTeamView.findViewById(R.id.form_team_dialog_teamname);
+					String teamName = teamNameView.getText().toString();
+					Log.d(CLASS, String.format("chosen team name: %s", teamName));
+					SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+					String conferenceSrv = settings.getString(SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
+					new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
+				}
+			});
+		return builder.create();
+	}
+	
 	private void performExit() {
 		mXMPPService.disconnect();
 		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
@@ -306,10 +343,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	}
 
 	private void formTeamAction() {
-		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-		String teamName = settings.getString(SettingsActivity.SETTING_XMPP_GROUP_NAME, "");
-		String conferenceSrv = settings.getString(SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
-		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
+		showDialog(DIALOG_FORM_TEAM_ID);
 	}
 	
 	@Override
