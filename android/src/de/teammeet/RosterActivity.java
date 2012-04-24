@@ -66,9 +66,9 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
-			
-			if (mXMPPService.isAuthenticated() && mRoster == null) {
-				new FetchRosterTask(mXMPPService, new FetchRosterHandler());
+
+			if (mXMPPService.isAuthenticated()) {
+				new FetchRosterTask(mXMPPService, new FetchRosterHandler()).execute();
 			}
 		}
 
@@ -207,6 +207,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			unbindService(mXMPPServiceConnection);
 		}
 		mXMPPService = null;
+		mRoster = null;
 		super.onPause();
 	}
 	
