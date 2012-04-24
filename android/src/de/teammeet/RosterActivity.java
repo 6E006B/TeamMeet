@@ -70,6 +70,12 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			if (mXMPPService.isAuthenticated() && mRoster == null) {
 				new FetchRosterTask(mXMPPService, new FetchRosterHandler());
 			}
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					invalidateOptionsMenu();
+				}
+			});
 		}
 
 		@Override
@@ -388,7 +394,8 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			@Override
 			public void run() {
 				fillExpandableList(mRoster);
-				mAdapter.notifyDataSetChanged();	
+				mAdapter.notifyDataSetChanged();
+				invalidateOptionsMenu();
 			}
 		});
 	}
