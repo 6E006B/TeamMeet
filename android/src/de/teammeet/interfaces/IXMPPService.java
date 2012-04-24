@@ -57,7 +57,7 @@ public interface IXMPPService {
 
 	void leaveRoom(String roomName);
 
-	void invite(String contact, String roomName);
+	void invite(String contact, String roomName) throws XMPPException;
 
 	void sendLocation(GeoPoint location, float accuracy) throws XMPPException;
 
