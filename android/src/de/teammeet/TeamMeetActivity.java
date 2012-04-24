@@ -40,11 +40,8 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
-import de.teammeet.helper.LocationFollower;
 import de.teammeet.helper.ToastDisposerSingleton;
-import de.teammeet.interfaces.ILocationService;
 import de.teammeet.interfaces.IXMPPService;
-import de.teammeet.location.LocationService;
 import de.teammeet.xmpp.XMPPService;
 
 public class TeamMeetActivity extends MapActivity {
@@ -55,7 +52,6 @@ public class TeamMeetActivity extends MapActivity {
 
 	private MapView						mMapView					= null;
 	private MapController				mMapController				= null;
-	private LocationFollower			mLocationFollower			= null;
 	private List<Overlay>				mListOfOverlays				= null;
 
 	private MyDirectionLocationOverlay	mMyLocationOverlay			= null;
@@ -65,29 +61,6 @@ public class TeamMeetActivity extends MapActivity {
 	private boolean						mFollowingLocation			= false;
 	private boolean						mSatelliteView				= false;
 	private boolean						mFullscreen					= false;
-
-	private ILocationService			mLocationService			= null;
-	private LocationServiceConnection	mLocationServiceConnection	= new LocationServiceConnection();
-
-	private class LocationServiceConnection implements ServiceConnection {
-
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder binder) {
-			Log.d(CLASS, "TeamMeetActivity.LocationServiceConnection.onServiceConnected('" + className + "')");
-			mLocationService = ((LocationService.LocalBinder) binder).getService();
-
-			// register to get status updates
-			mLocationService.registerLocationUpdates(mLocationFollower);
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName className) {
-			Log.d(CLASS, "TeamMeetActivity.LocationServiceConnection.onServiceDisconnected('" + className +
-					"')");
-			unregisterLocationUpdates();
-			mLocationService = null;
-		}
-	};
 
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
@@ -101,6 +74,7 @@ public class TeamMeetActivity extends MapActivity {
 
 			// register to get status updates
 			mXMPPService.registerMatesUpdates(mMatesOverlay);
+			mXMPPService.startLocationTransmission(mMyLocationOverlay);
 		}
 
 		@Override
@@ -133,9 +107,7 @@ public class TeamMeetActivity extends MapActivity {
 
 		Log.d(CLASS, "TeamMeetActivity.onResume()");
 
-		// create the services (if they aren't already running)
-		final Intent locationIntent = new Intent(getApplicationContext(), LocationService.class);
-		startService(locationIntent);
+		// create the service (if it isn't already running)
 		final Intent xmppIntent = new Intent(getApplicationContext(), XMPPService.class);
 		startService(xmppIntent);
 
@@ -157,23 +129,13 @@ public class TeamMeetActivity extends MapActivity {
 		mMapController = mMapView.getController();
 		mListOfOverlays = mMapView.getOverlays();
 
-		mLocationFollower = new LocationFollower(mMapController);
-		mLocationFollower.setActive(mFollowingLocation);
-
 		mMyLocationOverlay.enableMyLocation();
 		mMyLocationOverlay.enableCompass();
+		mMyLocationOverlay.followLocation(mFollowingLocation);
 		addOverlays();
 
-		// now connect to the services
-		boolean bindSuccess = bindService(locationIntent, mLocationServiceConnection, 0);
-		if (bindSuccess) {
-			Log.d(CLASS, "TeamMeetActivity.onResume() bind to location service succeeded");
-		} else {
-			Log.e(CLASS, "TeamMeetActivity.onResume() bind to location service failed");
-			mToastSingleton.showError("Couldn't connect to location service.");
-		}
-
-		bindSuccess = bindService(xmppIntent, mXMPPServiceConnection, 0);
+		// now connect to the service
+		final boolean bindSuccess = bindService(xmppIntent, mXMPPServiceConnection, 0);
 		if (bindSuccess) {
 			Log.d(CLASS, "TeamMeetActivity.onResume() bind to XMPP service succeeded");
 		} else {
@@ -184,17 +146,12 @@ public class TeamMeetActivity extends MapActivity {
 
 	@Override
 	protected void onPause() {
-		mMyLocationOverlay.disableMyLocation();
+//		mMyLocationOverlay.disableMyLocation();
 		mMyLocationOverlay.disableCompass();
-		unregisterLocationUpdates();
 		unregisterMatesUpdates();
-		if (mLocationServiceConnection != null) {
-			unbindService(mLocationServiceConnection);
-		}
 		if (mXMPPServiceConnection != null) {
 			unbindService(mXMPPServiceConnection);
 		}
-		mLocationService = null;
 		mXMPPService = null;
 		mListOfOverlays.clear();
 		super.onPause();
@@ -202,8 +159,6 @@ public class TeamMeetActivity extends MapActivity {
 
 	@Override
 	protected void onDestroy() {
-		final Intent intent = new Intent(this, LocationService.class);
-		stopService(intent);
 		super.onDestroy();
 	}
 
@@ -218,12 +173,6 @@ public class TeamMeetActivity extends MapActivity {
 		mListOfOverlays.add(mMatesOverlay);
 		mListOfOverlays.add(mIndicationOverlay);
 		mListOfOverlays.add(mMyLocationOverlay);
-	}
-
-	private void unregisterLocationUpdates() {
-		if (mLocationFollower != null) {
-			mLocationService.unregisterLocationUpdates(mLocationFollower);
-		}
 	}
 
 	private void unregisterMatesUpdates() {
@@ -273,7 +222,7 @@ public class TeamMeetActivity extends MapActivity {
 
 	private void toggleFollowingLocation() {
 		mFollowingLocation = !mFollowingLocation;
-		mLocationFollower.setActive(mFollowingLocation);
+		mMyLocationOverlay.followLocation(mFollowingLocation);
 	}
 
 	private void toggleSatelliteView() {
@@ -282,7 +231,7 @@ public class TeamMeetActivity extends MapActivity {
 	}
 
 	private void focusCurrentLocation() {
-		mLocationFollower.focusCurrentLocation();
+		mMyLocationOverlay.focusCurrentLocation();
 	}
 
 	private void toggleFullscreen() {

@@ -24,6 +24,7 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPException;
 
 import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MyLocationOverlay;
 
 import de.teammeet.Mate;
 
@@ -58,6 +59,10 @@ public interface IXMPPService {
 	void leaveRoom(String roomName);
 
 	void invite(String contact, String roomName) throws XMPPException;
+
+	void startLocationTransmission(MyLocationOverlay locationOverlay);
+
+	void stopLocationTransmission();
 
 	void sendLocation(GeoPoint location, float accuracy) throws XMPPException;
 

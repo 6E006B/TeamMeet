@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.jivesoftware.smack.Connection;
@@ -31,6 +33,7 @@ import android.view.Gravity;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MyLocationOverlay;
 
 import de.teammeet.MainActivity;
 import de.teammeet.Mate;
@@ -80,6 +83,8 @@ public class XMPPService extends Service implements IXMPPService {
 
 	private final IBinder mBinder = new LocalBinder();
 	private int mBindCounter = 0;
+
+	private TimerTask mTimerTask;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -175,6 +180,7 @@ public class XMPPService extends Service implements IXMPPService {
 	@Override
 	public void disconnect() {
 		Log.d(CLASS, "XMPPService.disconnect()");
+		stopLocationTransmission();
 		if (mXMPP != null) {
 			if (mRoomInvitationListener != null) {
 				MultiUserChat.removeInvitationListener(mXMPP, mRoomInvitationListener);
@@ -274,6 +280,40 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 		
 		// TODO: there is an InvitationRejectionListener - maybe use it
+	}
+
+	@Override
+	public void startLocationTransmission(final MyLocationOverlay locationOverlay) {
+		if (mTimerTask != null) {
+			mTimerTask.cancel();
+		}
+		final int timeout = getResources().getInteger(R.integer.location_message_delay);
+		final Timer timer = new Timer(CLASS, true);
+		mTimerTask = new TimerTask() {
+			@Override
+			public void run() {
+				GeoPoint location = locationOverlay.getMyLocation();
+				float accuracy = locationOverlay.getLastFix().getAccuracy();
+				if (location != null) {
+					try {
+						sendLocation(location, accuracy);
+					} catch (XMPPException e) {
+						e.printStackTrace();
+						Log.e(CLASS, "Error while sending location: " + e.toString());
+					}
+					Log.d(CLASS, "Location update to: " + location.toString());
+				}
+			}
+		};
+		timer.scheduleAtFixedRate(mTimerTask, timeout, timeout);
+	}
+
+	@Override
+	public void stopLocationTransmission() {
+		if (mTimerTask != null) {
+			mTimerTask.cancel();
+			mTimerTask = null;
+		}
 	}
 
 	@Override

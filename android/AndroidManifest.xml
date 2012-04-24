@@ -38,8 +38,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".location.LocationService" >
-        </service>
         <service android:name=".xmpp.XMPPService" >
         </service>
 
