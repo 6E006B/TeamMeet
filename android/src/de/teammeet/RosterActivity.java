@@ -131,10 +131,15 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	
 	private class InviteMateHandler implements AsyncTaskCallback<String[]> {
 		@Override
-		public void onTaskCompleted(String[] params) {
-			Toast.makeText(RosterActivity.this,
-						   String.format("You invited %s to %s", params[0], params[1]),
-						   Toast.LENGTH_LONG).show();
+		public void onTaskCompleted(String[] connection_data) {
+			String user_feedback;
+			if (connection_data.length > 0) {
+				user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
+			} else {
+				user_feedback = "Failed to invite contact to team!";
+			}
+			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+
 		}
 	}
 	
