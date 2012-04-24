@@ -30,7 +30,7 @@ public class RoomMessageListener implements PacketListener {
 		if (geoloc != null) {
 			int lon = geoloc.getLongitude();
 			int lat = geoloc.getLatitude();
-			GeoPoint location = new GeoPoint(lon, lat);
+			GeoPoint location = new GeoPoint(lat, lon);
 			float accuracy = geoloc.getAccuracy();
 			Log.d(CLASS, "geoloc - longitude: " + lon + " latitude: " + lat  + " accuracy: " + 
 						 accuracy);
