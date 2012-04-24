@@ -263,7 +263,8 @@ public class MainActivity extends Activity {
 		if (room != null && inviter != null && reason != null && from != null) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Group Invitation");
-			builder.setMessage(String.format("%s wants you to join '%s':\n%s", from, room, reason));
+			builder.setMessage(String.format("%s wants you to join '%s':\n%s",
+			                                 inviter, room, reason));
 			builder.setCancelable(false);
 			builder.setPositiveButton("Join", new DialogInterface.OnClickListener() {
 			           public void onClick(DialogInterface dialog, int id) {

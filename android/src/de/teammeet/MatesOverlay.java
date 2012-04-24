@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
@@ -77,6 +78,7 @@ public class MatesOverlay extends Overlay implements IMatesUpdateRecipient {
 
 	@Override
 	public void handleMateUpdate(Mate mate) {
+		Log.d(CLASS, "MatesOverlay.handleMateUpdate() : " + mate.getID());
 		acquireLock();
 		try {
 			mMates.put(mate.getID(), mate);
