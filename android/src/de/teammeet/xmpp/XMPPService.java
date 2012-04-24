@@ -264,9 +264,14 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void invite(String contact, String groupName) {
-		MultiUserChat muc = mGroups.get(groupName);
-		muc.invite(contact, "reason");
+	public void invite(String contact, String roomName) throws XMPPException {
+		MultiUserChat muc = mGroups.get(roomName);
+		if (muc != null) {
+			muc.invite(contact, "reason");
+		} else {
+			throw new XMPPException(String.format("Cannot invite to non-existent MUC '%s'", roomName));
+		}
+		
 		// TODO: there is an InvitationRejectionListener - maybe use it
 	}
 

@@ -5,44 +5,42 @@ import org.jivesoftware.smack.XMPPException;
 import android.os.AsyncTask;
 import android.util.Log;
 import de.teammeet.interfaces.AsyncTaskCallback;
-import de.teammeet.xmpp.XMPPService;
+import de.teammeet.interfaces.IXMPPService;
 
-public class CreateGroupTask extends AsyncTask<String, Void, Boolean> {
+public class CreateGroupTask extends AsyncTask<String, Void, String[]> {
 
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
-	private XMPPService mService;
-	private AsyncTaskCallback<Boolean> mCallback;
+	private IXMPPService mService;
+	private AsyncTaskCallback<String[]> mCallback;
 
-	public CreateGroupTask(XMPPService service, AsyncTaskCallback<Boolean> callback) {
+	public CreateGroupTask(IXMPPService mXMPPService, AsyncTaskCallback<String[]> callback) {
 		assert mService != null : "Cannot create group without a service";
-		mService = service;
+		mService = mXMPPService;
 		mCallback = callback;
 	}
 
 	@Override
-	protected Boolean doInBackground(String... params) {
+	protected String[] doInBackground(String... params) {
 
 		String groupName = params[0];
 		String conferenceServer = params[1];
-		Boolean success = true;
+		String[] conn_data = params;
 
 		try {
 			mService.createRoom(groupName, conferenceServer);
 		} catch (XMPPException e) {
-			success = false;
+			conn_data = new String[0];
 			e.printStackTrace();
 			Log.e(CLASS, String.format("Failed to create group '%s': %s", groupName, e.toString()));
 		}
 
-		return success;
+		return conn_data;
 	}
 
 	@Override
-	protected void onPostExecute(Boolean result) {
-		if (result) {
-			mCallback.onTaskCompleted(result);
-		}
+	protected void onPostExecute(String[] connection_data) {
+		mCallback.onTaskCompleted(connection_data);
 	}
 
 }
