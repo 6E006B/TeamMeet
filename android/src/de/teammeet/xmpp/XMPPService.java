@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
@@ -47,7 +48,7 @@ import de.teammeet.interfaces.IXMPPService;
 
 public class XMPPService extends Service implements IXMPPService {
 
-	private static final String					CLASS				= XMPPService.class.getSimpleName();
+	private static final String CLASS = XMPPService.class.getSimpleName();
 
 	public static final String TYPE = "type";
 	public static final String ROOM = "room";
@@ -64,10 +65,10 @@ public class XMPPService extends Service implements IXMPPService {
 	private static final int NOTIFICATION_GROUP_INVITATION_ID = 1;
 	private static final int NOTIFICATION_GROUP_CHAT_MESSAGE_ID = 2;
 
-	private XMPPConnection						mXMPP				= null;
-	private String								mUserID				= null;
-	private String								mServer				= null;
-	private Map<String, MultiUserChat>			mGroups				= null;
+	private XMPPConnection mXMPP = null;
+	private String mUserID = null;
+	private String mServer = null;
+	private Map<String, MultiUserChat> mRooms = null;
 	private RoomInvitationListener mRoomInvitationListener = null;
 
 	private final ReentrantLock mLockMates = new ReentrantLock();
@@ -141,7 +142,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void connect(String userID, String server, String password) throws XMPPException {
-		mGroups = new HashMap<String, MultiUserChat>();
+		mRooms = new HashMap<String, MultiUserChat>();
 		mUserID = userID;
 		mServer = server;
 
@@ -192,7 +193,7 @@ public class XMPPService extends Service implements IXMPPService {
 			}
 			mXMPP.disconnect();
 		}
-		mGroups = null;
+		mRooms = null;
 		mRoomInvitationListener = null;
 		mXMPP = null;
 //		stopSelf();
@@ -237,13 +238,13 @@ public class XMPPService extends Service implements IXMPPService {
 	private void addRoom(String room, MultiUserChat muc) {
 		acquireGroupsLock();
 		muc.addMessageListener(new RoomMessageListener(this, room));
-		mGroups.put(room, muc);
+		mRooms.put(room, muc);
 		releaseGroupsLock();
 	}
 
 	private void removeRoom(String roomName) {
 		acquireGroupsLock();
-		mGroups.remove(roomName);
+		mRooms.remove(roomName);
 		//TODO find out if the GroupMessageHandler has to be removed
 		// if there has to be an additional dict of handlers
 		releaseGroupsLock();
@@ -252,7 +253,7 @@ public class XMPPService extends Service implements IXMPPService {
 	@Override
 	public void leaveRoom(String roomName) {
 		acquireGroupsLock();
-		MultiUserChat muc = mGroups.get(roomName);
+		MultiUserChat muc = mRooms.get(roomName);
 		if (muc != null) {
 			muc.leave();
 			removeRoom(roomName);
@@ -263,7 +264,7 @@ public class XMPPService extends Service implements IXMPPService {
 	@Override
 	public void destroyRoom(String roomName) throws XMPPException {
 		acquireGroupsLock();
-		MultiUserChat muc = mGroups.get(roomName);
+		MultiUserChat muc = mRooms.get(roomName);
 		if (muc != null) {
 			SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
 			String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
@@ -276,8 +277,13 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
+	public Set<String> getRooms() {
+		return mRooms.keySet();
+	}
+	
+	@Override
 	public void invite(String contact, String roomName) throws XMPPException {
-		MultiUserChat muc = mGroups.get(roomName);
+		MultiUserChat muc = mRooms.get(roomName);
 		if (muc != null) {
 			muc.invite(contact, "reason");
 		} else {
@@ -359,7 +365,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	private void sendAllGroups(Message message) throws XMPPException {
 		message.setType(Type.groupchat);
-		for (MultiUserChat muc : mGroups.values()) {
+		for (MultiUserChat muc : mRooms.values()) {
 			message.setTo(muc.getRoom());
 			muc.sendMessage(message);
 		}
