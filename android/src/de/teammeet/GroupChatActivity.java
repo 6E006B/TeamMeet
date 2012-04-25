@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 
 	private static final String CLASS = GroupChatActivity.class.getSimpleName();
 
+	private ScrollView mScrollView = null;
 	private TextView mChatTextView = null;
 	private EditText mChatEditText = null;
 	private String mGroup = null;
@@ -54,7 +56,8 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 		Log.d(CLASS, "onCreate(): started group chat");
 		
 		setContentView(R.layout.groupchat);
-		
+
+		mScrollView = (ScrollView)findViewById(R.id.scrollView);
 		mChatTextView = (TextView)findViewById(R.id.chatTextView);
 		mChatEditText = (EditText)findViewById(R.id.chatInput);
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
@@ -111,6 +114,12 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 				chatText += String.format("%s: %s\n", from, message.getMessage());
 			}
 			mChatTextView.setText(chatText);
+			mScrollView.post(new Runnable() {
+				@Override
+				public void run() {
+					mScrollView.smoothScrollTo(0, mChatTextView.getBottom());
+				}
+			});
 		} else {
 			final String error = "GroupChatActivity intent has no group";
 			Log.e(CLASS, error);
