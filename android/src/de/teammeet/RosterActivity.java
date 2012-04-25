@@ -220,7 +220,10 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			unbindService(mXMPPServiceConnection);
 		}
 		mXMPPService = null;
+		
+		mRoster.removeRosterListener(this);
 		mRoster = null;
+		
 		super.onPause();
 	}
 	
