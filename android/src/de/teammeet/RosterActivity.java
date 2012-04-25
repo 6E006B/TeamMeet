@@ -120,6 +120,21 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 
+	private class DisconnectHandler implements AsyncTaskCallback<Void> {
+		@Override
+		public void onTaskCompleted(Void result) {
+			Log.d(CLASS, "you're now disconnected");
+			mExpandableGroups.clear();
+			mExpandableChildren.clear();
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					mAdapter.notifyDataSetChanged();
+				}
+			});
+		}
+	}
+	
 	private class FetchRosterHandler implements AsyncTaskCallback<Roster> {
 		@Override
 		public void onTaskCompleted(Roster roster) {
@@ -395,7 +410,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 
 	private void performConnectButtonAction() {
 		if (mXMPPService.isAuthenticated()) {
-			new DisconnectTask((XMPPService)mXMPPService, null).execute();
+			new DisconnectTask((XMPPService)mXMPPService, new DisconnectHandler()).execute();
 		} else {
 			new ConnectTask((XMPPService)mXMPPService, new ConnectHandler()).execute();
 		}
