@@ -27,6 +27,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -309,8 +310,12 @@ public class XMPPService extends Service implements IXMPPService {
 			@Override
 			public void run() {
 				GeoPoint location = locationOverlay.getMyLocation();
-				float accuracy = locationOverlay.getLastFix().getAccuracy();
 				if (location != null) {
+					Location lastFix = locationOverlay.getLastFix();
+					float accuracy = -1;
+					if (lastFix != null) {
+						accuracy = lastFix.getAccuracy();
+					}
 					try {
 						sendLocation(location, accuracy);
 					} catch (XMPPException e) {
