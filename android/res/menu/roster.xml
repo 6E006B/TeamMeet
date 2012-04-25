@@ -15,7 +15,8 @@
         android:id="@+id/roster_menu_form_team"
         android:showAsAction="ifRoom|withText"
         android:title="@string/roster_menu_form_team"
-        android:titleCondensed="@string/roster_menu_form_team_condensed"/>
+        android:titleCondensed="@string/roster_menu_form_team_condensed"
+        android:enabled="false" />
     <item
         android:id="@+id/roster_menu_exit"
         android:showAsAction="ifRoom|withText"

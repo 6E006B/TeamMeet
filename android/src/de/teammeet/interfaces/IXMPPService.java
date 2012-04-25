@@ -20,6 +20,8 @@
 
 package de.teammeet.interfaces;
 
+import java.util.Set;
+
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPException;
 
@@ -71,4 +73,6 @@ public interface IXMPPService {
 	void updateMate(Mate mate);
 
 	void destroyRoom(String roomName) throws XMPPException;
+
+	Set<String> getRooms();
 }
