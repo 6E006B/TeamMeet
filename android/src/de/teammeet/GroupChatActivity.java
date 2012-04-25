@@ -97,6 +97,7 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 
 	@Override
 	protected void onPause() {
+		mXMPPService.unregisterGroupMessageHandler(this);
 		if (mXMPPServiceConnection != null) {
 			unbindService(mXMPPServiceConnection);
 		}
