@@ -30,17 +30,17 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.Gravity;
-import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
+import de.teammeet.GroupChatActivity;
 import de.teammeet.MainActivity;
 import de.teammeet.Mate;
 import de.teammeet.R;
 import de.teammeet.RosterActivity;
 import de.teammeet.SettingsActivity;
+import de.teammeet.helper.GroupChatOpenHelper;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IInvitationHandler;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
@@ -56,12 +56,14 @@ public class XMPPService extends Service implements IXMPPService {
 	public static final String REASON = "reason";
 	public static final String PASSWORD = "password";
 	public static final String FROM = "from";
+	public static final String GROUP = "group";
 
 	public static final int TYPE_NONE = 0;
 	public static final int TYPE_JOIN = 1;
 
 	private static final int NOTIFICATION_XMPP_SERVICE_ID = 0;
 	private static final int NOTIFICATION_GROUP_INVITATION_ID = 1;
+	private static final int NOTIFICATION_GROUP_CHAT_MESSAGE_ID = 2;
 
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
@@ -86,6 +88,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private int mBindCounter = 0;
 
 	private TimerTask mTimerTask = null;
+	private GroupChatOpenHelper mGroupChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
 
 	public class LocalBinder extends Binder {
@@ -99,6 +102,7 @@ public class XMPPService extends Service implements IXMPPService {
 		super.onCreate();
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
+		mGroupChatDatabase = new GroupChatOpenHelper(this);
 	}
 
 	@Override
@@ -367,6 +371,15 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
+	public void sendToGroup(String group, String message) throws XMPPException {
+		final MultiUserChat muc = mRooms.get(group);
+		if (muc != null) {
+			muc.sendMessage(message);
+		} else {
+			throw new XMPPException(String.format("Unknown group '%s'", group));
+		}
+	}
+
 	@Override
 	public void updateMate(final Mate mate) {
 		acquireMatesLock();
@@ -505,6 +518,8 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	public void newGroupMessage(GroupChatMessage message) {
+		mGroupChatDatabase.addMessage(message);
+
 		boolean handled = false;
 		Log.d(CLASS, String.format("newGroupMessage('%s', '%s', '%d', '%s')",
 		                           message.getFrom(), message.getGroup(),
@@ -523,16 +538,34 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	private void notifyGroupMessage(GroupChatMessage message) {
-		String notificationText = String.format("%s (%s) : %s",
-		                                        message.getFrom(),
-		                                        message.getGroup(),
-		                                        message.getMessage());
+		final String notificationText = String.format("%s (%s) : %s",
+		                                              message.getFrom(),
+		                                              message.getGroup(),
+		                                              message.getMessage());
 		Log.d(CLASS, notificationText);
-		Toast toast = Toast.makeText(getApplicationContext(),
-		                             notificationText,
-		                             Toast.LENGTH_LONG);
-		toast.setGravity(Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
-		toast.show();
+
+		final String ns = Context.NOTIFICATION_SERVICE;
+		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
+
+		final int icon = R.drawable.group_invitation_icon;
+		final CharSequence tickerText = String.format("New team message in %s", notificationText);
+		final long when = System.currentTimeMillis();
+
+		final Notification notification = new Notification(icon, tickerText, when);
+
+		final CharSequence contentTitle = "Group chat message received";
+		final Intent notificationIntent = new Intent(this, GroupChatActivity.class);
+		notificationIntent.putExtra(GROUP, message.getGroup());
+		final PendingIntent contentIntent =
+				PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
+
+		notification.setLatestEventInfo(this, contentTitle, notificationText, contentIntent);
+	    notification.defaults = Notification.DEFAULT_ALL;
+	    notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+		notificationManager.notify(NOTIFICATION_GROUP_CHAT_MESSAGE_ID, notification);
 	}
 
 	@Override
