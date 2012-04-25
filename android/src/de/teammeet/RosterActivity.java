@@ -141,7 +141,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			}
 		}
 	}
-	
+
 	private class InviteMateHandler implements AsyncTaskCallback<String[]> {
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
@@ -408,22 +408,29 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) {
 		Log.d(CLASS, "preparing roster options menu");
+
+		MenuItem connectMenu = menu.findItem(R.id.roster_menu_connect);
+		MenuItem formTeamMenu = menu.findItem(R.id.roster_menu_form_team);
+
 		Resources res = getResources();
-		MenuItem connect_menu = menu.findItem(R.id.roster_menu_connect);
 		int connectTitle = R.string.roster_menu_connect;
 		CharSequence connectTitleCondensed = res.getString(R.string.roster_menu_connect_condensed);
+		boolean enableFormTeam = false;
+		
 		if (mXMPPService != null && mXMPPService.isAuthenticated()) {
 			Log.d(CLASS, "setting menu option to 'disconnect'");
 			connectTitle = R.string.roster_menu_disconnect;
 			connectTitleCondensed = res.getString(R.string.roster_menu_disconnect_condensed);
+			enableFormTeam = true;
 		}
-		connect_menu.setTitle(connectTitle);
-		connect_menu.setTitleCondensed(connectTitleCondensed);
+		connectMenu.setTitle(connectTitle);
+		connectMenu.setTitleCondensed(connectTitleCondensed);
+		formTeamMenu.setEnabled(enableFormTeam);
+		
 		return true;
 	}
 
 
-	
 	/**
 	 * Fill the contact list with data from the roster.
 	 * 
