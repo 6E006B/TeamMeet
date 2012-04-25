@@ -242,8 +242,10 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 		mXMPPService = null;
 		
-		mRoster.removeRosterListener(this);
-		mRoster = null;
+		if (mRoster != null) {
+			mRoster.removeRosterListener(this);
+			mRoster = null;
+		}
 		
 		super.onPause();
 	}
