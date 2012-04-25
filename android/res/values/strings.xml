@@ -36,6 +36,7 @@
     <string name="roster_menu_exit_condensed">Exit</string>
     <string name="roster_text_offline">You\'re offline</string>
     <string name="form_team_dialog_title">Form a new Team</string>
+    <!-- <string name="invite_mate_dialog_title">Select a Team</string> -->
     <string name="context_invite">Invite to team</string>
     <string name="context_invite_condensed">Invite</string>
     <string name="button_show_map">Show Map</string>

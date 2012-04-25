@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
@@ -21,6 +22,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -31,8 +33,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.SimpleExpandableListAdapter;
@@ -55,11 +59,14 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	private static final String NAME = "name";
 	private static final String AVAILABILITY = "avail";
 	private static final String UNFILED_GROUP = "Unfiled contacts";
-	private static final int DIALOG_FORM_TEAM_ID = 0;
-
+	private static final int DIALOG_FORM_TEAM_ID = 0x7e000000;
+	//private static final int DIALOG_INVITE_MATE_ID = 0x7e000001;
+	private static final int CONTEXT_MENU_INVITE_PARENT_ID = 0x7e000002;
+	private static final int CONTEXT_MENU_INVITE_ROOM_ID = 0x7e000003;
 	private SimpleExpandableListAdapter mAdapter;
 	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
 	private List<List<Map<String, String>>> mExpandableChildren = new ArrayList<List<Map<String, String>>>();
+	private ExpandableListContextMenuInfo mLastContextItemInfo;
 
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
@@ -258,45 +265,83 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	public void onCreateContextMenu(ContextMenu menu, View v,
 									ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.roster_context, menu);
+		//TODO Uncomment if you added static entries to an XML layout
+		//MenuInflater inflater = getMenuInflater();
+		//inflater.inflate(R.menu.roster_context, menu);
+		Log.d(CLASS, "creating context menu");
+		Set<String> rooms = mXMPPService.getRooms();
+		if (!rooms.isEmpty()) {
+			SubMenu inviteSubMenu = menu.addSubMenu(Menu.NONE, CONTEXT_MENU_INVITE_PARENT_ID,
+													Menu.NONE, R.string.context_invite);
+			for (String room : rooms) {
+				Log.d(CLASS, "room: " + room);
+				inviteSubMenu.add(Menu.NONE, CONTEXT_MENU_INVITE_ROOM_ID, Menu.NONE, room);
+			}
+		}
 	}
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		Log.d(CLASS, String.format("Context item '%s' clicked", item.getTitleCondensed()));
-		ExpandableListContextMenuInfo info = ((ExpandableListContextMenuInfo)item.getMenuInfo());
-		Map<String, String> child = null;
-		
-		if(ExpandableListView.getPackedPositionType(info.packedPosition) ==
-		   ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-			int group_position = ExpandableListView.getPackedPositionGroup(info.packedPosition);
-			int child_position = ExpandableListView.getPackedPositionChild(info.packedPosition);
-			child = (Map<String, String>) getExpandableListAdapter().getChild(group_position, child_position) ;
-		} else {
-			Log.e(CLASS, "Can't invite group of contacts");
-			return super.onContextItemSelected(item);
-		}
-		
+
 		switch(item.getItemId()) {
-			case R.id.roster_list_context_invite:
-				Log.d(CLASS, String.format("clicked contact '%s'", child.get(NAME)));
-				SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-				String teamName = settings.getString(SettingsActivity.SETTING_XMPP_GROUP_NAME, "");
-				new InviteTask(mXMPPService, new InviteMateHandler()).execute(child.get(NAME), teamName);
+			case CONTEXT_MENU_INVITE_PARENT_ID:
+				/* backup info, will need it when sub-menu item gets selected.
+				 * cf http://code.google.com/p/android/issues/detail?id=7139.
+				 */
+				mLastContextItemInfo = ((ExpandableListContextMenuInfo)item.getMenuInfo());
+				return true;
+			case CONTEXT_MENU_INVITE_ROOM_ID:
+				clickedInviteToTeam(item);
 				return true;
 			default:
+				Log.d(CLASS, String.format("unhandeled item clicked: 0x%x", item.getItemId()));
 				return super.onContextItemSelected(item);
 		}
 	}
 
+	private void clickedInviteToTeam(MenuItem item) {
+		String contact = getExpandableListChild(mLastContextItemInfo.packedPosition);
+		String teamName = item.getTitle().toString();
+		Log.d(CLASS, String.format("clicked contact '%s'", contact));
+		AsyncTask<String, Void, String[]> inviteTask = new InviteTask(mXMPPService,
+																	  new InviteMateHandler());
+		inviteTask.execute(contact, teamName);
+		// TODO Example code for dialog approach:
+		//      dialog never shows
+		/*Log.d(CLASS, "going to display invite mate dialog");
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				showDialog(DIALOG_INVITE_MATE_ID);
+			}
+		});
+		Log.d(CLASS, "done showing invite mate dialog");
+		*/
+	}
+	
+	private String getExpandableListChild(long packedPosition) {
+		final int group_position = ExpandableListView.getPackedPositionGroup(packedPosition);
+		final int child_position = ExpandableListView.getPackedPositionChild(packedPosition);
+		final ExpandableListAdapter adapter = getExpandableListAdapter();
+		final Map<String, String> child = (Map<String, String>) adapter.getChild(group_position,
+																		   child_position);
+		return child.get(NAME);
+	}
+	
 	@Override
 	protected Dialog onCreateDialog(int id) {
+		Log.d(CLASS, "showing dialog" + id);
 		Dialog dialog;
 		switch(id) {
 		case DIALOG_FORM_TEAM_ID:
 			dialog = buildFormTeamDialog();
 			break;
+		/*case DIALOG_INVITE_MATE_ID:
+			Log.d(CLASS, "showing invite mate dialog");
+			dialog = buildInviteMateDialog();
+		*/
 		default:
 			dialog = null;
 		}
@@ -321,6 +366,20 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			});
 		return builder.create();
 	}
+	
+	/*private Dialog buildInviteMateDialog() {
+		final CharSequence[] items = {"Red", "Green", "Blue"};
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.invite_mate_dialog_title);
+		builder.setItems(items, new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int item) {
+		        Toast.makeText(getApplicationContext(), items[item], Toast.LENGTH_LONG).show();
+		    }
+		});
+		Log.d(CLASS, "going to return invite mate dialog");
+		return builder.create();
+	}
+	*/
 	
 	private void performExit() {
 		mXMPPService.disconnect();
