@@ -67,7 +67,7 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 				Log.d(CLASS, "sending: " + sendText);
 //				mXMPPService.sendGroupMessage(mGroup, sendText);
 				v.setText("");
-				return false;
+				return true;
 			}
 		});
 
