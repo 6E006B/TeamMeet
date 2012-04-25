@@ -62,6 +62,8 @@ public interface IXMPPService {
 
 	void invite(String contact, String roomName) throws XMPPException;
 
+	void sendToGroup(String mGroup, String message) throws XMPPException;
+
 	void startLocationTransmission(MyLocationOverlay locationOverlay);
 
 	void stopLocationTransmission();

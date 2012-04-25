@@ -2,6 +2,8 @@ package de.teammeet;
 
 import java.util.List;
 
+import org.jivesoftware.smack.XMPPException;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -9,6 +11,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -65,7 +68,22 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				String sendText = v.getText().toString();
 				Log.d(CLASS, "sending: " + sendText);
-//				mXMPPService.sendGroupMessage(mGroup, sendText);
+				try {
+					mXMPPService.sendToGroup(mGroup, sendText);
+				} catch (XMPPException e) {
+					final String errorMessage = "Unable to send message:\n" + e.getMessage();
+					Log.e(CLASS, errorMessage);
+					e.printStackTrace();
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							final Toast toast  = Toast.makeText(GroupChatActivity.this,
+							                                    errorMessage, Toast.LENGTH_LONG);
+							toast.setGravity(Gravity.BOTTOM, 0, 0);
+							toast.show();
+						}
+					});
+				}
 				v.setText("");
 				return true;
 			}

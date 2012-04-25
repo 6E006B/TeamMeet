@@ -371,6 +371,15 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
+	public void sendToGroup(String group, String message) throws XMPPException {
+		final MultiUserChat muc = mRooms.get(group);
+		if (muc != null) {
+			muc.sendMessage(message);
+		} else {
+			throw new XMPPException(String.format("Unknown group '%s'", group));
+		}
+	}
+
 	@Override
 	public void updateMate(final Mate mate) {
 		acquireMatesLock();
