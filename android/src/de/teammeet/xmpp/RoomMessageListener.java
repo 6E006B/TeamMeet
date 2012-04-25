@@ -40,7 +40,7 @@ public class RoomMessageListener implements PacketListener {
 		final Message message = (Message)packet;
 		final String text = message.getBody();
 		Log.d(CLASS, "Message body: " + text);
-		if (!text.equals("")) {
+		if (!text.equals("") && !message.getFrom().equals(mGroup)) {
 			final long timestamp = System.currentTimeMillis();
 			final GroupChatMessage groupChatMessage = new GroupChatMessage(from, mGroup, timestamp,
 			                                                               text);
