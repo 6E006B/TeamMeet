@@ -509,6 +509,8 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	public void newGroupMessage(GroupChatMessage message) {
+		mGroupChatDatabase.addMessage(message);
+
 		boolean handled = false;
 		Log.d(CLASS, String.format("newGroupMessage('%s', '%s', '%d', '%s')",
 		                           message.getFrom(), message.getGroup(),
@@ -532,8 +534,6 @@ public class XMPPService extends Service implements IXMPPService {
 		                                              message.getGroup(),
 		                                              message.getMessage());
 		Log.d(CLASS, notificationText);
-
-		mGroupChatDatabase.addMessage(message);
 
 		final String ns = Context.NOTIFICATION_SERVICE;
 		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
