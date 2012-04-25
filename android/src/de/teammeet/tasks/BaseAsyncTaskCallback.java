@@ -11,7 +11,12 @@ public class BaseAsyncTaskCallback<T> implements IAsyncTaskCallback<T> {
 	public void onTaskCompleted(T result) {
 		Log.d(CLASS, String.format("%s completed successfully", getTaskType()));
 	}
-	
+
+	@Override
+	public void onTaskAborted(Exception e) {
+		Log.e(CLASS, String.format("%s was aborted: %s", getTaskType(), e.getMessage()));
+	}
+
 	private String getTaskType() {
 		String className = new Throwable().fillInStackTrace().getStackTrace()[3].getClassName();
 		return className.substring(className.lastIndexOf('.') + 1);
