@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import de.teammeet.SettingsActivity;
-import de.teammeet.interfaces.AsyncTaskCallback;
+import de.teammeet.interfaces.IAsyncTaskCallback;
 import de.teammeet.xmpp.XMPPService;
 
 public class ConnectTask extends AsyncTask<Void, Void, Boolean> {
@@ -14,9 +14,9 @@ public class ConnectTask extends AsyncTask<Void, Void, Boolean> {
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private XMPPService mService;
-	private AsyncTaskCallback<Boolean> mCallback;
+	private IAsyncTaskCallback<Boolean> mCallback;
 
-	public ConnectTask(XMPPService service, AsyncTaskCallback<Boolean> callback) {
+	public ConnectTask(XMPPService service, IAsyncTaskCallback<Boolean> callback) {
 		mService = service;
 		mCallback = callback;
 	}

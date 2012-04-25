@@ -4,7 +4,7 @@ import org.jivesoftware.smack.XMPPException;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import de.teammeet.interfaces.AsyncTaskCallback;
+import de.teammeet.interfaces.IAsyncTaskCallback;
 import de.teammeet.interfaces.IXMPPService;
 
 public class InviteTask extends AsyncTask<String, Void, String[]> {
@@ -12,9 +12,9 @@ public class InviteTask extends AsyncTask<String, Void, String[]> {
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private IXMPPService mService;
-	private AsyncTaskCallback<String[]> mCallback;
+	private IAsyncTaskCallback<String[]> mCallback;
 
-	public InviteTask(IXMPPService service, AsyncTaskCallback<String[]> callback) {
+	public InviteTask(IXMPPService service, IAsyncTaskCallback<String[]> callback) {
 		assert mService != null : "Cannot create group without a service";
 		mService = service;
 		mCallback = callback;

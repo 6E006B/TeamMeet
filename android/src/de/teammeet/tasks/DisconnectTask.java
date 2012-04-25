@@ -2,7 +2,7 @@ package de.teammeet.tasks;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import de.teammeet.interfaces.AsyncTaskCallback;
+import de.teammeet.interfaces.IAsyncTaskCallback;
 import de.teammeet.xmpp.XMPPService;
 
 public class DisconnectTask extends AsyncTask<Void, Void, Void> {
@@ -10,9 +10,9 @@ public class DisconnectTask extends AsyncTask<Void, Void, Void> {
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
 	private XMPPService mService;
-	private AsyncTaskCallback<Void> mCallback;
+	private IAsyncTaskCallback<Void> mCallback;
 
-	public DisconnectTask(XMPPService service, AsyncTaskCallback<Void> callback) {
+	public DisconnectTask(XMPPService service, IAsyncTaskCallback<Void> callback) {
 		mService = service;
 		mCallback = callback;
 	}

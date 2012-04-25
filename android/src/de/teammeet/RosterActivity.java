@@ -41,8 +41,8 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
-import de.teammeet.interfaces.AsyncTaskCallback;
 import de.teammeet.interfaces.IXMPPService;
+import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
@@ -112,7 +112,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 	
-	private class ConnectHandler implements AsyncTaskCallback<Boolean> {
+	private class ConnectHandler extends BaseAsyncTaskCallback<Boolean> {
 		@Override
 		public void onTaskCompleted(Boolean result) {
 			Log.d(CLASS, "connect task completed!!");
@@ -120,7 +120,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 
-	private class DisconnectHandler implements AsyncTaskCallback<Void> {
+	private class DisconnectHandler extends BaseAsyncTaskCallback<Void> {
 		@Override
 		public void onTaskCompleted(Void result) {
 			Log.d(CLASS, "you're now disconnected");
@@ -135,7 +135,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 	
-	private class FetchRosterHandler implements AsyncTaskCallback<Roster> {
+	private class FetchRosterHandler extends BaseAsyncTaskCallback<Roster> {
 		@Override
 		public void onTaskCompleted(Roster roster) {
 			if (roster != null) {
@@ -157,7 +157,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 
-	private class InviteMateHandler implements AsyncTaskCallback<String[]> {
+	private class InviteMateHandler extends BaseAsyncTaskCallback<String[]> {
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
 			String user_feedback;
@@ -171,7 +171,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 	
-	private class FormTeamHandler implements AsyncTaskCallback<String[]> {
+	private class FormTeamHandler extends BaseAsyncTaskCallback<String[]> {
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
 			String user_feedback;

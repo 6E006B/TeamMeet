@@ -1,6 +1,6 @@
 package de.teammeet.interfaces;
 
-public interface AsyncTaskCallback<T> {
+public interface IAsyncTaskCallback<T> {
 	
 	public void onTaskCompleted(T result);
 	

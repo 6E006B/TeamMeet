@@ -5,7 +5,7 @@ import org.jivesoftware.smack.XMPPException;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import de.teammeet.interfaces.AsyncTaskCallback;
+import de.teammeet.interfaces.IAsyncTaskCallback;
 import de.teammeet.interfaces.IXMPPService;
 
 public class FetchRosterTask extends AsyncTask<Void, Void, Roster> {
@@ -13,9 +13,9 @@ public class FetchRosterTask extends AsyncTask<Void, Void, Roster> {
 	private static final String CLASS = FetchRosterTask.class.getSimpleName();
 
 	private IXMPPService mService;
-	private AsyncTaskCallback<Roster> mCallback;
+	private IAsyncTaskCallback<Roster> mCallback;
 
-	public FetchRosterTask(IXMPPService service, AsyncTaskCallback<Roster> callback) {
+	public FetchRosterTask(IXMPPService service, IAsyncTaskCallback<Roster> callback) {
 		mService = service;
 		mCallback = callback;
 	}

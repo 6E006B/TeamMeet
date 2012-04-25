@@ -36,7 +36,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 import de.teammeet.helper.ToastDisposerSingleton;
-import de.teammeet.interfaces.AsyncTaskCallback;
+import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
@@ -71,23 +71,23 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private class ConnectHandler implements AsyncTaskCallback<Boolean> {
+	private class ConnectHandler extends BaseAsyncTaskCallback<Boolean> {
 		@Override
 		public void onTaskCompleted(Boolean result) {
 			Button connectButton = (Button) findViewById(R.id.buttonConnect);
 			connectButton.setText(R.string.button_disconnect);
 		}
 	}
-	
-	private class DisconnectHandler implements AsyncTaskCallback<Void> {
+
+	private class DisconnectHandler extends BaseAsyncTaskCallback<Void> {
 		@Override
 		public void onTaskCompleted(Void result) {
 			Button connectButton = (Button) findViewById(R.id.buttonConnect);
 			connectButton.setText(R.string.button_connect);
 		}
 	}
-	
-	private class CreateTeamHandler implements AsyncTaskCallback<String[]> {
+
+	private class CreateTeamHandler extends BaseAsyncTaskCallback<String[]> {
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
 			if (connection_data.length > 0) {
@@ -98,8 +98,8 @@ public class MainActivity extends Activity {
 			}
 		}
 	}
-	
-	private class InviteMateHandler implements AsyncTaskCallback<String[]> {
+
+	private class InviteMateHandler extends BaseAsyncTaskCallback<String[]> {
 		@Override
 		public void onTaskCompleted(String[] params) {
 			Button inviteButton = (Button) findViewById(R.id.buttonInvite);
