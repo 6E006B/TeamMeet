@@ -134,7 +134,23 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 
 	@Override
 	public boolean handleGroupMessage(GroupChatMessage message) {
-		// TODO Auto-generated method stub
+		Log.d(CLASS, "GroupChatActivity.handleGroupMessage()");
+		if (message.getGroup().equals(mGroup)) {
+			final String from = message.getFrom().split("@", 2)[0];
+			final String chatText = String.format("%s: %s\n", from, message.getMessage());
+			mScrollView.post(new Runnable() {
+				@Override
+				public void run() {
+					mChatTextView.append(chatText);
+					mChatTextView.post(new Runnable() {
+						@Override
+						public void run() {
+							mScrollView.smoothScrollTo(0, mChatTextView.getBottom());
+						}
+					});
+				}
+			});
+		}
 		return false;
 	}
 }
