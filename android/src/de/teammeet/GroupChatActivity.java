@@ -41,14 +41,16 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder binder) {
-			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
+			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceConnected('" +
+						 className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 			mXMPPService.registerGroupMessageHandler(GroupChatActivity.this);
 		}
 
 		@Override
 		public void onServiceDisconnected(ComponentName className) {
-			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceDisconnected('" + className + "')");
+			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceDisconnected('" +
+						 className + "')");
 			mXMPPService = null;
 		}
 	};
@@ -129,7 +131,8 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 			String chatText = "";
 			List<GroupChatMessage> messages = mDatabase.getMessages(mGroup);
 			for (GroupChatMessage message : messages) {
-				final String from = message.getFrom().split("@", 2)[0];
+				final String from = message.getFrom().
+						substring(message.getFrom().lastIndexOf('/') + 1);
 				chatText += String.format("%s: %s\n", from, message.getMessage());
 			}
 			mChatTextView.setText(chatText);
@@ -156,7 +159,7 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 		Log.d(CLASS, "GroupChatActivity.handleGroupMessage()");
 		boolean handled = false;
 		if (message.getGroup().equals(mGroup)) {
-			final String from = message.getFrom().split("@", 2)[0];
+			final String from = message.getFrom().substring(message.getFrom().lastIndexOf('/') + 1);
 			final String chatText = String.format("%s: %s\n", from, message.getMessage());
 			mScrollView.post(new Runnable() {
 				@Override
