@@ -5,7 +5,7 @@ import org.jivesoftware.smack.XMPPException;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import de.teammeet.interfaces.AsyncTaskCallback;
+import de.teammeet.interfaces.IAsyncTaskCallback;
 import de.teammeet.interfaces.IXMPPService;
 
 public class FetchRosterTask extends AsyncTask<Void, Void, Roster> {
@@ -13,9 +13,10 @@ public class FetchRosterTask extends AsyncTask<Void, Void, Roster> {
 	private static final String CLASS = FetchRosterTask.class.getSimpleName();
 
 	private IXMPPService mService;
-	private AsyncTaskCallback<Roster> mCallback;
+	private IAsyncTaskCallback<Roster> mCallback;
+	private Exception mError;
 
-	public FetchRosterTask(IXMPPService service, AsyncTaskCallback<Roster> callback) {
+	public FetchRosterTask(IXMPPService service, IAsyncTaskCallback<Roster> callback) {
 		mService = service;
 		mCallback = callback;
 	}
@@ -28,8 +29,9 @@ public class FetchRosterTask extends AsyncTask<Void, Void, Roster> {
 		try {
 			roster = mService.getRoster();
 		} catch (XMPPException e) {
-			e.printStackTrace();
 			Log.e(CLASS, "Could not fetch Roster: " + e.toString());
+			mError = e;
+			cancel(false);
 		}
 
 		return roster;
@@ -37,8 +39,11 @@ public class FetchRosterTask extends AsyncTask<Void, Void, Roster> {
 
 	@Override
 	protected void onPostExecute(Roster roster) {
-		if (mCallback != null) {
-			mCallback.onTaskCompleted(roster);
-		}
+		mCallback.onTaskCompleted(roster);
+	}
+	
+	@Override
+	protected void onCancelled() {
+		mCallback.onTaskAborted(mError);
 	}
 }
