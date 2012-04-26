@@ -132,12 +132,12 @@ public class XMPPService extends Service implements IXMPPService {
 	public void onDestroy() {
 		Log.d(CLASS, "XMPPService.onDestroy()");
 		removeNotifications();
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-		disconnect();
-//			}
-//		}).start();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				disconnect();
+			}
+		}).start();
 		super.onDestroy();
 	}
 
