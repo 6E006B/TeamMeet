@@ -14,6 +14,7 @@ public class FetchRosterTask extends AsyncTask<Void, Void, Roster> {
 
 	private IXMPPService mService;
 	private IAsyncTaskCallback<Roster> mCallback;
+	private Exception mError;
 
 	public FetchRosterTask(IXMPPService service, IAsyncTaskCallback<Roster> callback) {
 		mService = service;
@@ -28,8 +29,9 @@ public class FetchRosterTask extends AsyncTask<Void, Void, Roster> {
 		try {
 			roster = mService.getRoster();
 		} catch (XMPPException e) {
-			e.printStackTrace();
 			Log.e(CLASS, "Could not fetch Roster: " + e.toString());
+			mError = e;
+			cancel(false);
 		}
 
 		return roster;
@@ -37,8 +39,11 @@ public class FetchRosterTask extends AsyncTask<Void, Void, Roster> {
 
 	@Override
 	protected void onPostExecute(Roster roster) {
-		if (mCallback != null) {
-			mCallback.onTaskCompleted(roster);
-		}
+		mCallback.onTaskCompleted(roster);
+	}
+	
+	@Override
+	protected void onCancelled() {
+		mCallback.onTaskAborted(mError);
 	}
 }

@@ -28,7 +28,6 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -144,22 +143,16 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	private class FetchRosterHandler extends BaseAsyncTaskCallback<Roster> {
 		@Override
 		public void onTaskCompleted(Roster roster) {
-			if (roster != null) {
-				mRoster = roster;
-				Log.d(CLASS, "roster is " + mRoster);
-				mRoster.addRosterListener(RosterActivity.this);
-				fillExpandableList(mRoster);
-				Log.d(CLASS, "list has been filled");
-				
-				mAdapter.notifyDataSetChanged();
-			} else {
-				//TODO Error handling. Inform user in dialog.
-				final String error = "Could not fetch roster. Because!!";
-				final Toast toast = Toast.makeText(RosterActivity.this, error, Toast.LENGTH_LONG);
-				toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
-				toast.show();
-				Log.e(CLASS, error);
-			}
+			mRoster = roster;
+			mRoster.addRosterListener(RosterActivity.this);
+			fillExpandableList(mRoster);
+			mAdapter.notifyDataSetChanged();
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			final String problem = String.format("Could not fetch roster: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 
