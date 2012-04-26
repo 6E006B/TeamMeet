@@ -166,14 +166,14 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	private class InviteMateHandler extends BaseAsyncTaskCallback<String[]> {
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
-			String user_feedback;
-			if (connection_data.length > 0) {
-				user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
-			} else {
-				user_feedback = "Failed to invite contact to team!";
-			}
+			String user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
 			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
-
+		}
+	
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to invite contact to team: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 	

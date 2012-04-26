@@ -13,6 +13,7 @@ public class InviteTask extends AsyncTask<String, Void, String[]> {
 
 	private IXMPPService mService;
 	private IAsyncTaskCallback<String[]> mCallback;
+	private Exception mError;
 
 	public InviteTask(IXMPPService service, IAsyncTaskCallback<String[]> callback) {
 		assert mService != null : "Cannot create group without a service";
@@ -30,8 +31,9 @@ public class InviteTask extends AsyncTask<String, Void, String[]> {
 		try {
 			mService.invite(contact, team);
 		} catch (XMPPException e) {
-			conn_data = new String[0];
 			Log.e(CLASS, String.format("Failed to invite %s to team %s: %s", contact, team, e.getMessage()));
+			mError = e;
+			cancel(false);
 		}
 		
 		return conn_data;
@@ -42,4 +44,8 @@ public class InviteTask extends AsyncTask<String, Void, String[]> {
 		mCallback.onTaskCompleted(connection_data);
 	}
 
+	@Override
+	protected void onCancelled() {
+		mCallback.onTaskAborted(mError);
+	}
 }
