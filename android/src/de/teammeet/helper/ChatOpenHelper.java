@@ -61,6 +61,7 @@ public class ChatOpenHelper extends SQLiteOpenHelper {
 	 */
 	public void addMessage(String from, String to, long timestamp, String message) {
 		SQLiteDatabase db = getWritableDatabase();
+		db.setLockingEnabled(true);
 		ContentValues cv = new ContentValues();
 		cv.put(KEY_FROM, from);
 		cv.put(KEY_TO, to);
@@ -79,6 +80,7 @@ public class ChatOpenHelper extends SQLiteOpenHelper {
 	public List<ChatMessage> getMessages(String conversationPartner) {
 		final List<ChatMessage> messages = new ArrayList<ChatMessage>();
 		final SQLiteDatabase db = getReadableDatabase();
+		db.setLockingEnabled(true);
 		final String [] columns = new String[]{KEY_FROM, KEY_TO, KEY_TIMESTAMP, KEY_MESSAGE};
 		final String whereClause = String.format("%s=? OR %s=?", KEY_TO, KEY_FROM);
 		final Cursor c = db.query(CHAT_TABLE_NAME, columns, whereClause,
@@ -90,6 +92,7 @@ public class ChatOpenHelper extends SQLiteOpenHelper {
 			final String message = c.getString(c.getColumnIndex(KEY_MESSAGE));
 			messages.add(new ChatMessage(from, conversationPartner, timestamp, message));
 		}
+		db.close();
 		return messages;
 	}
 }
