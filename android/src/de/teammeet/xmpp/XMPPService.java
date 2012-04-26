@@ -15,6 +15,7 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Message.Type;
 import org.jivesoftware.smackx.Form;
@@ -71,6 +72,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private String mServer = null;
 	private Map<String, MultiUserChat> mRooms = null;
 	private RoomInvitationListener mRoomInvitationListener = null;
+	private ChatMessageListener mChatMessageListener = null;
 
 	private final ReentrantLock mLockMates = new ReentrantLock();
 	private final ReentrantLock mLockGroups = new ReentrantLock();
@@ -171,6 +173,8 @@ public class XMPPService extends Service implements IXMPPService {
 		mRoomInvitationListener  = new RoomInvitationListener(this);
 		MultiUserChat.addInvitationListener(mXMPP, mRoomInvitationListener);
 
+		mChatMessageListener = new ChatMessageListener(this);
+		mXMPP.addPacketListener(mChatMessageListener, new MessageTypeFilter(Message.Type.chat));
 		showXMPPServiceNotification();
 	}
 
