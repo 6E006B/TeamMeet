@@ -28,7 +28,6 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,8 +40,8 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
-import de.teammeet.interfaces.AsyncTaskCallback;
 import de.teammeet.interfaces.IXMPPService;
+import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
@@ -118,15 +117,21 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 	
-	private class ConnectHandler implements AsyncTaskCallback<Boolean> {
+	private class ConnectHandler extends BaseAsyncTaskCallback<Void> {
 		@Override
-		public void onTaskCompleted(Boolean result) {
-			Log.d(CLASS, "connect task completed!!");
+		public void onTaskCompleted(Void nothing) {
+			Log.d(CLASS, "Connect task completed!!");
 			new FetchRosterTask(mXMPPService, new FetchRosterHandler()).execute();
+		}
+		
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 
-	private class DisconnectHandler implements AsyncTaskCallback<Void> {
+	private class DisconnectHandler extends BaseAsyncTaskCallback<Void> {
 		@Override
 		public void onTaskCompleted(Void result) {
 			Log.d(CLASS, "you're now disconnected");
@@ -141,52 +146,47 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 	
-	private class FetchRosterHandler implements AsyncTaskCallback<Roster> {
+	private class FetchRosterHandler extends BaseAsyncTaskCallback<Roster> {
 		@Override
 		public void onTaskCompleted(Roster roster) {
-			if (roster != null) {
-				mRoster = roster;
-				Log.d(CLASS, "roster is " + mRoster);
-				mRoster.addRosterListener(RosterActivity.this);
-				fillExpandableList(mRoster);
-				Log.d(CLASS, "list has been filled");
-				
-				mAdapter.notifyDataSetChanged();
-			} else {
-				//TODO Error handling. Inform user in dialog.
-				final String error = "Could not fetch roster. Because!!";
-				final Toast toast = Toast.makeText(RosterActivity.this, error, Toast.LENGTH_LONG);
-				toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
-				toast.show();
-				Log.e(CLASS, error);
-			}
+			mRoster = roster;
+			mRoster.addRosterListener(RosterActivity.this);
+			fillExpandableList(mRoster);
+			mAdapter.notifyDataSetChanged();
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			final String problem = String.format("Could not fetch roster: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 
-	private class InviteMateHandler implements AsyncTaskCallback<String[]> {
+	private class InviteMateHandler extends BaseAsyncTaskCallback<String[]> {
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
-			String user_feedback;
-			if (connection_data.length > 0) {
-				user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
-			} else {
-				user_feedback = "Failed to invite contact to team!";
-			}
+			String user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
 			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
-
+		}
+	
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to invite contact to team: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 	
-	private class FormTeamHandler implements AsyncTaskCallback<String[]> {
+	private class FormTeamHandler extends BaseAsyncTaskCallback<String[]> {
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
-			String user_feedback;
-			if (connection_data.length > 0) {
-				user_feedback = String.format("Founded team '%s'", connection_data[0]);
-			} else {
-				user_feedback = "Failed to form team!";
-			}
+			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
 			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+		}
+	
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to form team: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 	
