@@ -13,6 +13,7 @@ public class CreateGroupTask extends AsyncTask<String, Void, String[]> {
 
 	private IXMPPService mService;
 	private IAsyncTaskCallback<String[]> mCallback;
+	private Exception mError;
 
 	public CreateGroupTask(IXMPPService mXMPPService, IAsyncTaskCallback<String[]> callback) {
 		assert mService != null : "Cannot create group without a service";
@@ -30,9 +31,10 @@ public class CreateGroupTask extends AsyncTask<String, Void, String[]> {
 		try {
 			mService.createRoom(groupName, conferenceServer);
 		} catch (XMPPException e) {
-			conn_data = new String[0];
-			e.printStackTrace();
 			Log.e(CLASS, String.format("Failed to create group '%s': %s", groupName, e.toString()));
+			e.printStackTrace();
+			mError = e;
+			cancel(false);
 		}
 
 		return conn_data;
@@ -43,4 +45,9 @@ public class CreateGroupTask extends AsyncTask<String, Void, String[]> {
 		mCallback.onTaskCompleted(connection_data);
 	}
 
+	@Override
+	protected void onCancelled() {
+		mCallback.onTaskAborted(mError);
+	}
+	
 }

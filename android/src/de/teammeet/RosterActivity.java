@@ -121,10 +121,8 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		
 		@Override
 		public void onTaskAborted(Exception e) {
-			Toast error = Toast.makeText(RosterActivity.this,
-										 String.format("Failed to connect to XMPP server: %s", e.getMessage()),
-										 Toast.LENGTH_LONG);
-			error.show();
+			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -182,13 +180,14 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	private class FormTeamHandler extends BaseAsyncTaskCallback<String[]> {
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
-			String user_feedback;
-			if (connection_data.length > 0) {
-				user_feedback = String.format("Founded team '%s'", connection_data[0]);
-			} else {
-				user_feedback = "Failed to form team!";
-			}
+			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
 			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+		}
+	
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to form team: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 	
