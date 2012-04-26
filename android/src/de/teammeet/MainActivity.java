@@ -71,9 +71,9 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private class ConnectHandler extends BaseAsyncTaskCallback<Boolean> {
+	private class ConnectHandler extends BaseAsyncTaskCallback<Void> {
 		@Override
-		public void onTaskCompleted(Boolean result) {
+		public void onTaskCompleted(Void nothing) {
 			Button connectButton = (Button) findViewById(R.id.buttonConnect);
 			connectButton.setText(R.string.button_disconnect);
 		}

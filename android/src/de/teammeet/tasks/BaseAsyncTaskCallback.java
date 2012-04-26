@@ -18,7 +18,7 @@ public class BaseAsyncTaskCallback<T> implements IAsyncTaskCallback<T> {
 	}
 
 	private String getTaskType() {
-		String className = new Throwable().fillInStackTrace().getStackTrace()[3].getClassName();
+		String className = new Throwable().getStackTrace()[2].getClassName();
 		return className.substring(className.lastIndexOf('.') + 1);
 	}
 

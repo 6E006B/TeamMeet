@@ -112,11 +112,19 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		}
 	}
 	
-	private class ConnectHandler extends BaseAsyncTaskCallback<Boolean> {
+	private class ConnectHandler extends BaseAsyncTaskCallback<Void> {
 		@Override
-		public void onTaskCompleted(Boolean result) {
-			Log.d(CLASS, "connect task completed!!");
+		public void onTaskCompleted(Void nothing) {
+			Log.d(CLASS, "Connect task completed!!");
 			new FetchRosterTask(mXMPPService, new FetchRosterHandler()).execute();
+		}
+		
+		@Override
+		public void onTaskAborted(Exception e) {
+			Toast error = Toast.makeText(RosterActivity.this,
+										 String.format("Failed to connect to XMPP server: %s", e.getMessage()),
+										 Toast.LENGTH_LONG);
+			error.show();
 		}
 	}
 
