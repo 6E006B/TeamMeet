@@ -52,28 +52,43 @@ public class ChatOpenHelper extends SQLiteOpenHelper {
 		           message.getMessage());
 	}
 
-	public void addMessage(String from, String group, long timestamp, String message) {
+	/**
+	 * Writes a new message to the SQLite database
+	 * @param from The sender of the message.
+	 * @param to The receipient of the message. For groups the receipient is the group itself.
+	 * @param timestamp
+	 * @param message
+	 */
+	public void addMessage(String from, String to, long timestamp, String message) {
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues cv = new ContentValues();
 		cv.put(KEY_FROM, from);
-		cv.put(KEY_TO, group);
+		cv.put(KEY_TO, to);
 		cv.put(KEY_TIMESTAMP, timestamp);
 		cv.put(KEY_MESSAGE, message);
 		db.insert(CHAT_TABLE_NAME, null, cv);
 		db.close();
 	}
 
-	public List<ChatMessage> getMessages(String group) {
-		List<ChatMessage> messages = new ArrayList<ChatMessage>();
-		SQLiteDatabase db = getReadableDatabase();
-		String [] columns = new String[]{KEY_FROM, KEY_TIMESTAMP, KEY_MESSAGE};
-		Cursor c = db.query(CHAT_TABLE_NAME, columns, KEY_TO + "=?", new String[]{group},
+	/**
+	 * 
+	 * @param conversationPartner The partner of the conversation to fetch the messages for.
+	 *                            This is the room for group chats.
+	 * @return A list of chat messages with the conversation partner.
+	 */
+	public List<ChatMessage> getMessages(String conversationPartner) {
+		final List<ChatMessage> messages = new ArrayList<ChatMessage>();
+		final SQLiteDatabase db = getReadableDatabase();
+		final String [] columns = new String[]{KEY_FROM, KEY_TO, KEY_TIMESTAMP, KEY_MESSAGE};
+		final String whereClause = String.format("%s=? OR %s=?", KEY_TO, KEY_FROM);
+		final Cursor c = db.query(CHAT_TABLE_NAME, columns, whereClause,
+		                    new String[]{conversationPartner, conversationPartner},
 		                    null, null, KEY_TIMESTAMP);
 		while(c.moveToNext()) {
 			final String from = c.getString(c.getColumnIndex(KEY_FROM));
 			final long timestamp = c.getLong(c.getColumnIndex(KEY_TIMESTAMP));
 			final String message = c.getString(c.getColumnIndex(KEY_MESSAGE));
-			messages.add(new ChatMessage(from, group, timestamp, message));
+			messages.add(new ChatMessage(from, conversationPartner, timestamp, message));
 		}
 		return messages;
 	}
