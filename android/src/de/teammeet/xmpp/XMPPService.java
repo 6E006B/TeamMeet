@@ -522,12 +522,12 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
-	public void newGroupMessage(GroupChatMessage message) {
+	public void newGroupMessage(ChatMessage message) {
 		mGroupChatDatabase.addMessage(message);
 
 		boolean handled = false;
 		Log.d(CLASS, String.format("newGroupMessage('%s', '%s', '%d', '%s')",
-		                           message.getFrom(), message.getGroup(),
+		                           message.getFrom(), message.getTo(),
 		                           message.getTimestamp(), message.getMessage()));
 		acquireGroupMessageLock();
 		try {
@@ -542,10 +542,10 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
-	private void notifyGroupMessage(GroupChatMessage message) {
+	private void notifyGroupMessage(ChatMessage message) {
 		final String notificationText = String.format("%s (%s) : %s",
 		                                              message.getFrom(),
-		                                              message.getGroup(),
+		                                              message.getTo(),
 		                                              message.getMessage());
 		Log.d(CLASS, notificationText);
 
@@ -560,7 +560,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 		final CharSequence contentTitle = "Group chat message received";
 		final Intent notificationIntent = new Intent(this, GroupChatActivity.class);
-		notificationIntent.putExtra(GROUP, message.getGroup());
+		notificationIntent.putExtra(GROUP, message.getTo());
 		final PendingIntent contentIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent, 0);
 

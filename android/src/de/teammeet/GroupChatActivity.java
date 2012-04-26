@@ -21,7 +21,7 @@ import android.widget.Toast;
 import de.teammeet.helper.GroupChatOpenHelper;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IXMPPService;
-import de.teammeet.xmpp.GroupChatMessage;
+import de.teammeet.xmpp.ChatMessage;
 import de.teammeet.xmpp.XMPPService;
 
 public class GroupChatActivity extends Activity implements IGroupMessageHandler {
@@ -129,8 +129,8 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 		mGroup = intent.getStringExtra(XMPPService.GROUP);
 		if (mGroup != null) {
 			String chatText = "";
-			List<GroupChatMessage> messages = mDatabase.getMessages(mGroup);
-			for (GroupChatMessage message : messages) {
+			List<ChatMessage> messages = mDatabase.getMessages(mGroup);
+			for (ChatMessage message : messages) {
 				final String from = message.getFrom().
 						substring(message.getFrom().lastIndexOf('/') + 1);
 				chatText += String.format("%s: %s\n", from, message.getMessage());
@@ -155,10 +155,10 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 	}
 
 	@Override
-	public boolean handleGroupMessage(GroupChatMessage message) {
+	public boolean handleGroupMessage(ChatMessage message) {
 		Log.d(CLASS, "GroupChatActivity.handleGroupMessage()");
 		boolean handled = false;
-		if (message.getGroup().equals(mGroup)) {
+		if (message.getTo().equals(mGroup)) {
 			final String from = message.getFrom().substring(message.getFrom().lastIndexOf('/') + 1);
 			final String chatText = String.format("%s: %s\n", from, message.getMessage());
 			mScrollView.post(new Runnable() {

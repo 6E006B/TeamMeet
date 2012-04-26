@@ -42,9 +42,9 @@ public class RoomMessageListener implements PacketListener {
 		Log.d(CLASS, "Message body: " + text);
 		if (!text.equals("") && !message.getFrom().equals(mGroup)) {
 			final long timestamp = System.currentTimeMillis();
-			final GroupChatMessage groupChatMessage = new GroupChatMessage(from, mGroup, timestamp,
+			final ChatMessage chatMessage = new ChatMessage(from, mGroup, timestamp,
 			                                                               text);
-			mXMPPService.newGroupMessage(groupChatMessage);
+			mXMPPService.newGroupMessage(chatMessage);
 		}
 		Log.d(CLASS, from + " sent " + xml);
 	}

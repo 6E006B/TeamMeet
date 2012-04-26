@@ -27,7 +27,7 @@ public class InviteTask extends AsyncTask<String, Void, String[]> {
 		String contact = params[0];
 		String team = params[1];
 		String[] conn_data = params;
-		
+
 		try {
 			mService.invite(contact, team);
 		} catch (XMPPException e) {
@@ -35,7 +35,7 @@ public class InviteTask extends AsyncTask<String, Void, String[]> {
 			mError = e;
 			cancel(false);
 		}
-		
+
 		return conn_data;
 	}
 

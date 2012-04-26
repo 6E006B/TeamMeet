@@ -9,7 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import de.teammeet.xmpp.GroupChatMessage;
+import de.teammeet.xmpp.ChatMessage;
 
 public class GroupChatOpenHelper extends SQLiteOpenHelper {
 
@@ -45,13 +45,13 @@ public class GroupChatOpenHelper extends SQLiteOpenHelper {
 		Log.w(CLASS, "No upgrading of database implemented!");
 	}
 
-	public void addMessage(GroupChatMessage message) {
+	public void addMessage(ChatMessage message) {
 		addMessage(message.getFrom(),
-		           message.getGroup(),
+		           message.getTo(),
 		           message.getTimestamp(),
 		           message.getMessage());
 	}
-	
+
 	public void addMessage(String from, String group, long timestamp, String message) {
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues cv = new ContentValues();
@@ -63,8 +63,8 @@ public class GroupChatOpenHelper extends SQLiteOpenHelper {
 		db.close();
 	}
 
-	public List<GroupChatMessage> getMessages(String group) {
-		List<GroupChatMessage> messages = new ArrayList<GroupChatMessage>();
+	public List<ChatMessage> getMessages(String group) {
+		List<ChatMessage> messages = new ArrayList<ChatMessage>();
 		SQLiteDatabase db = getReadableDatabase();
 		String [] columns = new String[]{KEY_FROM, KEY_TIMESTAMP, KEY_MESSAGE};
 		Cursor c = db.query(CHAT_TABLE_NAME, columns, KEY_TO + "=?", new String[]{group},
@@ -73,7 +73,7 @@ public class GroupChatOpenHelper extends SQLiteOpenHelper {
 			final String from = c.getString(c.getColumnIndex(KEY_FROM));
 			final long timestamp = c.getLong(c.getColumnIndex(KEY_TIMESTAMP));
 			final String message = c.getString(c.getColumnIndex(KEY_MESSAGE));
-			messages.add(new GroupChatMessage(from, group, timestamp, message));
+			messages.add(new ChatMessage(from, group, timestamp, message));
 		}
 		return messages;
 	}
