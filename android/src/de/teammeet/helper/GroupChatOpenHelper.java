@@ -15,17 +15,17 @@ public class GroupChatOpenHelper extends SQLiteOpenHelper {
 
 	private static final String CLASS = GroupChatOpenHelper.class.getSimpleName();
 
-	private static final String DATABASE_NAME = "TeamMeetGroupChats";
+	private static final String DATABASE_NAME = "TeamMeetChats";
 	private static final int DATABASE_VERSION = 1;
-	private static final String GROUP_CHAT_TABLE_NAME = "groupChatMessages";
+	private static final String CHAT_TABLE_NAME = "chatMessages";
 	private static final String KEY_FROM = "sender";
-	private static final String KEY_GROUP = "team";
+	private static final String KEY_TO = "receipient";
 	private static final String KEY_TIMESTAMP = "ts";
 	private static final String KEY_MESSAGE = "message";
-	private static final String GROUP_CHAT_TABLE_CREATE =
-            "CREATE TABLE " + GROUP_CHAT_TABLE_NAME + " (" +
+	private static final String CHAT_TABLE_CREATE =
+            "CREATE TABLE " + CHAT_TABLE_NAME + " (" +
             KEY_FROM + " TEXT, " +
-            KEY_GROUP + " TEXT, " +
+            KEY_TO + " TEXT, " +
             KEY_TIMESTAMP + " LONG, " +
             KEY_MESSAGE + " TEXT);";
 
@@ -36,7 +36,7 @@ public class GroupChatOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(GROUP_CHAT_TABLE_CREATE);
+		db.execSQL(CHAT_TABLE_CREATE);
 
 	}
 
@@ -56,10 +56,10 @@ public class GroupChatOpenHelper extends SQLiteOpenHelper {
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues cv = new ContentValues();
 		cv.put(KEY_FROM, from);
-		cv.put(KEY_GROUP, group);
+		cv.put(KEY_TO, group);
 		cv.put(KEY_TIMESTAMP, timestamp);
 		cv.put(KEY_MESSAGE, message);
-		db.insert(GROUP_CHAT_TABLE_NAME, null, cv);
+		db.insert(CHAT_TABLE_NAME, null, cv);
 		db.close();
 	}
 
@@ -67,7 +67,7 @@ public class GroupChatOpenHelper extends SQLiteOpenHelper {
 		List<GroupChatMessage> messages = new ArrayList<GroupChatMessage>();
 		SQLiteDatabase db = getReadableDatabase();
 		String [] columns = new String[]{KEY_FROM, KEY_TIMESTAMP, KEY_MESSAGE};
-		Cursor c = db.query(GROUP_CHAT_TABLE_NAME, columns, KEY_GROUP + "=?", new String[]{group},
+		Cursor c = db.query(CHAT_TABLE_NAME, columns, KEY_TO + "=?", new String[]{group},
 		                    null, null, KEY_TIMESTAMP);
 		while(c.moveToNext()) {
 			final String from = c.getString(c.getColumnIndex(KEY_FROM));
