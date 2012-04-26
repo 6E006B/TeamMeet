@@ -43,6 +43,7 @@ import de.teammeet.R;
 import de.teammeet.RosterActivity;
 import de.teammeet.SettingsActivity;
 import de.teammeet.helper.ChatOpenHelper;
+import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IInvitationHandler;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
@@ -59,6 +60,7 @@ public class XMPPService extends Service implements IXMPPService {
 	public static final String PASSWORD = "password";
 	public static final String FROM = "from";
 	public static final String GROUP = "group";
+	public static final String SENDER = null;
 
 	public static final int TYPE_NONE = 0;
 	public static final int TYPE_JOIN = 1;
@@ -66,6 +68,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private static final int NOTIFICATION_XMPP_SERVICE_ID = 0;
 	private static final int NOTIFICATION_GROUP_INVITATION_ID = 1;
 	private static final int NOTIFICATION_GROUP_CHAT_MESSAGE_ID = 2;
+	private static final int NOTIFICATION_CHAT_MESSAGE_ID = 3;
 
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
@@ -78,7 +81,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private final ReentrantLock mLockGroups = new ReentrantLock();
 	private final ReentrantLock mLockInvitations = new ReentrantLock();
 	private final ReentrantLock mLockGroupMessages = new ReentrantLock();
-
+	private final ReentrantLock mLockChatMessages = new ReentrantLock();
 
 	private final List<IMatesUpdateRecipient> mMatesRecipients =
 			new ArrayList<IMatesUpdateRecipient>();
@@ -86,6 +89,8 @@ public class XMPPService extends Service implements IXMPPService {
 			new ArrayList<IInvitationHandler>();
 	private final List<IGroupMessageHandler> mGroupMessageHandlers =
 			new ArrayList<IGroupMessageHandler>();
+	private final List<IChatMessageHandler> mChatMessageHandlers =
+			new ArrayList<IChatMessageHandler>();
 
 	private final IBinder mBinder = new LocalBinder();
 	private int mBindCounter = 0;
@@ -597,6 +602,71 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
+	public void handleNewChatMessage(ChatMessage message) {
+		boolean handled = false;
+		acquireChatMessageLock();
+		try {
+			for (final IChatMessageHandler object : mChatMessageHandlers) {
+				handled |= object.handleMessage(message);
+			}
+		} finally {
+			releaseChatMessageLock();
+		}
+		if (!handled) {
+			notifyNewChatMessage(message);
+		}
+	}
+
+	private void notifyNewChatMessage(ChatMessage message) {
+		final String notificationText = String.format("%s: %s",
+		                                              message.getFrom(),
+		                                              message.getMessage());
+		Log.d(CLASS, notificationText);
+
+		final String ns = Context.NOTIFICATION_SERVICE;
+		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
+
+		final int icon = R.drawable.group_invitation_icon;
+		final CharSequence tickerText = String.format("New message from %s", notificationText);
+		final long when = System.currentTimeMillis();
+
+		final Notification notification = new Notification(icon, tickerText, when);
+
+		final CharSequence contentTitle = "Chat message received";
+		final Intent notificationIntent = new Intent(this, GroupChatActivity.class);
+		notificationIntent.putExtra(SENDER, message.getTo());
+		final PendingIntent contentIntent =
+				PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
+
+		notification.setLatestEventInfo(this, contentTitle, notificationText, contentIntent);
+	    notification.defaults = Notification.DEFAULT_ALL;
+	    notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+		notificationManager.notify(NOTIFICATION_CHAT_MESSAGE_ID, notification);
+	}
+
+	@Override
+	public void registerChatMessageHandler(IChatMessageHandler object) {
+		acquireGroupMessageLock();
+		try {
+			mChatMessageHandlers.add(object);
+		} finally {
+			releaseChatMessageLock();
+		}
+	}
+
+	@Override
+	public void unregisterChatMessageHandler(IChatMessageHandler object) {
+		acquireChatMessageLock();
+		try {
+			mChatMessageHandlers.remove(object);
+		} finally {
+			releaseChatMessageLock();
+		}
+	}
+
 	private void acquireMatesLock() {
 		mLockMates.lock();
 	}
@@ -627,5 +697,13 @@ public class XMPPService extends Service implements IXMPPService {
 
 	private void acquireGroupMessageLock() {
 		mLockGroupMessages.lock();
+	}
+
+	private void releaseChatMessageLock() {
+		mLockChatMessages.unlock();
+	}
+
+	private void acquireChatMessageLock() {
+		mLockChatMessages.lock();
 	}
 }
