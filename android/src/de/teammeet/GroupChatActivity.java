@@ -18,7 +18,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
-import de.teammeet.helper.GroupChatOpenHelper;
+import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.xmpp.ChatMessage;
@@ -32,7 +32,7 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 	private TextView mChatTextView = null;
 	private EditText mChatEditText = null;
 	private String mGroup = null;
-	private GroupChatOpenHelper mDatabase = null;
+	private ChatOpenHelper mDatabase = null;
 
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
@@ -91,7 +91,7 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 			}
 		});
 
-		mDatabase = new GroupChatOpenHelper(getApplicationContext());
+		mDatabase = new ChatOpenHelper(getApplicationContext());
 	}
 
 	@Override

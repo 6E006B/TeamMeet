@@ -41,7 +41,7 @@ import de.teammeet.Mate;
 import de.teammeet.R;
 import de.teammeet.RosterActivity;
 import de.teammeet.SettingsActivity;
-import de.teammeet.helper.GroupChatOpenHelper;
+import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IInvitationHandler;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
@@ -89,7 +89,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private int mBindCounter = 0;
 
 	private TimerTask mTimerTask = null;
-	private GroupChatOpenHelper mGroupChatDatabase = null;
+	private ChatOpenHelper mGroupChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
 
 	public class LocalBinder extends Binder {
@@ -103,7 +103,7 @@ public class XMPPService extends Service implements IXMPPService {
 		super.onCreate();
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
-		mGroupChatDatabase = new GroupChatOpenHelper(this);
+		mGroupChatDatabase = new ChatOpenHelper(this);
 	}
 
 	@Override

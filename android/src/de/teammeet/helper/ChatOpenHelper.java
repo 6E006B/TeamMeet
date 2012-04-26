@@ -11,9 +11,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import de.teammeet.xmpp.ChatMessage;
 
-public class GroupChatOpenHelper extends SQLiteOpenHelper {
+public class ChatOpenHelper extends SQLiteOpenHelper {
 
-	private static final String CLASS = GroupChatOpenHelper.class.getSimpleName();
+	private static final String CLASS = ChatOpenHelper.class.getSimpleName();
 
 	private static final String DATABASE_NAME = "TeamMeetChats";
 	private static final int DATABASE_VERSION = 1;
@@ -30,7 +30,7 @@ public class GroupChatOpenHelper extends SQLiteOpenHelper {
             KEY_MESSAGE + " TEXT);";
 
 
-	public GroupChatOpenHelper(Context context) {
+	public ChatOpenHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
