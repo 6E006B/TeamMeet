@@ -220,11 +220,11 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void createRoom(String groupName, String conferenceServer) throws XMPPException {
-		MultiUserChat muc = new MultiUserChat(mXMPP, String.format("%s@%s", groupName,
-		                                                           conferenceServer));
+		final String group = String.format("%s@%s", groupName, conferenceServer);
+		MultiUserChat muc = new MultiUserChat(mXMPP, group);
 		muc.create(mUserID);
 		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
-		addRoom(groupName, muc);
+		addRoom(group, muc);
 	}
 
 	@Override
