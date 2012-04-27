@@ -385,6 +385,15 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
+	public void sendChatMessage(String to, String message) {
+		Message packet = new Message();
+		packet.setBody(message);
+		packet.setType(Message.Type.chat);
+		packet.setTo(to);
+		packet.setFrom(String.format("%s@%s", mUserID, mServer));
+		mXMPP.sendPacket(packet);
+	}
+
 	public void sendToGroup(String group, String message) throws XMPPException {
 		final MultiUserChat muc = mRooms.get(group);
 		if (muc != null) {
