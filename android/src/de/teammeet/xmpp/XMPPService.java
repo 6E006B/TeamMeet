@@ -636,7 +636,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 		final CharSequence contentTitle = "Chat message received";
 		final Intent notificationIntent = new Intent(this, GroupChatActivity.class);
-		notificationIntent.putExtra(SENDER, message.getTo());
+		notificationIntent.putExtra(SENDER, message.getFrom());
 		final PendingIntent contentIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
