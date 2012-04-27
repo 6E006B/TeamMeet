@@ -82,10 +82,9 @@ public class ChatOpenHelper extends SQLiteOpenHelper {
 		final SQLiteDatabase db = getReadableDatabase();
 		db.setLockingEnabled(true);
 		final String [] columns = new String[]{KEY_FROM, KEY_TO, KEY_TIMESTAMP, KEY_MESSAGE};
-		// TODO we probably want LIKE statements to get all "/resources"
-		final String whereClause = String.format("%s=? OR %s=?", KEY_TO, KEY_FROM);
+		final String whereClause = String.format("%s LIKE ? OR %s LIKE ?", KEY_TO, KEY_FROM);
 		final Cursor c = db.query(CHAT_TABLE_NAME, columns, whereClause,
-		                    new String[]{conversationPartner, conversationPartner},
+		                    new String[]{conversationPartner+"%", conversationPartner+"%"},
 		                    null, null, KEY_TIMESTAMP);
 		while(c.moveToNext()) {
 			final String from = c.getString(c.getColumnIndex(KEY_FROM));
