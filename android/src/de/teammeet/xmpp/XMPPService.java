@@ -180,7 +180,9 @@ public class XMPPService extends Service implements IXMPPService {
 		MultiUserChat.addInvitationListener(mXMPP, mRoomInvitationListener);
 
 		mChatMessageListener = new ChatMessageListener(this);
-		mXMPP.addPacketListener(mChatMessageListener, new MessageTypeFilter(Message.Type.chat));
+		final MessageTypeFilter chatMessageFilter = new MessageTypeFilter(Message.Type.chat);
+		mXMPP.addPacketListener(mChatMessageListener, chatMessageFilter);
+		mXMPP.addPacketSendingListener(mChatMessageListener, chatMessageFilter);
 		showXMPPServiceNotification();
 	}
 

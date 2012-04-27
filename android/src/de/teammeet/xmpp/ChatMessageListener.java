@@ -24,10 +24,15 @@ public class ChatMessageListener implements PacketListener {
 		final String to = message.getTo();
 		final String body = message.getBody();
 		final long timestamp = System.currentTimeMillis();
-		ChatMessage chatMessage = new ChatMessage(from, to, timestamp, body);
+		final ChatMessage chatMessage = new ChatMessage(from, to, timestamp, body);
 		Log.d(CLASS, String.format("new message from '%s': %s", from, body));
 		if (body != null) {
-			mXMPPService.handleNewChatMessage(chatMessage);
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					mXMPPService.handleNewChatMessage(chatMessage);
+				}
+			}).run();
 		}
 	}
 }
