@@ -44,6 +44,10 @@ public interface IXMPPService {
 
 	void unregisterGroupMessageHandler(IGroupMessageHandler object);
 
+	void registerChatMessageHandler(IChatMessageHandler object);
+
+	void unregisterChatMessageHandler(IChatMessageHandler object);
+
 	void connect(String userID, String server, String password) throws XMPPException;
 
 	boolean isAuthenticated();
@@ -61,6 +65,8 @@ public interface IXMPPService {
 	void leaveRoom(String roomName);
 
 	void invite(String contact, String roomName) throws XMPPException;
+
+	void sendChatMessage(String mSender, String sendText);
 
 	void sendToGroup(String mGroup, String message) throws XMPPException;
 

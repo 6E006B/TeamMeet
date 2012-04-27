@@ -1,15 +1,15 @@
 package de.teammeet.xmpp;
 
-public class GroupChatMessage {
+public class ChatMessage {
 
 	private String mFrom = null;
-	private String mGroup = null;
+	private String mTo = null;
 	private long mTimestamp = 0;
 	private String mMessage = null;
-	
-	public GroupChatMessage(String from, String group, long timestamp, String message) {
+
+	public ChatMessage(String from, String to, long timestamp, String message) {
 		mFrom = from;
-		mGroup = group;
+		mTo = to;
 		mTimestamp = timestamp;
 		mMessage = message;
 	}
@@ -18,8 +18,8 @@ public class GroupChatMessage {
 		return mFrom;
 	}
 
-	public String getGroup() {
-		return mGroup;
+	public String getTo() {
+		return mTo;
 	}
 
 	public long getTimestamp() {

@@ -2,23 +2,16 @@ package de.teammeet.tasks;
 
 import org.jivesoftware.smack.XMPPException;
 
-import android.os.AsyncTask;
 import android.util.Log;
 import de.teammeet.interfaces.IAsyncTaskCallback;
 import de.teammeet.interfaces.IXMPPService;
 
-public class InviteTask extends AsyncTask<String, Void, String[]> {
+public class InviteTask extends BaseAsyncTask<String, Void, String[]> {
 
 	private static final String CLASS = ConnectTask.class.getSimpleName();
 
-	private IXMPPService mService;
-	private IAsyncTaskCallback<String[]> mCallback;
-	private Exception mError;
-
 	public InviteTask(IXMPPService service, IAsyncTaskCallback<String[]> callback) {
-		assert mService != null : "Cannot create group without a service";
-		mService = service;
-		mCallback = callback;
+		super(service, callback);
 	}
 
 	@Override
@@ -27,7 +20,7 @@ public class InviteTask extends AsyncTask<String, Void, String[]> {
 		String contact = params[0];
 		String team = params[1];
 		String[] conn_data = params;
-		
+
 		try {
 			mService.invite(contact, team);
 		} catch (XMPPException e) {
@@ -35,17 +28,7 @@ public class InviteTask extends AsyncTask<String, Void, String[]> {
 			mError = e;
 			cancel(false);
 		}
-		
+
 		return conn_data;
-	}
-
-	@Override
-	protected void onPostExecute(String[] connection_data) {
-		mCallback.onTaskCompleted(connection_data);
-	}
-
-	@Override
-	protected void onCancelled() {
-		mCallback.onTaskAborted(mError);
 	}
 }
