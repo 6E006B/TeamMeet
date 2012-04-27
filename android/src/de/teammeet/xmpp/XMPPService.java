@@ -139,6 +139,10 @@ public class XMPPService extends Service implements IXMPPService {
 	@Override
 	public void onDestroy() {
 		Log.d(CLASS, "XMPPService.onDestroy()");
+		if (mChatMessageListener != null && mXMPP != null) {
+			mXMPP.removePacketListener(mChatMessageListener);
+			mXMPP.removePacketSendingListener(mChatMessageListener);
+		}
 		removeNotifications();
 		new Thread(new Runnable() {
 			@Override
