@@ -343,6 +343,11 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 				formTeamAction();
 				break;
 
+			case R.id.roster_menu_settings:
+				Log.d(CLASS, "User clicked 'form team' in menu");
+				clickedSettings();
+				break;
+
 			case R.id.roster_menu_exit:
 				Log.d(CLASS, "User clicked 'exit' in menu");
 				performExit();
@@ -473,7 +478,12 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		return builder.create();
 	}
 	*/
-	
+
+	private void clickedSettings() {
+		final Intent intent = new Intent(this, SettingsActivity.class);
+		startActivity(intent);
+	}
+
 	private void performExit() {
 		new Thread(new Runnable() {
 			@Override

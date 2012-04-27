@@ -11,9 +11,13 @@
         android:titleCondensed="@string/roster_menu_show_map_condensed"/>
     <item
         android:id="@+id/roster_menu_form_team"
+        android:enabled="false"
         android:title="@string/roster_menu_form_team"
-        android:titleCondensed="@string/roster_menu_form_team_condensed"
-        android:enabled="false" />
+        android:titleCondensed="@string/roster_menu_form_team_condensed"/>
+    <item
+        android:id="@+id/roster_menu_settings"
+        android:title="@string/roster_menu_settings"
+        android:titleCondensed="@string/roster_menu_settings_condensed"/>
     <item
         android:id="@+id/roster_menu_exit"
         android:title="@string/roster_menu_exit"
