@@ -32,7 +32,7 @@ public class ChatMessageListener implements PacketListener {
 				public void run() {
 					mXMPPService.handleNewChatMessage(chatMessage);
 				}
-			}).run();
+			}).start();
 		}
 	}
 }
