@@ -40,7 +40,9 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.SimpleExpandableListAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TwoLineListItem;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
@@ -357,6 +359,22 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 				break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+		// TODO Auto-generated method stub
+		Log.d(CLASS, String.format("onChildClick('%s', '%s', '%d', '%d', '%d')",
+		                           parent.toString(), v.toString(), groupPosition,
+		                           childPosition, id));
+		TwoLineListItem listItem = (TwoLineListItem)v;
+		TextView textView = (TextView) listItem.getChildAt(0);
+		final String contact = textView.getText().toString();
+		Log.d(CLASS, String.format("clicked on child: %s", contact));
+		Intent intent = new Intent(this, ChatActivity.class);
+		intent.putExtra(XMPPService.SENDER, contact);
+		startActivity(intent);
+		return super.onChildClick(parent, v, groupPosition, childPosition, id);
 	}
 
 	@Override

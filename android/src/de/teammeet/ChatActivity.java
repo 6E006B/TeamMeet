@@ -114,7 +114,10 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 	private void handleIntent(Intent intent) {
 		mSender = intent.getStringExtra(XMPPService.SENDER);
 		if (mSender != null) {
-			mSender = mSender.substring(0, mSender.indexOf('/'));
+			int slashIndex = mSender.indexOf('/');
+			if (slashIndex != -1) {
+				mSender = mSender.substring(0, slashIndex);
+			}
 			Log.d(CLASS, "chat with " + mSender);
 			String chatText = "";
 			List<ChatMessage> messages = mDatabase.getMessages(mSender);
