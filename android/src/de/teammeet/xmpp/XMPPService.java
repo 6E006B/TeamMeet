@@ -429,7 +429,7 @@ public class XMPPService extends Service implements IXMPPService {
 		// .getSimpleName() + ")");
 		acquireMatesLock();
 		try {
-			if (mMatesRecipients.contains(object)) {
+			if (!mMatesRecipients.contains(object)) {
 				mMatesRecipients.add(object);
 			}
 		} finally {
@@ -607,7 +607,7 @@ public class XMPPService extends Service implements IXMPPService {
 	public void registerGroupMessageHandler(IGroupMessageHandler object) {
 		acquireGroupMessageLock();
 		try {
-			if (mGroupMessageHandlers.contains(object)) {
+			if (!mGroupMessageHandlers.contains(object)) {
 				mGroupMessageHandlers.add(object);
 			}
 		} finally {
@@ -638,6 +638,7 @@ public class XMPPService extends Service implements IXMPPService {
 			releaseChatMessageLock();
 		}
 		if (!handled) {
+			Log.d(CLASS, "chat message has not been handled.");
 			notifyNewChatMessage(message);
 		}
 	}
@@ -678,7 +679,7 @@ public class XMPPService extends Service implements IXMPPService {
 	public void registerChatMessageHandler(IChatMessageHandler object) {
 		acquireChatMessageLock();
 		try {
-			if (mChatMessageHandlers.contains(object)) {
+			if (!mChatMessageHandlers.contains(object)) {
 				mChatMessageHandlers.add(object);
 			}
 		} finally {
