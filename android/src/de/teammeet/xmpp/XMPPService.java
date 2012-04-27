@@ -36,6 +36,7 @@ import android.util.Log;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
+import de.teammeet.ChatActivity;
 import de.teammeet.GroupChatActivity;
 import de.teammeet.MainActivity;
 import de.teammeet.Mate;
@@ -644,7 +645,7 @@ public class XMPPService extends Service implements IXMPPService {
 		final Notification notification = new Notification(icon, tickerText, when);
 
 		final CharSequence contentTitle = "Chat message received";
-		final Intent notificationIntent = new Intent(this, GroupChatActivity.class);
+		final Intent notificationIntent = new Intent(this, ChatActivity.class);
 		notificationIntent.putExtra(SENDER, message.getFrom());
 		final PendingIntent contentIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent, 0);
