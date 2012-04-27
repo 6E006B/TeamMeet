@@ -228,7 +228,7 @@ public class TeamMeetActivity extends MapActivity {
 
 	        case android.R.id.home:
 	            // app icon in action bar clicked; go home
-	            Intent intent = new Intent(this, MainActivity.class);
+	            Intent intent = new Intent(this, RosterActivity.class);
 	            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	            startActivity(intent);
 	            Log.d(CLASS, "home icon clicked");
