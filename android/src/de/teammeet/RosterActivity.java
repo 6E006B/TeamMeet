@@ -11,6 +11,7 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.app.AlertDialog;
@@ -84,6 +85,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			if (mXMPPService.isAuthenticated()) {
 				new FetchRosterTask(mXMPPService, new FetchRosterHandler()).execute();
 			}
+			handleIntent(getIntent());
 		}
 
 		@Override
@@ -245,7 +247,78 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		
 		super.onPause();
 	}
-	
+
+
+	private void handleIntent(Intent intent) {
+		Log.d(CLASS, "RosterActivity.handleIntent() ");
+		Bundle extras = intent.getExtras();
+		if (extras != null) {
+			Log.d(CLASS, "extras: " + extras.toString());
+		} else {
+			Log.d(CLASS, "no extras");
+		}
+		final int type = intent.getIntExtra(XMPPService.TYPE, XMPPService.TYPE_NONE);
+		intent.removeExtra(XMPPService.TYPE);
+		switch (type) {
+		case XMPPService.TYPE_JOIN:
+			Log.d(CLASS, "Intent to join a group");
+			handleJoinIntent(intent);
+			break;
+		default:
+			Log.d(CLASS, "Intent of unknown type: " + type);
+			break;
+		}
+	}
+
+	private void handleJoinIntent(Intent intent) {
+		final String room = intent.getStringExtra(XMPPService.ROOM);
+		final String inviter = intent.getStringExtra(XMPPService.INVITER);
+		final String reason = intent.getStringExtra(XMPPService.REASON);
+		final String password = intent.getStringExtra(XMPPService.PASSWORD);
+		final String from = intent.getStringExtra(XMPPService.FROM);
+		// cleanup the extras so that this is only executed once, not every time the activity is
+		// brought to foreground again
+		intent.removeExtra(XMPPService.ROOM);
+		intent.removeExtra(XMPPService.INVITER);
+		intent.removeExtra(XMPPService.REASON);
+		intent.removeExtra(XMPPService.PASSWORD);
+		intent.removeExtra(XMPPService.FROM);
+		Log.d(CLASS, String.format("room: '%s' inviter: '%s' reason: '%s' password: '%s' from: '%s'", room, inviter, reason, password, from));
+		if (room != null && inviter != null && reason != null && from != null) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Group Invitation");
+			builder.setMessage(String.format("%s wants you to join '%s':\n%s",
+			                                 inviter, room, reason));
+			builder.setCancelable(false);
+			builder.setPositiveButton("Join", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			                dialog.dismiss();
+			                SharedPreferences settings =
+			                		getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+			                final String userID =
+			                		settings.getString(SettingsActivity.SETTING_XMPP_USER_ID,
+			                		                   "anonymous");
+			                try {
+								mXMPPService.joinRoom(room, userID, password);
+							} catch (XMPPException e) {
+								e.printStackTrace();
+								Log.e(CLASS, "Unable to join room.");
+								// TODO show the user
+							}
+			           }
+			       });
+			builder.setNegativeButton("Decline", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			                dialog.dismiss();
+			           }
+			       });
+			final AlertDialog alert = builder.create();
+			alert.show();
+		} else {
+			Log.e(CLASS, "Cannot handle invite: Missing parameters.");
+		}
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -270,6 +343,11 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			case R.id.roster_menu_form_team:
 				Log.d(CLASS, "User clicked 'form team' in menu");
 				formTeamAction();
+				break;
+
+			case R.id.roster_menu_settings:
+				Log.d(CLASS, "User clicked 'form team' in menu");
+				clickedSettings();
 				break;
 
 			case R.id.roster_menu_exit:
@@ -418,7 +496,12 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		return builder.create();
 	}
 	*/
-	
+
+	private void clickedSettings() {
+		final Intent intent = new Intent(this, SettingsActivity.class);
+		startActivity(intent);
+	}
+
 	private void performExit() {
 		new Thread(new Runnable() {
 			@Override

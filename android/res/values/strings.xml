@@ -32,6 +32,8 @@
     <string name="roster_menu_show_map_condensed">Map</string>
     <string name="roster_menu_form_team">From a new team</string>
     <string name="roster_menu_form_team_condensed">Form team</string>
+    <string name="roster_menu_settings">Settings</string>
+    <string name="roster_menu_settings_condensed">Settings</string>
     <string name="roster_menu_exit">Exit</string>
     <string name="roster_menu_exit_condensed">Exit</string>
     <string name="roster_text_offline">You\'re offline</string>
