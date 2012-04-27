@@ -26,6 +26,8 @@ public class ChatMessageListener implements PacketListener {
 		final long timestamp = System.currentTimeMillis();
 		ChatMessage chatMessage = new ChatMessage(from, to, timestamp, body);
 		Log.d(CLASS, String.format("new message from '%s': %s", from, body));
-		mXMPPService.handleNewChatMessage(chatMessage);
+		if (body != null) {
+			mXMPPService.handleNewChatMessage(chatMessage);
+		}
 	}
 }
