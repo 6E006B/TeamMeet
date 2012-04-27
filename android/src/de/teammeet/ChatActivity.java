@@ -55,7 +55,7 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d(CLASS, "onCreate(): started group chat");
+		Log.d(CLASS, "onCreate(): started chat activity");
 		
 		setContentView(R.layout.groupchat);
 
