@@ -55,7 +55,7 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d(CLASS, "onCreate(): started group chat");
+		Log.d(CLASS, "onCreate(): started chat activity");
 		
 		setContentView(R.layout.groupchat);
 
@@ -114,11 +114,12 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 	private void handleIntent(Intent intent) {
 		mSender = intent.getStringExtra(XMPPService.SENDER);
 		if (mSender != null) {
+			mSender = mSender.substring(0, mSender.indexOf('@'));
+			Log.d(CLASS, "chat with " + mSender);
 			String chatText = "";
 			List<ChatMessage> messages = mDatabase.getMessages(mSender);
 			for (ChatMessage message : messages) {
-				final String from = message.getFrom().
-						substring(message.getFrom().lastIndexOf('/') + 1);
+				final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
 				chatText += String.format("%s: %s\n", from, message.getMessage());
 			}
 			mChatTextView.setText(chatText);
