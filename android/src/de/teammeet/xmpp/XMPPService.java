@@ -649,7 +649,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void registerChatMessageHandler(IChatMessageHandler object) {
-		acquireGroupMessageLock();
+		acquireChatMessageLock();
 		try {
 			mChatMessageHandlers.add(object);
 		} finally {
