@@ -603,6 +603,8 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	public void handleNewChatMessage(ChatMessage message) {
+		mGroupChatDatabase.addMessage(message);
+
 		boolean handled = false;
 		acquireChatMessageLock();
 		try {
