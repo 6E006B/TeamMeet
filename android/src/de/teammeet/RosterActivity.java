@@ -402,7 +402,12 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	*/
 	
 	private void performExit() {
-		mXMPPService.disconnect();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				mXMPPService.disconnect();
+			}
+		}).start();
 		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
 		stopService(intent);
 		finish();
