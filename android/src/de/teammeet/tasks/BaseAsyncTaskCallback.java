@@ -3,7 +3,7 @@ package de.teammeet.tasks;
 import android.util.Log;
 import de.teammeet.interfaces.IAsyncTaskCallback;
 
-public class BaseAsyncTaskCallback<T> implements IAsyncTaskCallback<T> {
+public abstract class BaseAsyncTaskCallback<T> implements IAsyncTaskCallback<T> {
 
 	private static final String CLASS = BaseAsyncTaskCallback.class.getSimpleName();
 	
