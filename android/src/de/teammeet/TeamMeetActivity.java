@@ -163,7 +163,7 @@ public class TeamMeetActivity extends MapActivity {
 	}
 
 	private void createOverlays() {
-		mMatesOverlay = new MatesOverlay(getResources());
+		mMatesOverlay = new MatesOverlay(getResources().getDrawable(R.drawable.matepos));
 		mIndicationOverlay = new IndicationOverlay(getResources());
 		mMyLocationOverlay = new MyDirectionLocationOverlay(getApplicationContext(),
 		                                             (MapView) findViewById(R.id.mapview));
