@@ -81,7 +81,6 @@ public class TeamMeetActivity extends MapActivity {
 		public void onServiceDisconnected(ComponentName className) {
 			Log.d(CLASS, "TeamMeetActivity.XMPPServiceConnection.onServiceDisconnected('" + className +
 					"')");
-			unregisterMatesUpdates();
 			mXMPPService = null;
 		}
 	};
