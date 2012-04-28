@@ -44,9 +44,10 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 
 
 	public MatesOverlay(Drawable marker) {
-		super(marker);
+		super(boundCenter(marker));
 		mMates = new HashMap<String, Mate>();
 		mOverlayItems = new ArrayList<OverlayItem>();
+		populate();
 	}
 
 	@Override
@@ -80,7 +81,14 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 
 	@Override
 	public int size() {
-		return mMates.size();
+		int size = 0;
+		acquireLock();
+		try {
+			size = mMates.size();
+		} finally {
+			releaseLock();
+		}
+		return size;
 	}
 
 }
