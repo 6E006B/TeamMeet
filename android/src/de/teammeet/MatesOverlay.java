@@ -20,60 +20,33 @@
 
 package de.teammeet;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapView;
-import com.google.android.maps.Overlay;
+import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.OverlayItem;
 
 import de.teammeet.interfaces.IMatesUpdateRecipient;
 
-public class MatesOverlay extends Overlay implements IMatesUpdateRecipient {
+public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMatesUpdateRecipient {
 
-	private static final String	CLASS		= MatesOverlay.class.getSimpleName();
+	private static final String	CLASS = MatesOverlay.class.getSimpleName();
 
-	private Map<String, Mate>			mMates		= null;
-	private Resources			mResources	= null;
-	private final ReentrantLock	mLock		= new ReentrantLock();
+	private Map<String, Mate> mMates = null;
+	private List<OverlayItem> mOverlayItems = null;
+	private final ReentrantLock	mLock = new ReentrantLock();
 
-	public MatesOverlay(final Resources res) {
+
+	public MatesOverlay(Drawable marker) {
+		super(marker);
 		mMates = new HashMap<String, Mate>();
-		mResources = res;
-	}
-
-	@Override
-	public boolean draw(final Canvas canvas, final MapView mapView, final boolean shadow, final long when) {
-		super.draw(canvas, mapView, shadow);
-
-		if (mMates != null) {
-			final Paint paintPlayer = new Paint();
-			paintPlayer.setStyle(Paint.Style.FILL);
-			paintPlayer.setColor(mResources.getColor(R.color.paint_mates));
-
-			// translate the GeoPoint to screen pixels
-			acquireLock();
-			try {
-				final Point coords = new Point();
-				for (final Mate mate : mMates.values()) {
-					final GeoPoint point = mate.getLocation();
-					mapView.getProjection().toPixels(point, coords);
-					canvas.drawCircle(coords.x, coords.y, 5, paintPlayer);
-				}
-			} finally {
-				releaseLock();
-			}
-		} else {
-			// Log.e(CLASS, "WARNING mMates is null!");
-		}
-		return true;
+		mOverlayItems = new ArrayList<OverlayItem>();
 	}
 
 	@Override
@@ -81,7 +54,12 @@ public class MatesOverlay extends Overlay implements IMatesUpdateRecipient {
 		Log.d(CLASS, "MatesOverlay.handleMateUpdate() : " + mate.getID());
 		acquireLock();
 		try {
-			mMates.put(mate.getID(), mate);
+			if (mMates.containsKey(mate.getID())) {
+				mMates.get(mate.getID()).setLocation(mate.getLocation(), mate.getAccuracy());
+			} else {
+				mMates.put(mate.getID(), mate);
+				mOverlayItems.add(new MateOverlayItem(mate));
+			}
 		} finally {
 			releaseLock();
 		}
@@ -93,6 +71,16 @@ public class MatesOverlay extends Overlay implements IMatesUpdateRecipient {
 
 	private void releaseLock() {
 		mLock.unlock();
+	}
+
+	@Override
+	protected OverlayItem createItem(int index) {
+		return mOverlayItems.get(index);
+	}
+
+	@Override
+	public int size() {
+		return mMates.size();
 	}
 
 }
