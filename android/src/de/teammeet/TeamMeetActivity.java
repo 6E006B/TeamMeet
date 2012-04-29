@@ -175,7 +175,7 @@ public class TeamMeetActivity extends MapActivity {
 	}
 
 	private void unregisterMatesUpdates() {
-		if (mMatesOverlay != null) {
+		if (mMatesOverlay != null && mXMPPService != null) {
 			mXMPPService.unregisterMatesUpdates(mMatesOverlay);
 		}
 	}
