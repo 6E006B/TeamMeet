@@ -16,4 +16,8 @@ public class MateOverlayItem extends OverlayItem {
 	public GeoPoint getPoint() {
 		return mMate.getLocation();
 	}
+
+	public Mate getMate() {
+		return mMate;
+	}
 }

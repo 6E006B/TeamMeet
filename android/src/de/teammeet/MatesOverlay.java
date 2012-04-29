@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
@@ -38,13 +40,15 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 
 	private static final String	CLASS = MatesOverlay.class.getSimpleName();
 
+	private Context mContext = null;
 	private Map<String, Mate> mMates = null;
 	private List<OverlayItem> mOverlayItems = null;
 	private final ReentrantLock	mLock = new ReentrantLock();
 
 
-	public MatesOverlay(Drawable marker) {
+	public MatesOverlay(Context context, Drawable marker) {
 		super(boundCenterBottom(marker));
+		mContext = context;
 		mMates = new HashMap<String, Mate>();
 		mOverlayItems = new ArrayList<OverlayItem>();
 		populate();
@@ -92,4 +96,9 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 		return size;
 	}
 
+	@Override
+	protected boolean onTap(int index) {
+		Toast.makeText(mContext, ((MateOverlayItem)mOverlayItems.get(index)).getMate().getID(), Toast.LENGTH_SHORT).show();
+		return super.onTap(index);
+	}
 }
