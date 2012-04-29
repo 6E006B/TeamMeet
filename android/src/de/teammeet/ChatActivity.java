@@ -78,6 +78,7 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		});
 
 		mDatabase = new ChatOpenHelper(getApplicationContext());
+		handleIntent(getIntent());
 	}
 
 	@Override
@@ -98,7 +99,6 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 			Log.e(CLASS, "onResume(): bind to XMPP service failed");
 			Toast.makeText(getApplicationContext(), "Couldn't connect to XMPP service.", 3);
 		}
-		handleIntent(getIntent());
 	}
 
 	@Override
@@ -109,6 +109,13 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		}
 		mXMPPService = null;
 		super.onPause();
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		Log.d(CLASS, "ChatActivity.onNewIntent()");
+		super.onNewIntent(intent);
+		handleIntent(intent);
 	}
 
 	private void handleIntent(Intent intent) {

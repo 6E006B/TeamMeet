@@ -73,6 +73,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
 	private Roster mRoster = null;
+	private Intent mCurrentIntent = null;
 
 
 	private class XMPPServiceConnection implements ServiceConnection {
@@ -85,7 +86,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			if (mXMPPService.isAuthenticated()) {
 				new FetchRosterTask(mXMPPService, new FetchRosterHandler()).execute();
 			}
-			handleIntent(getIntent());
+			handleIntent(mCurrentIntent);
 		}
 
 		@Override
@@ -195,6 +196,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		
 		setContentView(R.layout.roster);
 		
+		mCurrentIntent = getIntent();
 		mAdapter = new SimpleExpandableListAdapter(
 				this,
 				mExpandableGroups,
@@ -248,6 +250,11 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		super.onPause();
 	}
 
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		mCurrentIntent = intent;
+	}
 
 	private void handleIntent(Intent intent) {
 		Log.d(CLASS, "RosterActivity.handleIntent() ");
