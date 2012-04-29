@@ -20,6 +20,26 @@
 <resources>
 
     <string name="app_name">TeamMeet</string>
+    <string name="preference_category_map">Map Settings</string>
+    <string name="preference_category_xmpp">XMPP Settings</string>
+    <string name="preference_auto_center_key"></string>
+    <string name="preference_auto_center_title">Follow Location</string>
+    <string name="preference_auto_center_summary"></string>
+    <string name="preference_fullscreen_key"></string>
+    <string name="preference_fullscreen_title">Fullscreen</string>
+    <string name="preference_fullscreen_summary"></string>
+    <string name="preference_user_id_key"></string>
+    <string name="preference_user_id_title">Username</string>
+    <string name="preference_user_id_summary"></string>
+    <string name="preference_server_key"></string>
+    <string name="preference_server_title">Server</string>
+    <string name="preference_server_summary"></string>
+    <string name="preference_password_key"></string>
+    <string name="preference_password_title">Password</string>
+    <string name="preference_password_summary"></string>
+    <string name="preference_conference_server_key"></string>
+    <string name="preference_conference_server_title">Conference Server</string>
+    <string name="preference_conference_server_summary"></string>
     <string name="menu_auto_center">Auto center position</string>
     <string name="menu_fullscreen">Fullscreen</string>
     <string name="menu_goto_mylocation">Current location</string>
