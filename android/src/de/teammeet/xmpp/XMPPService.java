@@ -17,7 +17,6 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smack.packet.Message.Type;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
@@ -384,7 +383,7 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	private void sendAllGroups(Message message) throws XMPPException {
-		message.setType(Type.groupchat);
+		message.setType(Message.Type.groupchat);
 		for (MultiUserChat muc : mRooms.values()) {
 			message.setTo(muc.getRoom());
 			muc.sendMessage(message);
