@@ -46,7 +46,9 @@
         </activity>
         <activity android:name=".SettingsActivity" >
         </activity>
-        <activity android:name=".GroupChatActivity" >
+        <activity
+            android:name=".GroupChatActivity"
+            android:launchMode="singleTop" >
         </activity>
         <activity
             android:name=".ChatActivity"

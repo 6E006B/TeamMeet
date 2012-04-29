@@ -92,6 +92,7 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 		});
 
 		mDatabase = new ChatOpenHelper(getApplicationContext());
+		handleIntent(getIntent());
 	}
 
 	@Override
@@ -112,7 +113,6 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 			Log.e(CLASS, "onResume(): bind to XMPP service failed");
 			Toast.makeText(getApplicationContext(), "Couldn't connect to XMPP service.", 3);
 		}
-		handleIntent(getIntent());
 	}
 
 	@Override
@@ -123,6 +123,13 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 		}
 		mXMPPService = null;
 		super.onPause();
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		Log.d(CLASS, "ChatActivity.onNewIntent()");
+		super.onNewIntent(intent);
+		handleIntent(intent);
 	}
 
 	private void handleIntent(Intent intent) {
