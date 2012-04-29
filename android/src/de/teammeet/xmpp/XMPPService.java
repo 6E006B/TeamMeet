@@ -664,7 +664,7 @@ public class XMPPService extends Service implements IXMPPService {
 		notificationIntent.setAction(Long.toString(when));
 		final PendingIntent contentIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent,
-				                          PendingIntent.FLAG_CANCEL_CURRENT);
+				                          PendingIntent.FLAG_UPDATE_CURRENT);
 
 		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
 
