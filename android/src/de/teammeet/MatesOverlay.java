@@ -44,7 +44,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 
 
 	public MatesOverlay(Drawable marker) {
-		super(boundCenter(marker));
+		super(boundCenterBottom(marker));
 		mMates = new HashMap<String, Mate>();
 		mOverlayItems = new ArrayList<OverlayItem>();
 		populate();
