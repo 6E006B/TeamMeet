@@ -123,7 +123,7 @@ public class TeamMeetActivity extends MapActivity {
 
 		mMapView = (MapView) findViewById(R.id.mapview);
 		Log.d(CLASS, "mMapView:" + mMapView.toString());
-		mMapView.setBuiltInZoomControls(false);
+		mMapView.setBuiltInZoomControls(true);
 		mMapView.setSatellite(mSatelliteView);
 		mMapController = mMapView.getController();
 		mListOfOverlays = mMapView.getOverlays();
