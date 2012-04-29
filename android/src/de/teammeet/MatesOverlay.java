@@ -64,6 +64,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 		} finally {
 			releaseLock();
 		}
+		populate();
 	}
 
 	private void acquireLock() {
