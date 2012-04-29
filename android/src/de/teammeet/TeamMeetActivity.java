@@ -171,8 +171,9 @@ public class TeamMeetActivity extends MapActivity {
 
 	private void addOverlays() {
 		mListOfOverlays.add(mMatesOverlay);
-		mListOfOverlays.add(mIndicationOverlay);
+//		mListOfOverlays.add(mIndicationOverlay);
 		mListOfOverlays.add(mMyLocationOverlay);
+		mListOfOverlays.add(new MapGestureDetectorOverlay(mMapView, getResources()));
 	}
 
 	private void unregisterMatesUpdates() {
