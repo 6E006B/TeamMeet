@@ -98,7 +98,9 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 
 	@Override
 	protected boolean onTap(int index) {
-		Toast.makeText(mContext, ((MateOverlayItem)mOverlayItems.get(index)).getMate().getID(), Toast.LENGTH_SHORT).show();
+		final String mateID = ((MateOverlayItem)mOverlayItems.get(index)).getMate().getID();
+		final String mateNick = mateID.substring(mateID.lastIndexOf("/")+1);
+		Toast.makeText(mContext, mateNick, Toast.LENGTH_SHORT).show();
 		return super.onTap(index);
 	}
 }
