@@ -18,7 +18,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	private static String CONTACTS_TAB_ID = "contacts_tab";
 	private static String TEAMS_TAB_ID = "teams_tab";
 	private static String SAVED_TAB_KEY = "last_tab";
-	private static int CONTACT_FRAGMENT_POS = 0;
+	private static int CONTACTS_FRAGMENT_POS = 0;
 	private static int TEAMS_FRAGMENT_POS = 1;
 	
 	private TabHost mTabHost;
@@ -83,7 +83,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		// Intialise ViewPager
 		this.intialiseViewPager();
 		
-		ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getItem(CONTACT_FRAGMENT_POS);
+		ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getItem(CONTACTS_FRAGMENT_POS);
 		contacts.setIntent(getIntent());
 	}
 
@@ -91,7 +91,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getItem(CONTACT_FRAGMENT_POS);
+		ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getItem(CONTACTS_FRAGMENT_POS);
 		contacts.setIntent(intent);
 	}
 	
@@ -109,8 +109,8 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	private void intialiseViewPager() {
 
 		List<Fragment> fragments = new Vector<Fragment>();
-		fragments.add(Fragment.instantiate(this, ContactsFragment.class.getName()));
-		fragments.add(Fragment.instantiate(this, Teams.class.getName()));
+		fragments.add(CONTACTS_FRAGMENT_POS, Fragment.instantiate(this, ContactsFragment.class.getName()));
+		fragments.add(TEAMS_FRAGMENT_POS, Fragment.instantiate(this, Teams.class.getName()));
 		this.mPagerAdapter  = new RosterAdapter(super.getSupportFragmentManager(), fragments);
 
 		this.mViewPager = (ViewPager)super.findViewById(R.id.viewpager);
