@@ -214,6 +214,7 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		LinearLayout rootView = (LinearLayout) inflater.inflate(R.layout.contacts, container, false);
 		mContactsList = (ExpandableListView) rootView.findViewById(R.id.contacts_list);
 		mContactsList.setAdapter(mAdapter);
+		mContactsList.setEmptyView(rootView.findViewById(R.id.contacts_empty));
 		mContactsList.setOnChildClickListener(new OnChildClickListener() {
 			
 			@Override
