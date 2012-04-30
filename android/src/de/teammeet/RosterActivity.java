@@ -511,7 +511,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	*/
 
 	private void clickedSettings() {
-		final Intent intent = new Intent(this, NewSettingsActivity.class);
+		final Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
 	}
 

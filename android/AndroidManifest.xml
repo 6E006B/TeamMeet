@@ -49,7 +49,7 @@
             android:launchMode="singleTop" >
         </activity>
         <activity
-            android:name=".NewSettingsActivity"
+            android:name=".SettingsActivity"
             android:launchMode="singleTop" >
         </activity>
         <activity
