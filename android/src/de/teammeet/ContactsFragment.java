@@ -15,8 +15,6 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ExpandableListActivity;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,6 +24,7 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -35,10 +34,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.ExpandableListAdapter;
+import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
+import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.LinearLayout;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,7 +46,6 @@ import android.widget.TwoLineListItem;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
-import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
 import de.teammeet.tasks.FetchRosterTask;
 import de.teammeet.tasks.InviteTask;
@@ -56,8 +55,8 @@ import de.teammeet.xmpp.XMPPService;
 /**
  * Demonstrates expandable lists backed by a Simple Map-based adapter
  */
-public class RosterActivity extends ExpandableListActivity implements RosterListener {
-	private static final String CLASS = RosterActivity.class.getSimpleName();
+public class ContactsFragment extends Fragment implements RosterListener {
+	private static final String CLASS = ContactsFragment.class.getSimpleName();
 	private static final String NAME = "name";
 	private static final String AVAILABILITY = "avail";
 	private static final String UNFILED_GROUP = "Unfiled contacts";
@@ -74,6 +73,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
 	private Roster mRoster = null;
 	private Intent mCurrentIntent = null;
+	private ExpandableListView mContactsList;
 
 
 	private class XMPPServiceConnection implements ServiceConnection {
@@ -126,7 +126,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		@Override
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
-			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -136,7 +136,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			Log.d(CLASS, "you're now disconnected");
 			mExpandableGroups.clear();
 			mExpandableChildren.clear();
-			runOnUiThread(new Runnable() {
+			mContactsList.post(new Runnable() {
 				@Override
 				public void run() {
 					mAdapter.notifyDataSetChanged();
@@ -149,7 +149,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		@Override
 		public void onTaskCompleted(Roster roster) {
 			mRoster = roster;
-			mRoster.addRosterListener(RosterActivity.this);
+			mRoster.addRosterListener(ContactsFragment.this);
 			fillExpandableList(mRoster);
 			mAdapter.notifyDataSetChanged();
 		}
@@ -157,7 +157,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		@Override
 		public void onTaskAborted(Exception e) {
 			final String problem = String.format("Could not fetch roster: %s", e.getMessage());
-			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -165,13 +165,13 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
 			String user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
-			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+			Toast.makeText(getActivity(), user_feedback, Toast.LENGTH_LONG).show();
 		}
 	
 		@Override
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to invite contact to team: %s", e.getMessage());
-			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
 	}
 	
@@ -179,13 +179,13 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
 			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
-			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+			Toast.makeText(getActivity(), user_feedback, Toast.LENGTH_LONG).show();
 		}
 	
 		@Override
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to form team: %s", e.getMessage());
-			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
 	}
 	
@@ -194,11 +194,8 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		super.onCreate(savedInstanceState);
 		Log.d(CLASS, "onCreate(): started roster activity");
 		
-		setContentView(R.layout.contacts);
-		
-		mCurrentIntent = getIntent();
 		mAdapter = new SimpleExpandableListAdapter(
-				this,
+				getActivity(),
 				mExpandableGroups,
 				android.R.layout.simple_expandable_list_item_1,
 				new String[] { NAME },
@@ -209,36 +206,63 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 				new int[] { android.R.id.text1, android.R.id.text2}
 				);
 		
-		setListAdapter(mAdapter);
-		registerForContextMenu(getExpandableListView());
+		setHasOptionsMenu(true);
 	}
 
 	@Override
-	protected void onResume() {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		LinearLayout rootView = (LinearLayout) inflater.inflate(R.layout.contacts, container, false);
+		mContactsList = (ExpandableListView) rootView.findViewById(R.id.contacts_list);
+		mContactsList.setAdapter(mAdapter);
+		mContactsList.setOnChildClickListener(new OnChildClickListener() {
+			
+			@Override
+			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
+					int childPosition, long id) {
+				Log.d(CLASS, String.format("onChildClick('%s', '%s', '%d', '%d', '%d')",
+				                           parent.toString(), v.toString(), groupPosition,
+				                           childPosition, id));
+				TwoLineListItem listItem = (TwoLineListItem)v;
+				TextView textView = (TextView) listItem.getChildAt(0);
+				final String contact = textView.getText().toString();
+				Log.d(CLASS, String.format("clicked on child: %s", contact));
+				Intent intent = new Intent(getActivity(), ChatActivity.class);
+				intent.putExtra(XMPPService.SENDER, contact);
+				startActivity(intent);
+				//return super.onChildClick(parent, v, groupPosition, childPosition, id);
+				return true;
+			}
+		});
+		registerForContextMenu(mContactsList);
+		return rootView;
+	}
+	
+	@Override
+	public void onResume() {
 		super.onResume();
 
 		Log.d(CLASS, "RosterActivity.onResume()");
 
 		// create the service (if it isn't already running)
-		final Intent xmppIntent = new Intent(getApplicationContext(), XMPPService.class);
-		startService(xmppIntent);
+		final Intent xmppIntent = new Intent(getActivity().getApplicationContext(), XMPPService.class);
+		getActivity().startService(xmppIntent);
 
 		Log.d(CLASS, "started XMPP service");
 
 		// now connect to the service
-		boolean bindSuccess = bindService(xmppIntent, mXMPPServiceConnection, 0);
+		boolean bindSuccess = getActivity().bindService(xmppIntent, mXMPPServiceConnection, 0);
 		if (bindSuccess) {
 			Log.d(CLASS, "onResume(): bind to XMPP service succeeded");
 		} else {
 			Log.e(CLASS, "onResume(): bind to XMPP service failed");
-			Toast.makeText(getApplicationContext(), "Couldn't connect to XMPP service.", 3);
+			Toast.makeText(getActivity(), "Couldn't connect to XMPP service.", 3).show();
 		}
 	}
 
 	@Override
-	protected void onPause() {
+	public void onPause() {
 		if (mXMPPServiceConnection != null) {
-			unbindService(mXMPPServiceConnection);
+			getActivity().unbindService(mXMPPServiceConnection);
 		}
 		mXMPPService = null;
 		
@@ -250,10 +274,8 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		super.onPause();
 	}
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		mCurrentIntent = intent;
+	public void setIntent(Intent intent) {
+		mCurrentIntent  = intent;
 	}
 
 	private void handleIntent(Intent intent) {
@@ -292,7 +314,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		intent.removeExtra(XMPPService.FROM);
 		Log.d(CLASS, String.format("room: '%s' inviter: '%s' reason: '%s' password: '%s' from: '%s'", room, inviter, reason, password, from));
 		if (room != null && inviter != null && reason != null && from != null) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 			builder.setTitle("Group Invitation");
 			builder.setMessage(String.format("%s wants you to join '%s':\n%s",
 			                                 inviter, room, reason));
@@ -301,7 +323,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			           public void onClick(DialogInterface dialog, int id) {
 			                dialog.dismiss();
 			                SharedPreferences settings =
-			                		getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+			                		getActivity().getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
 			                final String userID =
 			                		settings.getString(SettingsActivity.SETTING_XMPP_USER_ID,
 			                		                   "anonymous");
@@ -327,12 +349,35 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(final Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.roster, menu);
-		return true;
 	}
 	
+	@Override
+	public void onPrepareOptionsMenu (Menu menu) {
+		Log.d(CLASS, String.format("preparing roster options menu: %d", menu.size()));
+
+		MenuItem connectMenu = menu.findItem(R.id.roster_menu_connect);
+		MenuItem formTeamMenu = menu.findItem(R.id.roster_menu_form_team);
+
+		Log.d(CLASS, String.format("connect menu is '%s'", connectMenu.toString()));
+		
+		Resources res = getResources();
+		int connectTitle = R.string.roster_menu_connect;
+		CharSequence connectTitleCondensed = res.getString(R.string.roster_menu_connect_condensed);
+		boolean enableFormTeam = false;
+		
+		if (mXMPPService != null && mXMPPService.isAuthenticated()) {
+			Log.d(CLASS, "setting menu option to 'disconnect'");
+			connectTitle = R.string.roster_menu_disconnect;
+			connectTitleCondensed = res.getString(R.string.roster_menu_disconnect_condensed);
+			enableFormTeam = true;
+		}
+		connectMenu.setTitle(connectTitle);
+		connectMenu.setTitleCondensed(connectTitleCondensed);
+		formTeamMenu.setEnabled(enableFormTeam);
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
 
@@ -366,22 +411,6 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 				break;
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-		// TODO Auto-generated method stub
-		Log.d(CLASS, String.format("onChildClick('%s', '%s', '%d', '%d', '%d')",
-		                           parent.toString(), v.toString(), groupPosition,
-		                           childPosition, id));
-		TwoLineListItem listItem = (TwoLineListItem)v;
-		TextView textView = (TextView) listItem.getChildAt(0);
-		final String contact = textView.getText().toString();
-		Log.d(CLASS, String.format("clicked on child: %s", contact));
-		Intent intent = new Intent(this, ChatActivity.class);
-		intent.putExtra(XMPPService.SENDER, contact);
-		startActivity(intent);
-		return super.onChildClick(parent, v, groupPosition, childPosition, id);
 	}
 
 	@Override
@@ -447,48 +476,47 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	private String getExpandableListChild(long packedPosition) {
 		final int group_position = ExpandableListView.getPackedPositionGroup(packedPosition);
 		final int child_position = ExpandableListView.getPackedPositionChild(packedPosition);
-		final ExpandableListAdapter adapter = getExpandableListAdapter();
-		final Map<String, String> child = (Map<String, String>) adapter.getChild(group_position,
+		final Map<String, String> child = (Map<String, String>) mAdapter.getChild(group_position,
 																		   child_position);
 		return child.get(NAME);
 	}
 	
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		Log.d(CLASS, "showing dialog" + id);
-		Dialog dialog;
-		switch(id) {
-		case DIALOG_FORM_TEAM_ID:
-			dialog = buildFormTeamDialog();
-			break;
-		/*case DIALOG_INVITE_MATE_ID:
-			Log.d(CLASS, "showing invite mate dialog");
-			dialog = buildInviteMateDialog();
-		*/
-		default:
-			dialog = null;
-		}
-		return dialog;
-	}
-
-	private Dialog buildFormTeamDialog() {
-		final LayoutInflater factory = LayoutInflater.from(this);
-		final View formTeamView = factory.inflate(R.layout.form_team_dialog, null);
-		final AlertDialog.Builder builder = new AlertDialog.Builder(RosterActivity.this);
-		builder.setTitle(R.string.form_team_dialog_title);
-		builder.setView(formTeamView);
-		builder.setPositiveButton(R.string.button_create, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					EditText teamNameView = (EditText) formTeamView.findViewById(R.id.form_team_dialog_teamname);
-					String teamName = teamNameView.getText().toString();
-					Log.d(CLASS, String.format("chosen team name: %s", teamName));
-					SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-					String conferenceSrv = settings.getString(SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
-					new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
-				}
-			});
-		return builder.create();
-	}
+//	@Override
+//	protected Dialog onCreateDialog(int id) {
+//		Log.d(CLASS, "showing dialog" + id);
+//		Dialog dialog;
+//		switch(id) {
+//		case DIALOG_FORM_TEAM_ID:
+//			dialog = buildFormTeamDialog();
+//			break;
+//		/*case DIALOG_INVITE_MATE_ID:
+//			Log.d(CLASS, "showing invite mate dialog");
+//			dialog = buildInviteMateDialog();
+//		*/
+//		default:
+//			dialog = null;
+//		}
+//		return dialog;
+//	}
+//
+//	private Dialog buildFormTeamDialog() {
+//		final LayoutInflater factory = LayoutInflater.from(this);
+//		final View formTeamView = factory.inflate(R.layout.form_team_dialog, null);
+//		final AlertDialog.Builder builder = new AlertDialog.Builder(ContactsFragment.this);
+//		builder.setTitle(R.string.form_team_dialog_title);
+//		builder.setView(formTeamView);
+//		builder.setPositiveButton(R.string.button_create, new DialogInterface.OnClickListener() {
+//				public void onClick(DialogInterface dialog, int whichButton) {
+//					EditText teamNameView = (EditText) formTeamView.findViewById(R.id.form_team_dialog_teamname);
+//					String teamName = teamNameView.getText().toString();
+//					Log.d(CLASS, String.format("chosen team name: %s", teamName));
+//					SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+//					String conferenceSrv = settings.getString(SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
+//					new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
+//				}
+//			});
+//		return builder.create();
+//	}
 	
 	/*private Dialog buildInviteMateDialog() {
 		final CharSequence[] items = {"Red", "Green", "Blue"};
@@ -505,7 +533,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	*/
 
 	private void clickedSettings() {
-		final Intent intent = new Intent(this, SettingsActivity.class);
+		final Intent intent = new Intent(getActivity(), SettingsActivity.class);
 		startActivity(intent);
 	}
 
@@ -516,13 +544,13 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 				mXMPPService.disconnect();
 			}
 		}).start();
-		final Intent intent = new Intent(getApplicationContext(), XMPPService.class);
-		stopService(intent);
-		finish();
+		final Intent intent = new Intent(getActivity(), XMPPService.class);
+		getActivity().stopService(intent);
+		getActivity().finish();
 	}
 
 	private void startMapActvity() {
-		final Intent intent = new Intent(getApplicationContext(), TeamMeetActivity.class);
+		final Intent intent = new Intent(getActivity(), TeamMeetActivity.class);
 		startActivity(intent);
 	}
 
@@ -535,34 +563,9 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	}
 
 	private void formTeamAction() {
-		showDialog(DIALOG_FORM_TEAM_ID);
+		//showDialog(DIALOG_FORM_TEAM_ID);
+		Log.d(CLASS, "Would display 'formTeamDialog' now");
 	}
-	
-	@Override
-	public boolean onPrepareOptionsMenu (Menu menu) {
-		Log.d(CLASS, "preparing roster options menu");
-
-		MenuItem connectMenu = menu.findItem(R.id.roster_menu_connect);
-		MenuItem formTeamMenu = menu.findItem(R.id.roster_menu_form_team);
-
-		Resources res = getResources();
-		int connectTitle = R.string.roster_menu_connect;
-		CharSequence connectTitleCondensed = res.getString(R.string.roster_menu_connect_condensed);
-		boolean enableFormTeam = false;
-		
-		if (mXMPPService != null && mXMPPService.isAuthenticated()) {
-			Log.d(CLASS, "setting menu option to 'disconnect'");
-			connectTitle = R.string.roster_menu_disconnect;
-			connectTitleCondensed = res.getString(R.string.roster_menu_disconnect_condensed);
-			enableFormTeam = true;
-		}
-		connectMenu.setTitle(connectTitle);
-		connectMenu.setTitleCondensed(connectTitleCondensed);
-		formTeamMenu.setEnabled(enableFormTeam);
-		
-		return true;
-	}
-
 
 	/**
 	 * Fill the contact list with data from the roster.
@@ -617,7 +620,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		Log.d(CLASS, String.format("presence of '%s' in group '%s' has changed in the roster.", contact, groupName));
 		*/
 		
-		getExpandableListView().post(new Runnable() {
+		mContactsList.post(new Runnable() {
 			
 			@Override
 			public void run() {

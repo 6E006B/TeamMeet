@@ -39,7 +39,7 @@ import de.teammeet.ChatActivity;
 import de.teammeet.GroupChatActivity;
 import de.teammeet.Mate;
 import de.teammeet.R;
-import de.teammeet.RosterActivity;
+import de.teammeet.ContactsFragment;
 import de.teammeet.SettingsActivity;
 import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
@@ -461,7 +461,7 @@ public class XMPPService extends Service implements IXMPPService {
 		Notification notification = new Notification(icon, tickerText, when);
 		
 		Context context = getApplicationContext();
-		Intent notificationIntent = new Intent(this, RosterActivity.class);
+		Intent notificationIntent = new Intent(this, ContactsFragment.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
 		                                                        PendingIntent.FLAG_CANCEL_CURRENT);
 
@@ -506,7 +506,7 @@ public class XMPPService extends Service implements IXMPPService {
 		final Notification notification = new Notification(icon, tickerText, when);
 
 		final CharSequence contentTitle = "Group Invitation received";
-		final Intent notificationIntent = new Intent(this, RosterActivity.class);
+		final Intent notificationIntent = new Intent(this, ContactsFragment.class);
 		notificationIntent.putExtra(TYPE, TYPE_JOIN);
 		notificationIntent.putExtra(ROOM, room);
 		notificationIntent.putExtra(INVITER, inviter);
