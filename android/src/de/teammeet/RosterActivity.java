@@ -194,7 +194,7 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		super.onCreate(savedInstanceState);
 		Log.d(CLASS, "onCreate(): started roster activity");
 		
-		setContentView(R.layout.roster);
+		setContentView(R.layout.contacts);
 		
 		mCurrentIntent = getIntent();
 		mAdapter = new SimpleExpandableListAdapter(
