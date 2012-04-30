@@ -60,7 +60,7 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 		super.onCreate(savedInstanceState);
 		Log.d(CLASS, "onCreate(): started group chat");
 		
-		setContentView(R.layout.groupchat);
+		setContentView(R.layout.chat);
 
 		mScrollView = (ScrollView)findViewById(R.id.scrollView);
 		mChatTextView = (TextView)findViewById(R.id.chatTextView);

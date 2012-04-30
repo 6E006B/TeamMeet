@@ -57,7 +57,7 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		super.onCreate(savedInstanceState);
 		Log.d(CLASS, "onCreate(): started chat activity");
 		
-		setContentView(R.layout.groupchat);
+		setContentView(R.layout.chat);
 
 		mScrollView = (ScrollView)findViewById(R.id.scrollView);
 		mChatTextView = (TextView)findViewById(R.id.chatTextView);
