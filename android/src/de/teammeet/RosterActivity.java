@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -300,11 +301,10 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 			builder.setPositiveButton("Join", new DialogInterface.OnClickListener() {
 			           public void onClick(DialogInterface dialog, int id) {
 			                dialog.dismiss();
-			                SharedPreferences settings =
-			                		getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-			                final String userID =
-			                		settings.getString(SettingsActivity.SETTING_XMPP_USER_ID,
-			                		                   "anonymous");
+							final SharedPreferences settings = PreferenceManager.
+									getDefaultSharedPreferences(RosterActivity.this);
+							final String userIDKey = getString(R.string.preference_user_id_key);
+							final String userID = settings.getString(userIDKey, "anonymous");
 			                try {
 								mXMPPService.joinRoom(room, userID, password);
 							} catch (XMPPException e) {
@@ -369,7 +369,8 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 	}
 
 	@Override
-	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
+			int childPosition, long id) {
 		// TODO Auto-generated method stub
 		Log.d(CLASS, String.format("onChildClick('%s', '%s', '%d', '%d', '%d')",
 		                           parent.toString(), v.toString(), groupPosition,
@@ -479,12 +480,17 @@ public class RosterActivity extends ExpandableListActivity implements RosterList
 		builder.setView(formTeamView);
 		builder.setPositiveButton(R.string.button_create, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-					EditText teamNameView = (EditText) formTeamView.findViewById(R.id.form_team_dialog_teamname);
+					EditText teamNameView = (EditText) formTeamView.
+							findViewById(R.id.form_team_dialog_teamname);
 					String teamName = teamNameView.getText().toString();
 					Log.d(CLASS, String.format("chosen team name: %s", teamName));
-					SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-					String conferenceSrv = settings.getString(SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
-					new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
+					SharedPreferences settings =
+							PreferenceManager.getDefaultSharedPreferences(RosterActivity.this);
+					final String conferenceSrvKey =
+							getString(R.string.preference_conference_server_key);
+					String conferenceSrv = settings.getString(conferenceSrvKey, "");
+					new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName,
+					                                                                 conferenceSrv);
 				}
 			});
 		return builder.create();

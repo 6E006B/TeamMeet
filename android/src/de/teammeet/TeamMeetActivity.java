@@ -28,6 +28,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -94,9 +95,11 @@ public class TeamMeetActivity extends MapActivity {
 
 		mToastSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
 
-		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-		mFullscreen = settings.getBoolean(SettingsActivity.SETTING_FULLSCREEN, false);
-		mFollowingLocation = settings.getBoolean(SettingsActivity.SETTING_FOLLOW_LOCATION, false);
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		final String fullscreenKey = getString(R.string.preference_fullscreen_key);
+		mFullscreen = settings.getBoolean(fullscreenKey, false);
+		final String followLocationKey = getString(R.string.preference_auto_center_key);
+		mFollowingLocation = settings.getBoolean(followLocationKey, false);
 
 		createOverlays();
 	}
