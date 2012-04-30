@@ -1,5 +1,6 @@
 package de.teammeet;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -10,8 +11,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ScrollView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -25,8 +27,10 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 
 	private static final String CLASS = ChatActivity.class.getSimpleName();
 
-	private ScrollView mScrollView = null;
-	private TextView mChatTextView = null;
+//	private ScrollView mScrollView = null;
+//	private TextView mChatTextView = null;
+	private ListView mChatListView = null;
+	private ArrayAdapter<String> mListAdapter = null;
 	private EditText mChatEditText = null;
 	private String mSender = null;
 	private ChatOpenHelper mDatabase = null;
@@ -59,8 +63,12 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		
 		setContentView(R.layout.chat);
 
-		mScrollView = (ScrollView)findViewById(R.id.scrollView);
-		mChatTextView = (TextView)findViewById(R.id.chatTextView);
+//		mScrollView = (ScrollView)findViewById(R.id.scrollView);
+//		mChatTextView = (TextView)findViewById(R.id.chatTextView);
+		mChatListView = (ListView)findViewById(R.id.chatListView);
+		mListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+												new ArrayList<String>());
+		mChatListView.setAdapter(mListAdapter);
 		mChatEditText = (EditText)findViewById(R.id.chatInput);
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
 			@Override
@@ -126,17 +134,20 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 				mSender = mSender.substring(0, slashIndex);
 			}
 			Log.d(CLASS, "chat with " + mSender);
-			String chatText = "";
+//			String chatText = "";
 			List<ChatMessage> messages = mDatabase.getMessages(mSender);
 			for (ChatMessage message : messages) {
 				final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
-				chatText += String.format("%s: %s\n", from, message.getMessage());
+//				chatText += String.format("%s: %s\n", from, message.getMessage());
+				mListAdapter.add(String.format("%s: %s\n", from, message.getMessage()));
 			}
-			mChatTextView.setText(chatText);
-			mScrollView.post(new Runnable() {
+			mListAdapter.notifyDataSetChanged();
+//			mChatTextView.setText(chatText);
+			mChatListView.post(new Runnable() {
 				@Override
 				public void run() {
-					mScrollView.smoothScrollTo(0, mChatTextView.getBottom());
+					mChatListView.smoothScrollToPosition(0);
+//					mScrollView.smoothScrollTo(0, mChatTextView.getBottom());
 				}
 			});
 		} else {
@@ -158,16 +169,21 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		if(message.getTo().startsWith(mSender) || message.getFrom().startsWith(mSender)) {
 			final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
 			final String chatText = String.format("%s: %s\n", from, message.getMessage());
-			mScrollView.post(new Runnable() {
+			mChatListView.post(new Runnable() {
 				@Override
 				public void run() {
-					mChatTextView.append(chatText);
-					mChatTextView.post(new Runnable() {
-						@Override
-						public void run() {
-							mScrollView.smoothScrollTo(0, mChatTextView.getBottom());
-						}
-					});
+//					mChatTextView.append(chatText);
+//					mChatTextView.post(new Runnable() {
+					mListAdapter.add(chatText);
+					mListAdapter.notifyDataSetChanged();
+//					mChatListView.post(new Runnable() {
+//						@Override
+//						public void run() {
+					Log.d(CLASS, "list adapter count is "+mListAdapter.getCount());
+							mChatListView.smoothScrollToPosition(mListAdapter.getCount());
+//							mScrollView.smoothScrollTo(0, mChatListView.getBottom());
+//						}
+//					});
 				}
 			});
 			handled = true;
