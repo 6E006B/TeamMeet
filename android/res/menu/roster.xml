@@ -13,12 +13,13 @@
         android:titleCondensed="@string/roster_menu_show_map_condensed"/>
     <item
         android:id="@+id/roster_menu_form_team"
-        android:showAsAction="ifRoom|withText"
         android:enabled="false"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/roster_menu_form_team"
         android:titleCondensed="@string/roster_menu_form_team_condensed"/>
     <item
         android:id="@+id/roster_menu_settings"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/roster_menu_settings"
         android:titleCondensed="@string/roster_menu_settings_condensed"/>
     <item
