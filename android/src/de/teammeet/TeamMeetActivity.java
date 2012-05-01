@@ -83,7 +83,6 @@ public class TeamMeetActivity extends MapActivity {
 		public void onServiceDisconnected(ComponentName className) {
 			Log.d(CLASS, "TeamMeetActivity.XMPPServiceConnection.onServiceDisconnected('" + className +
 					"')");
-			unregisterMatesUpdates();
 			mXMPPService = null;
 		}
 	};
@@ -136,7 +135,7 @@ public class TeamMeetActivity extends MapActivity {
 
 		mMapView = (MapView) findViewById(R.id.mapview);
 		Log.d(CLASS, "mMapView:" + mMapView.toString());
-		mMapView.setBuiltInZoomControls(false);
+		mMapView.setBuiltInZoomControls(true);
 		mMapView.setSatellite(mSatelliteView);
 		mMapController = mMapView.getController();
 		mListOfOverlays = mMapView.getOverlays();
@@ -175,7 +174,7 @@ public class TeamMeetActivity extends MapActivity {
 	}
 
 	private void createOverlays() {
-		mMatesOverlay = new MatesOverlay(getResources());
+		mMatesOverlay = new MatesOverlay(this, getResources().getDrawable(R.drawable.matepos));
 		mIndicationOverlay = new IndicationOverlay(getResources());
 		mMyLocationOverlay = new MyDirectionLocationOverlay(getApplicationContext(),
 		                                             (MapView) findViewById(R.id.mapview));
@@ -188,7 +187,7 @@ public class TeamMeetActivity extends MapActivity {
 	}
 
 	private void unregisterMatesUpdates() {
-		if (mMatesOverlay != null) {
+		if (mMatesOverlay != null && mXMPPService != null) {
 			mXMPPService.unregisterMatesUpdates(mMatesOverlay);
 		}
 	}
