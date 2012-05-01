@@ -88,7 +88,11 @@ public class ContactsFragment extends Fragment implements RosterListener {
 			if (mXMPPService.isAuthenticated()) {
 				new FetchRosterTask(mXMPPService, new FetchRosterHandler()).execute();
 			}
-			handleIntent(mCurrentIntent);
+			if (mCurrentIntent != null) {
+				handleIntent(mCurrentIntent);
+			} else {
+				Log.d(CLASS, "Skipping handling of intent since it hasn't been set yet *lazy*");
+			}
 		}
 
 		@Override
@@ -194,7 +198,7 @@ public class ContactsFragment extends Fragment implements RosterListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d(CLASS, "onCreate(): started roster activity");
+		Log.d(CLASS, "onCreate(): started contacts fragment");
 		
 		mAdapter = new SimpleExpandableListAdapter(
 				getActivity(),
@@ -278,11 +282,12 @@ public class ContactsFragment extends Fragment implements RosterListener {
 	}
 
 	public void setIntent(Intent intent) {
-		mCurrentIntent  = intent;
+		Log.d(CLASS, String.format("intent is being set: %s", intent));
+		mCurrentIntent = intent;
 	}
 
 	private void handleIntent(Intent intent) {
-		Log.d(CLASS, "RosterActivity.handleIntent() ");
+		Log.d(CLASS, "handling intent");
 		Bundle extras = intent.getExtras();
 		if (extras != null) {
 			Log.d(CLASS, "extras: " + extras.toString());

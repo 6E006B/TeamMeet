@@ -10,11 +10,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 
 public class TabbedRosterActivity extends FragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
+	private static String CLASS = TabbedRosterActivity.class.getSimpleName();
 	private static String CONTACTS_TAB_ID = "contacts_tab";
 	private static String TEAMS_TAB_ID = "teams_tab";
 	private static String SAVED_TAB_KEY = "last_tab";
@@ -73,13 +75,18 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	 */
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		Log.d(CLASS, "creating tabbed roster activity");
+		
 		// Inflate the layout
 		setContentView(R.layout.tabbed_roster);
+		
 		// Initialise the TabHost
 		this.initialiseTabHost(savedInstanceState);
 		if (savedInstanceState != null) {
 			mTabHost.setCurrentTabByTag(savedInstanceState.getString(SAVED_TAB_KEY)); //set the tab as per the saved state
 		}
+		
 		// Intialise ViewPager
 		this.intialiseViewPager();
 		
