@@ -25,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -46,6 +47,7 @@ import android.widget.TwoLineListItem;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
+import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
 import de.teammeet.tasks.FetchRosterTask;
 import de.teammeet.tasks.InviteTask;
@@ -395,7 +397,7 @@ public class ContactsFragment extends Fragment implements RosterListener {
 
 			case R.id.roster_menu_form_team:
 				Log.d(CLASS, "User clicked 'form team' in menu");
-				formTeamAction();
+				clickedFormTeam();
 				break;
 
 			case R.id.roster_menu_settings:
@@ -563,11 +565,22 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		}
 	}
 
-	private void formTeamAction() {
-		//showDialog(DIALOG_FORM_TEAM_ID);
-		Log.d(CLASS, "Would display 'formTeamDialog' now");
+	private void clickedFormTeam() {
+		Log.d(CLASS, "Will display 'formTeamDialog' now");
+		FormTeamDialog dialog = new FormTeamDialog();
+		FragmentManager fm = getActivity().getSupportFragmentManager();
+		dialog.setTargetFragment(this, 0);
+		dialog.show(fm, null);
+		
 	}
 
+	public void enteredTeamName(String teamName) {
+		Log.d(CLASS, String.format("Will create team '%s'", teamName));
+		SharedPreferences settings = getActivity().getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+		String conferenceSrv = settings.getString(SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
+		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
+	}
+	
 	/**
 	 * Fill the contact list with data from the roster.
 	 * 
