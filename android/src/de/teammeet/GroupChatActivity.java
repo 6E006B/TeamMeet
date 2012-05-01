@@ -62,8 +62,8 @@ public class GroupChatActivity extends Activity implements IGroupMessageHandler 
 		
 		setContentView(R.layout.chat);
 
-		mScrollView = (ScrollView)findViewById(R.id.scrollView);
-		mChatTextView = (TextView)findViewById(R.id.chatTextView);
+//		mScrollView = (ScrollView)findViewById(R.id.scrollView);
+//		mChatTextView = (TextView)findViewById(R.id.chatTextView);
 		mChatEditText = (EditText)findViewById(R.id.chatInput);
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
 			@Override
