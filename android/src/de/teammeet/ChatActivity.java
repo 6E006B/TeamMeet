@@ -30,7 +30,7 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 //	private ScrollView mScrollView = null;
 //	private TextView mChatTextView = null;
 	private ListView mChatListView = null;
-	private ArrayAdapter<String> mListAdapter = null;
+	private ArrayAdapter<List<String>> mListAdapter = null;
 	private EditText mChatEditText = null;
 	private String mSender = null;
 	private ChatOpenHelper mDatabase = null;
@@ -63,11 +63,8 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		
 		setContentView(R.layout.chat);
 
-//		mScrollView = (ScrollView)findViewById(R.id.scrollView);
-//		mChatTextView = (TextView)findViewById(R.id.chatTextView);
 		mChatListView = (ListView)findViewById(R.id.chatListView);
-		mListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
-												new ArrayList<String>());
+		mListAdapter = new MyPerformanceArrayAdapter(this, new ArrayList<List<String>>());
 		mChatListView.setAdapter(mListAdapter);
 		mChatEditText = (EditText)findViewById(R.id.chatInput);
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
@@ -134,22 +131,16 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 				mSender = mSender.substring(0, slashIndex);
 			}
 			Log.d(CLASS, "chat with " + mSender);
-//			String chatText = "";
 			List<ChatMessage> messages = mDatabase.getMessages(mSender);
 			for (ChatMessage message : messages) {
 				final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
-//				chatText += String.format("%s: %s\n", from, message.getMessage());
-				mListAdapter.add(String.format("%s: %s\n", from, message.getMessage()));
+				List<String> stringList = new ArrayList<String>();
+				stringList.add(from+":");
+				stringList.add(message.getMessage());
+				mListAdapter.add(stringList);
 			}
 			mListAdapter.notifyDataSetChanged();
-//			mChatTextView.setText(chatText);
-			mChatListView.post(new Runnable() {
-				@Override
-				public void run() {
-					mChatListView.smoothScrollToPosition(0);
-//					mScrollView.smoothScrollTo(0, mChatTextView.getBottom());
-				}
-			});
+			mChatListView.setSelection(mListAdapter.getCount());
 		} else {
 			final String error = "ChatActivity intent has no sender";
 			Log.e(CLASS, error);
@@ -163,27 +154,21 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 	}
 
 	@Override
-	public boolean handleMessage(ChatMessage message) {
+	public boolean handleMessage(final ChatMessage message) {
 		Log.d(CLASS, "ChatActivity.handleMessage()");
 		boolean handled = false;
 		if(message.getTo().startsWith(mSender) || message.getFrom().startsWith(mSender)) {
 			final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
-			final String chatText = String.format("%s: %s\n", from, message.getMessage());
 			mChatListView.post(new Runnable() {
 				@Override
 				public void run() {
-//					mChatTextView.append(chatText);
-//					mChatTextView.post(new Runnable() {
-					mListAdapter.add(chatText);
+					List<String> stringList = new ArrayList<String>();
+					stringList.add(from+":");
+					stringList.add(message.getMessage());
+					mListAdapter.add(stringList);
 					mListAdapter.notifyDataSetChanged();
-//					mChatListView.post(new Runnable() {
-//						@Override
-//						public void run() {
 					Log.d(CLASS, "list adapter count is "+mListAdapter.getCount());
-							mChatListView.smoothScrollToPosition(mListAdapter.getCount());
-//							mScrollView.smoothScrollTo(0, mChatListView.getBottom());
-//						}
-//					});
+					mChatListView.setSelection(mListAdapter.getCount());
 				}
 			});
 			handled = true;
