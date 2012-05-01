@@ -13,8 +13,8 @@ import android.widget.EditText;
 public class FormTeamDialog extends DialogFragment {
 	private static final String CLASS = FormTeamDialog.class.getSimpleName();
 
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	@Override
+	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		final LayoutInflater factory = LayoutInflater.from(getActivity());
 		final View formTeamView = factory.inflate(R.layout.form_team_dialog, null);
 		final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -25,10 +25,9 @@ public class FormTeamDialog extends DialogFragment {
 				EditText teamNameView = (EditText) formTeamView.findViewById(R.id.form_team_dialog_teamname);
 				String teamName = teamNameView.getText().toString();
 				Log.d(CLASS, String.format("chosen team name: %s", teamName));
-				ContactsFragment contacts = (ContactsFragment) getTargetFragment();
-				contacts.enteredTeamName(teamName);
+				((TabbedRosterActivity) getActivity()).enteredTeamName(teamName);
 			}
 		});
 		return builder.create();
-    }
+	}
 }
