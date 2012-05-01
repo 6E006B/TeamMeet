@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.Toast;
@@ -41,6 +42,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 	private static final String	CLASS = MatesOverlay.class.getSimpleName();
 
 	private Context mContext = null;
+	private String mOwnID = null;
 	private Map<String, Mate> mMates = null;
 	private List<OverlayItem> mOverlayItems = null;
 	private final ReentrantLock	mLock = new ReentrantLock();
@@ -49,6 +51,10 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 	public MatesOverlay(Context context, Drawable marker) {
 		super(boundCenterBottom(marker));
 		mContext = context;
+		SharedPreferences settings = mContext.getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+		final String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
+		final String server = settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "");
+		mOwnID = String.format("%s@%s", userID, server);
 		mMates = new HashMap<String, Mate>();
 		mOverlayItems = new ArrayList<OverlayItem>();
 		populate();
@@ -57,18 +63,20 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 	@Override
 	public void handleMateUpdate(Mate mate) {
 		Log.d(CLASS, "MatesOverlay.handleMateUpdate() : " + mate.getID());
-		acquireLock();
-		try {
-			if (mMates.containsKey(mate.getID())) {
-				mMates.get(mate.getID()).setLocation(mate.getLocation(), mate.getAccuracy());
-			} else {
-				mMates.put(mate.getID(), mate);
-				mOverlayItems.add(new MateOverlayItem(mate));
+		if (mate.getID().equals(mOwnID)) {
+			acquireLock();
+			try {
+				if (mMates.containsKey(mate.getID())) {
+					mMates.get(mate.getID()).setLocation(mate.getLocation(), mate.getAccuracy());
+				} else {
+					mMates.put(mate.getID(), mate);
+					mOverlayItems.add(new MateOverlayItem(mate));
+				}
+			} finally {
+				releaseLock();
 			}
-		} finally {
-			releaseLock();
+			populate();
 		}
-		populate();
 	}
 
 	private void acquireLock() {
