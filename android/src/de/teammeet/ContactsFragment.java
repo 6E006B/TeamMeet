@@ -80,14 +80,20 @@ public class ContactsFragment extends Fragment implements RosterListener {
 			}
 		}
 	}
-	//TODO Do we need roster in the teams fragment? Else only do it in contacts fragment
-	public class FetchRosterHandler extends BaseAsyncTaskCallback<Roster> {
+
+	protected class FetchRosterHandler extends BaseAsyncTaskCallback<Roster> {
 		@Override
 		public void onTaskCompleted(Roster roster) {
+			Log.d(CLASS, String.format("Receiving roster. adapter is '%s', list is '%s' in '%s'", mAdapter, mContactsList, ContactsFragment.this));
 			mRoster = roster;
 			mRoster.addRosterListener(ContactsFragment.this);
-			fillExpandableList(mRoster);
-			mAdapter.notifyDataSetChanged();
+			mContactsList.post(new Runnable() {
+				@Override
+				public void run() {
+					fillExpandableList(mRoster);
+					mAdapter.notifyDataSetChanged();
+				}
+			});
 		}
 
 		@Override
@@ -127,6 +133,8 @@ public class ContactsFragment extends Fragment implements RosterListener {
 				new String[] { NAME, AVAILABILITY },
 				new int[] { android.R.id.text1, android.R.id.text2}
 				);
+		
+		Log.d(CLASS, String.format("adapter is now '%s' in '%s'", mAdapter, this));
 	}
 
 	@Override

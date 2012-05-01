@@ -64,6 +64,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 			if (mXMPPService.isAuthenticated()) {
 				// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
 				ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getItem(CONTACTS_FRAGMENT_POS);
+				Log.d(CLASS, String.format("contacts fragment is '%s'", contacts));
 				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 			}
 			if (mCurrentIntent != null) {
@@ -86,6 +87,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 			Log.d(CLASS, "Connect task completed!!");
 			// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
 			ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getItem(CONTACTS_FRAGMENT_POS);
+			Log.d(CLASS, String.format("contacts fragment is '%s'", contacts));
 			new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 		}
 		
@@ -246,6 +248,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 
 		List<Fragment> fragments = new Vector<Fragment>();
 		fragments.add(CONTACTS_FRAGMENT_POS, Fragment.instantiate(this, ContactsFragment.class.getName()));
+		Log.d(CLASS, String.format("new contacts fragment is '%s'", fragments.get(0)));
 		fragments.add(TEAMS_FRAGMENT_POS, Fragment.instantiate(this, Teams.class.getName()));
 		this.mPagerAdapter  = new RosterAdapter(super.getSupportFragmentManager(), fragments);
 
@@ -261,7 +264,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		mTabHost = (TabHost)findViewById(android.R.id.tabhost);
 		mTabHost.setup();
 		TabInfo tabInfo = null;
-		TabbedRosterActivity.AddTab(this, this.mTabHost, this.mTabHost.newTabSpec(CONTACTS_TAB_ID).setIndicator(getString(R.string.tab_contacts)), ( tabInfo = new TabInfo(CONTACTS_TAB_ID, Contacts.class, args)));
+		TabbedRosterActivity.AddTab(this, this.mTabHost, this.mTabHost.newTabSpec(CONTACTS_TAB_ID).setIndicator(getString(R.string.tab_contacts)), ( tabInfo = new TabInfo(CONTACTS_TAB_ID, ContactsFragment.class, args)));
 		this.mapTabInfo.put(tabInfo.tag, tabInfo);
 		TabbedRosterActivity.AddTab(this, this.mTabHost, this.mTabHost.newTabSpec(TEAMS_TAB_ID).setIndicator(getString(R.string.tab_teams)), ( tabInfo = new TabInfo(TEAMS_TAB_ID, Teams.class, args)));
 		this.mapTabInfo.put(tabInfo.tag, tabInfo);
