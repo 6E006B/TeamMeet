@@ -387,12 +387,12 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		switch (item.getItemId()) {
 			case R.id.roster_menu_connect:
 				Log.d(CLASS, "User clicked 'connect' in menu");
-				performConnectButtonAction();
+				clickedConnect();
 				break;
 
 			case R.id.roster_menu_show_map:
 				Log.d(CLASS, "User clicked 'map' in menu");
-				startMapActvity();
+				clickedMap();
 				break;
 
 			case R.id.roster_menu_form_team:
@@ -407,7 +407,7 @@ public class ContactsFragment extends Fragment implements RosterListener {
 
 			case R.id.roster_menu_exit:
 				Log.d(CLASS, "User clicked 'exit' in menu");
-				performExit();
+				clickedExit();
 				break;
 
 			default:
@@ -462,18 +462,6 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		AsyncTask<String, Void, String[]> inviteTask = new InviteTask(mXMPPService,
 																	  new InviteMateHandler());
 		inviteTask.execute(contact, teamName);
-		// TODO Example code for dialog approach:
-		//      dialog never shows
-		/*Log.d(CLASS, "going to display invite mate dialog");
-		runOnUiThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				showDialog(DIALOG_INVITE_MATE_ID);
-			}
-		});
-		Log.d(CLASS, "done showing invite mate dialog");
-		*/
 	}
 	
 	private String getExpandableListChild(long packedPosition) {
@@ -484,63 +472,13 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		return child.get(NAME);
 	}
 	
-//	@Override
-//	protected Dialog onCreateDialog(int id) {
-//		Log.d(CLASS, "showing dialog" + id);
-//		Dialog dialog;
-//		switch(id) {
-//		case DIALOG_FORM_TEAM_ID:
-//			dialog = buildFormTeamDialog();
-//			break;
-//		/*case DIALOG_INVITE_MATE_ID:
-//			Log.d(CLASS, "showing invite mate dialog");
-//			dialog = buildInviteMateDialog();
-//		*/
-//		default:
-//			dialog = null;
-//		}
-//		return dialog;
-//	}
-//
-//	private Dialog buildFormTeamDialog() {
-//		final LayoutInflater factory = LayoutInflater.from(this);
-//		final View formTeamView = factory.inflate(R.layout.form_team_dialog, null);
-//		final AlertDialog.Builder builder = new AlertDialog.Builder(ContactsFragment.this);
-//		builder.setTitle(R.string.form_team_dialog_title);
-//		builder.setView(formTeamView);
-//		builder.setPositiveButton(R.string.button_create, new DialogInterface.OnClickListener() {
-//				public void onClick(DialogInterface dialog, int whichButton) {
-//					EditText teamNameView = (EditText) formTeamView.findViewById(R.id.form_team_dialog_teamname);
-//					String teamName = teamNameView.getText().toString();
-//					Log.d(CLASS, String.format("chosen team name: %s", teamName));
-//					SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-//					String conferenceSrv = settings.getString(SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
-//					new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
-//				}
-//			});
-//		return builder.create();
-//	}
-	
-	/*private Dialog buildInviteMateDialog() {
-		final CharSequence[] items = {"Red", "Green", "Blue"};
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.invite_mate_dialog_title);
-		builder.setItems(items, new DialogInterface.OnClickListener() {
-		    public void onClick(DialogInterface dialog, int item) {
-		        Toast.makeText(getApplicationContext(), items[item], Toast.LENGTH_LONG).show();
-		    }
-		});
-		Log.d(CLASS, "going to return invite mate dialog");
-		return builder.create();
-	}
-	*/
 
 	private void clickedSettings() {
 		final Intent intent = new Intent(getActivity(), SettingsActivity.class);
 		startActivity(intent);
 	}
 
-	private void performExit() {
+	private void clickedExit() {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -552,12 +490,12 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		getActivity().finish();
 	}
 
-	private void startMapActvity() {
+	private void clickedMap() {
 		final Intent intent = new Intent(getActivity(), TeamMeetActivity.class);
 		startActivity(intent);
 	}
 
-	private void performConnectButtonAction() {
+	private void clickedConnect() {
 		if (mXMPPService.isAuthenticated()) {
 			new DisconnectTask((XMPPService)mXMPPService, new DisconnectHandler()).execute();
 		} else {
