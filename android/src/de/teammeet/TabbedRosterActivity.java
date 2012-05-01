@@ -390,16 +390,22 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		Resources res = getResources();
 		int connectTitle = R.string.roster_menu_connect;
 		CharSequence connectTitleCondensed = res.getString(R.string.roster_menu_connect_condensed);
+		boolean enableConnect = false;
 		boolean enableFormTeam = false;
 		
-		if (mXMPPService != null && mXMPPService.isAuthenticated()) {
+		if (mXMPPService != null) {
+			enableConnect = true;
+			
+			if (mXMPPService.isAuthenticated()) {
 			Log.d(CLASS, "setting menu option to 'disconnect'");
 			connectTitle = R.string.roster_menu_disconnect;
 			connectTitleCondensed = res.getString(R.string.roster_menu_disconnect_condensed);
 			enableFormTeam = true;
+			}
 		}
 		connectMenu.setTitle(connectTitle);
 		connectMenu.setTitleCondensed(connectTitleCondensed);
+		connectMenu.setEnabled(enableConnect);
 		formTeamMenu.setEnabled(enableFormTeam);
 		
 		return true;
