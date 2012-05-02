@@ -36,11 +36,12 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
 import de.teammeet.ChatActivity;
+import de.teammeet.ContactsFragment;
 import de.teammeet.GroupChatActivity;
 import de.teammeet.Mate;
 import de.teammeet.R;
-import de.teammeet.ContactsFragment;
 import de.teammeet.SettingsActivity;
+import de.teammeet.TabbedRosterActivity;
 import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
@@ -461,7 +462,7 @@ public class XMPPService extends Service implements IXMPPService {
 		Notification notification = new Notification(icon, tickerText, when);
 		
 		Context context = getApplicationContext();
-		Intent notificationIntent = new Intent(this, ContactsFragment.class);
+		Intent notificationIntent = new Intent(this, TabbedRosterActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
 		                                                        PendingIntent.FLAG_CANCEL_CURRENT);
 
