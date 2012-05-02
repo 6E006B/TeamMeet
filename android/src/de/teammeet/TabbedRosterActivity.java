@@ -1,8 +1,5 @@
 package de.teammeet;
 
-import java.util.List;
-import java.util.Vector;
-
 import org.jivesoftware.smack.XMPPException;
 
 import android.app.AlertDialog;
@@ -14,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -39,9 +35,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	private static String CONTACTS_TAB_ID = "contacts_tab";
 	private static String TEAMS_TAB_ID = "teams_tab";
 	private static String SAVED_TAB_KEY = "last_tab";
-	private static int CONTACTS_FRAGMENT_POS = 0;
-	private static int TEAMS_FRAGMENT_POS = 1;
-	
+
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
 	private Intent mCurrentIntent = null;
@@ -60,7 +54,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 
 			if (mXMPPService.isAuthenticated()) {
 				// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-				ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getFragment(mViewPager, CONTACTS_FRAGMENT_POS);
+				ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getFragment(mViewPager, RosterAdapter.CONTACTS_FRAGMENT_POS);
 				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 			}
 			if (mCurrentIntent != null) {
@@ -82,7 +76,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		public void onTaskCompleted(Void nothing) {
 			Log.d(CLASS, "Connect task completed!!");
 			// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-			ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getFragment(mViewPager, CONTACTS_FRAGMENT_POS);
+			ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getFragment(mViewPager, RosterAdapter.CONTACTS_FRAGMENT_POS);
 			new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 		}
 		
@@ -98,7 +92,8 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		public void onTaskCompleted(Void result) {
 			Log.d(CLASS, "you're now disconnected");
 			//TODO notify contacts fragment
-			((ContactsFragment) mPagerAdapter.getItem(CONTACTS_FRAGMENT_POS)).handleDisconnect();
+			ContactsFragment contacts = ((ContactsFragment) mPagerAdapter.getFragment(mViewPager, RosterAdapter.CONTACTS_FRAGMENT_POS));
+			contacts.handleDisconnect();
 		}
 	}
 	
@@ -232,10 +227,10 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	 */
 	private void intialiseViewPager() {
 
-		List<Fragment> fragments = new Vector<Fragment>();
-		fragments.add(CONTACTS_FRAGMENT_POS, Fragment.instantiate(this, ContactsFragment.class.getName()));
-		fragments.add(TEAMS_FRAGMENT_POS, Fragment.instantiate(this, Teams.class.getName()));
-		mPagerAdapter  = new RosterAdapter(getSupportFragmentManager(), fragments);
+		//List<Fragment> fragments = new Vector<Fragment>();
+		//fragments.add(CONTACTS_FRAGMENT_POS, Fragment.instantiate(this, ContactsFragment.class.getName()));
+		//fragments.add(TEAMS_FRAGMENT_POS, Fragment.instantiate(this, Teams.class.getName()));
+		mPagerAdapter  = new RosterAdapter(getSupportFragmentManager());
 
 		mViewPager = (ViewPager) findViewById(R.id.viewpager);
 		mViewPager.setAdapter(mPagerAdapter);

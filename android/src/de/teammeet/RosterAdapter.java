@@ -1,7 +1,5 @@
 package de.teammeet;
 
-import java.util.List;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -10,21 +8,34 @@ import android.view.ViewGroup;
 public class RosterAdapter extends FragmentPagerAdapter {
 
 	private static final String CLASS = RosterAdapter.class.getSimpleName();
-	private List<Fragment> mFragments;
+	private static final int NUM_FRAGMENTS = 2;
 	
-	public RosterAdapter(FragmentManager fm, List<Fragment> fragments) {
+	public static final int CONTACTS_FRAGMENT_POS = 0;
+	public static final int TEAMS_FRAGMENT_POS = 1;
+
+	public RosterAdapter(FragmentManager fm) {
 		super(fm);
-		mFragments = fragments;
 	}
 
 	@Override
 	public Fragment getItem(int position) {
-		return mFragments.get(position);
+		Fragment newFragment = null;
+		
+		switch (position) {
+		case CONTACTS_FRAGMENT_POS:
+			newFragment = new ContactsFragment();
+			break;
+		case TEAMS_FRAGMENT_POS:
+			newFragment = new Teams();
+			break;
+		}
+		
+		return newFragment;
 	}
 
 	@Override
 	public int getCount() {
-		return mFragments.size();
+		return NUM_FRAGMENTS;
 	}
 
 	public Fragment getFragment(ViewGroup container, int position) {
