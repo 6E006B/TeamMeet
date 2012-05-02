@@ -62,8 +62,6 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 				// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
 				String contactsTag = mPagerAdapter.getFragmentName(mViewPager.getId(), CONTACTS_FRAGMENT_POS);
 				ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(contactsTag);
-				Log.d(CLASS, String.format("contacts fragment is '%s'", contacts));
-				Log.d(CLASS, String.format("view pager is %s [%d]", mViewPager, mViewPager.getId()));
 				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 			}
 			if (mCurrentIntent != null) {
@@ -86,7 +84,6 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 			Log.d(CLASS, "Connect task completed!!");
 			// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
 			ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getItem(CONTACTS_FRAGMENT_POS);
-			Log.d(CLASS, String.format("contacts fragment is '%s'", contacts));
 			new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 		}
 		
@@ -141,9 +138,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		Log.d(CLASS, "creating tabbed roster activity");
-		Log.d(CLASS, String.format("saved state is %s", savedInstanceState));
-		Log.d(CLASS, String.format("adapter is %s", mPagerAdapter));
+		Log.d(CLASS, "Creating tabbed roster activity");
 		
 		// Inflate the layout
 		setContentView(R.layout.tabbed_roster);
@@ -239,10 +234,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	private void intialiseViewPager() {
 
 		List<Fragment> fragments = new Vector<Fragment>();
-		Log.d(CLASS, "instantiating contacts fragment");
 		fragments.add(CONTACTS_FRAGMENT_POS, Fragment.instantiate(this, ContactsFragment.class.getName()));
-		Log.d(CLASS, String.format("new contacts fragment is '%s'", fragments.get(0)));
-		Log.d(CLASS, "done with contacts, now instantiating teams fragment");
 		fragments.add(TEAMS_FRAGMENT_POS, Fragment.instantiate(this, Teams.class.getName()));
 		mPagerAdapter  = new RosterAdapter(getSupportFragmentManager(), fragments);
 
@@ -347,13 +339,9 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		Log.d(CLASS, String.format("preparing roster options menu: %d", menu.size()));
-
 		MenuItem connectMenu = menu.findItem(R.id.roster_menu_connect);
 		MenuItem formTeamMenu = menu.findItem(R.id.roster_menu_form_team);
 
-		Log.d(CLASS, String.format("connect menu is '%s'", connectMenu.toString()));
-		
 		Resources res = getResources();
 		int connectTitle = R.string.roster_menu_connect;
 		CharSequence connectTitleCondensed = res.getString(R.string.roster_menu_connect_condensed);

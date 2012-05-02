@@ -84,7 +84,6 @@ public class ContactsFragment extends Fragment implements RosterListener {
 	protected class FetchRosterHandler extends BaseAsyncTaskCallback<Roster> {
 		@Override
 		public void onTaskCompleted(Roster roster) {
-			Log.d(CLASS, String.format("Receiving roster. adapter is '%s', list is '%s' in '%s'", mAdapter, mContactsList, ContactsFragment.this));
 			mRoster = roster;
 			mRoster.addRosterListener(ContactsFragment.this);
 			mContactsList.post(new Runnable() {
@@ -120,7 +119,7 @@ public class ContactsFragment extends Fragment implements RosterListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d(CLASS, String.format("onCreate(): started contacts fragment %s", this));
+		Log.d(CLASS, String.format("Creating contacts fragment"));
 		
 		mAdapter = new SimpleExpandableListAdapter(
 				getActivity(),
@@ -133,13 +132,10 @@ public class ContactsFragment extends Fragment implements RosterListener {
 				new String[] { NAME, AVAILABILITY },
 				new int[] { android.R.id.text1, android.R.id.text2}
 				);
-		
-		Log.d(CLASS, String.format("adapter is now '%s' in '%s'", mAdapter, this));
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		Log.d(CLASS, "Drawing contacts fragment");
 		LinearLayout rootView = (LinearLayout) inflater.inflate(R.layout.contacts, container, false);
 		mContactsList = (ExpandableListView) rootView.findViewById(R.id.contacts_list);
 		mContactsList.setAdapter(mAdapter);

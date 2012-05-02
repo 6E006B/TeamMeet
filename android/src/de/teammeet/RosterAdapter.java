@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
-import android.view.ViewGroup;
 
 public class RosterAdapter extends FragmentPagerAdapter {
 
@@ -22,24 +21,12 @@ public class RosterAdapter extends FragmentPagerAdapter {
 
 	@Override
 	public Fragment getItem(int position) {
-		Log.d(CLASS, String.format("getItem() was called for position %d:", position));
 		return mFragments.get(position);
 	}
 
 	@Override
 	public int getCount() {
 		return mFragments.size();
-	}
-	
-	@Override
-	public Object instantiateItem(ViewGroup container, int position) {
-		Fragment fragment = (Fragment) super.instantiateItem(container, position);
-		Log.d(CLASS, String.format("instantiateItem() was called for container %d, position %d:", container.getId(), position));
-		Log.d(CLASS, String.format("instantiated fragment %s", fragment));
-		
-		mFragments.set(position, fragment);
-		return fragment;
-		
 	}
 	
 	/*
