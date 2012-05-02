@@ -120,7 +120,7 @@ public class ContactsFragment extends Fragment implements RosterListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d(CLASS, "onCreate(): started contacts fragment");
+		Log.d(CLASS, String.format("onCreate(): started contacts fragment %s", this));
 		
 		mAdapter = new SimpleExpandableListAdapter(
 				getActivity(),

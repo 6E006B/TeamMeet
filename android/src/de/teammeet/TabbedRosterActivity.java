@@ -60,8 +60,10 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 
 			if (mXMPPService.isAuthenticated()) {
 				// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-				ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getItem(CONTACTS_FRAGMENT_POS);
+				String contactsTag = mPagerAdapter.getFragmentName(mViewPager.getId(), CONTACTS_FRAGMENT_POS);
+				ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(contactsTag);
 				Log.d(CLASS, String.format("contacts fragment is '%s'", contacts));
+				Log.d(CLASS, String.format("view pager is %s [%d]", mViewPager, mViewPager.getId()));
 				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 			}
 			if (mCurrentIntent != null) {
@@ -140,6 +142,8 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		super.onCreate(savedInstanceState);
 		
 		Log.d(CLASS, "creating tabbed roster activity");
+		Log.d(CLASS, String.format("saved state is %s", savedInstanceState));
+		Log.d(CLASS, String.format("adapter is %s", mPagerAdapter));
 		
 		// Inflate the layout
 		setContentView(R.layout.tabbed_roster);
@@ -153,7 +157,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		
 		// Intialise ViewPager
 		intialiseViewPager();
-		
+
 		mCurrentIntent = getIntent();
 	}
 
@@ -222,14 +226,6 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		mTabHost.setOnTabChangedListener(this);
 	}
 
-	/**
-	 * Add Tab content to the Tabhost
-	 * @param activity
-	 * @param tabHost
-	 * @param tabSpec
-	 * @param clss
-	 * @param args
-	 */
 	private void addTab(TabHost.TabSpec tabSpec) {
 		// Attach a Tab view factory to the spec
 		tabSpec.setContent(new DummyFactory());
@@ -243,24 +239,27 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	private void intialiseViewPager() {
 
 		List<Fragment> fragments = new Vector<Fragment>();
+		Log.d(CLASS, "instantiating contacts fragment");
 		fragments.add(CONTACTS_FRAGMENT_POS, Fragment.instantiate(this, ContactsFragment.class.getName()));
 		Log.d(CLASS, String.format("new contacts fragment is '%s'", fragments.get(0)));
+		Log.d(CLASS, "done with contacts, now instantiating teams fragment");
 		fragments.add(TEAMS_FRAGMENT_POS, Fragment.instantiate(this, Teams.class.getName()));
-		this.mPagerAdapter  = new RosterAdapter(super.getSupportFragmentManager(), fragments);
+		mPagerAdapter  = new RosterAdapter(getSupportFragmentManager(), fragments);
 
-		this.mViewPager = (ViewPager)super.findViewById(R.id.viewpager);
-		this.mViewPager.setAdapter(this.mPagerAdapter);
-		this.mViewPager.setOnPageChangeListener(this);
+		mViewPager = (ViewPager) findViewById(R.id.viewpager);
+		mViewPager.setAdapter(mPagerAdapter);
+		mViewPager.setOnPageChangeListener(this);
+
 	}
 
 	public void onTabChanged(String tag) {
-		int pos = this.mTabHost.getCurrentTab();
-		this.mViewPager.setCurrentItem(pos);
+		int pos = mTabHost.getCurrentTab();
+		mViewPager.setCurrentItem(pos);
 	}
 
 	@Override
 	public void onPageSelected(int position) {
-		this.mTabHost.setCurrentTab(position);
+		mTabHost.setCurrentTab(position);
 	}
 
 	@Override
