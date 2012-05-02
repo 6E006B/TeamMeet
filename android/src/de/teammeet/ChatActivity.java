@@ -6,8 +6,10 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.ArrayAdapter;
@@ -27,13 +29,14 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 	private static final String CLASS = ChatActivity.class.getSimpleName();
 
 	private ListView mChatListView = null;
-	private ArrayAdapter<String> mListAdapter = null;
+	private ArrayAdapter<CharSequence> mListAdapter = null;
 	private EditText mChatEditText = null;
 	private String mSender = null;
 	private ChatOpenHelper mDatabase = null;
 
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
+	private String mOwnID;
 
 	private class XMPPServiceConnection implements ServiceConnection {
 
@@ -60,8 +63,13 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		
 		setContentView(R.layout.chat);
 
+		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+		final String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
+		final String server = settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "");
+		mOwnID = String.format("%s@%s", userID, server);
+
 		mChatListView = (ListView)findViewById(R.id.chatListView);
-		mListAdapter = new ArrayAdapter<String>(this, R.layout.chat_item);
+		mListAdapter = new ArrayAdapter<CharSequence>(this, R.layout.chat_item);
 		mChatListView.setAdapter(mListAdapter);
 		mChatEditText = (EditText)findViewById(R.id.chatInput);
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
@@ -130,9 +138,7 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 			Log.d(CLASS, "chat with " + mSender);
 			List<ChatMessage> messages = mDatabase.getMessages(mSender);
 			for (ChatMessage message : messages) {
-				final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
-				final String chatMessage = String.format("%s: %s", from, message.getMessage());
-				mListAdapter.add(chatMessage);
+				mListAdapter.add(createMessageSequence(message));
 			}
 			mListAdapter.notifyDataSetChanged();
 			mChatListView.setSelection(mListAdapter.getCount());
@@ -153,12 +159,10 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		Log.d(CLASS, "ChatActivity.handleMessage()");
 		boolean handled = false;
 		if(message.getTo().startsWith(mSender) || message.getFrom().startsWith(mSender)) {
-			final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
 			mChatListView.post(new Runnable() {
 				@Override
 				public void run() {
-					final String chatMessage = String.format("%s: %s", from, message.getMessage());
-					mListAdapter.add(chatMessage);
+					mListAdapter.add(createMessageSequence(message));
 					mListAdapter.notifyDataSetChanged();
 					Log.d(CLASS, "list adapter count is "+mListAdapter.getCount());
 					mChatListView.setSelection(mListAdapter.getCount());
@@ -167,5 +171,15 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 			handled = true;
 		}
 		return handled;
+	}
+
+	private CharSequence createMessageSequence(ChatMessage message) {
+		String colour = "red";
+		if (message.getFrom().startsWith(mOwnID)) {
+			colour = "green";
+		}
+		final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
+		final String chatMessage = String.format("<b><font color=\"%s\">%s:</font></b> %s", colour, from, message.getMessage());
+		return Html.fromHtml(chatMessage);
 	}
 }
