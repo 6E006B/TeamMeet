@@ -20,70 +20,62 @@
 
 package de.teammeet;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Point;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.widget.Toast;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapView;
-import com.google.android.maps.Overlay;
+import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.OverlayItem;
 
 import de.teammeet.interfaces.IMatesUpdateRecipient;
 
-public class MatesOverlay extends Overlay implements IMatesUpdateRecipient {
+public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMatesUpdateRecipient {
 
-	private static final String	CLASS		= MatesOverlay.class.getSimpleName();
+	private static final String	CLASS = MatesOverlay.class.getSimpleName();
 
-	private Map<String, Mate>			mMates		= null;
-	private Resources			mResources	= null;
-	private final ReentrantLock	mLock		= new ReentrantLock();
+	private Context mContext = null;
+	private String mOwnID = null;
+	private Map<String, Mate> mMates = null;
+	private List<OverlayItem> mOverlayItems = null;
+	private final ReentrantLock	mLock = new ReentrantLock();
 
-	public MatesOverlay(final Resources res) {
+
+	public MatesOverlay(Context context, Drawable marker) {
+		super(boundCenterBottom(marker));
+		mContext = context;
+		SharedPreferences settings = mContext.getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
+		final String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
+		final String server = settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "");
+		mOwnID = String.format("%s@%s", userID, server);
 		mMates = new HashMap<String, Mate>();
-		mResources = res;
-	}
-
-	@Override
-	public boolean draw(final Canvas canvas, final MapView mapView, final boolean shadow, final long when) {
-		super.draw(canvas, mapView, shadow);
-
-		if (mMates != null) {
-			final Paint paintPlayer = new Paint();
-			paintPlayer.setStyle(Paint.Style.FILL);
-			paintPlayer.setColor(mResources.getColor(R.color.paint_mates));
-
-			// translate the GeoPoint to screen pixels
-			acquireLock();
-			try {
-				final Point coords = new Point();
-				for (final Mate mate : mMates.values()) {
-					final GeoPoint point = mate.getLocation();
-					mapView.getProjection().toPixels(point, coords);
-					canvas.drawCircle(coords.x, coords.y, 5, paintPlayer);
-				}
-			} finally {
-				releaseLock();
-			}
-		} else {
-			// Log.e(CLASS, "WARNING mMates is null!");
-		}
-		return true;
+		mOverlayItems = new ArrayList<OverlayItem>();
+		populate();
 	}
 
 	@Override
 	public void handleMateUpdate(Mate mate) {
 		Log.d(CLASS, "MatesOverlay.handleMateUpdate() : " + mate.getID());
-		acquireLock();
-		try {
-			mMates.put(mate.getID(), mate);
-		} finally {
-			releaseLock();
+		if (mate.getID().equals(mOwnID)) {
+			acquireLock();
+			try {
+				if (mMates.containsKey(mate.getID())) {
+					mMates.get(mate.getID()).setLocation(mate.getLocation(), mate.getAccuracy());
+				} else {
+					mMates.put(mate.getID(), mate);
+					mOverlayItems.add(new MateOverlayItem(mate));
+				}
+			} finally {
+				releaseLock();
+			}
+			populate();
 		}
 	}
 
@@ -95,4 +87,28 @@ public class MatesOverlay extends Overlay implements IMatesUpdateRecipient {
 		mLock.unlock();
 	}
 
+	@Override
+	protected OverlayItem createItem(int index) {
+		return mOverlayItems.get(index);
+	}
+
+	@Override
+	public int size() {
+		int size = 0;
+		acquireLock();
+		try {
+			size = mMates.size();
+		} finally {
+			releaseLock();
+		}
+		return size;
+	}
+
+	@Override
+	protected boolean onTap(int index) {
+		final String mateID = ((MateOverlayItem)mOverlayItems.get(index)).getMate().getID();
+		final String mateNick = mateID.substring(mateID.lastIndexOf("/")+1);
+		Toast.makeText(mContext, mateNick, Toast.LENGTH_SHORT).show();
+		return super.onTap(index);
+	}
 }
