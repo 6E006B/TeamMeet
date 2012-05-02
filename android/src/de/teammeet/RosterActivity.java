@@ -237,7 +237,12 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 
 	public void onTabChanged(String tag) {
 		int pos = mTabHost.getCurrentTab();
-		mViewPager.setCurrentItem(pos);
+		/* avoid race condition between changing tab and changing orientation
+		 * destroys the ViewPager.
+		 */
+		if (mViewPager != null) {
+			mViewPager.setCurrentItem(pos);
+		}
 	}
 
 	@Override
