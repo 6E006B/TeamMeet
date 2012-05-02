@@ -60,8 +60,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 
 			if (mXMPPService.isAuthenticated()) {
 				// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-				String contactsTag = mPagerAdapter.getFragmentName(mViewPager.getId(), CONTACTS_FRAGMENT_POS);
-				ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(contactsTag);
+				ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getFragment(mViewPager, CONTACTS_FRAGMENT_POS);
 				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 			}
 			if (mCurrentIntent != null) {
@@ -83,7 +82,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		public void onTaskCompleted(Void nothing) {
 			Log.d(CLASS, "Connect task completed!!");
 			// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-			ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getItem(CONTACTS_FRAGMENT_POS);
+			ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getFragment(mViewPager, CONTACTS_FRAGMENT_POS);
 			new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 		}
 		
