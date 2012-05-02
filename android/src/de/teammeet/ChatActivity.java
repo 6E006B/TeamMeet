@@ -1,6 +1,5 @@
 package de.teammeet;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -27,10 +26,8 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 
 	private static final String CLASS = ChatActivity.class.getSimpleName();
 
-//	private ScrollView mScrollView = null;
-//	private TextView mChatTextView = null;
 	private ListView mChatListView = null;
-	private ArrayAdapter<List<String>> mListAdapter = null;
+	private ArrayAdapter<String> mListAdapter = null;
 	private EditText mChatEditText = null;
 	private String mSender = null;
 	private ChatOpenHelper mDatabase = null;
@@ -64,7 +61,7 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		setContentView(R.layout.chat);
 
 		mChatListView = (ListView)findViewById(R.id.chatListView);
-		mListAdapter = new MyPerformanceArrayAdapter(this, new ArrayList<List<String>>());
+		mListAdapter = new ArrayAdapter<String>(this, R.layout.chat_item);
 		mChatListView.setAdapter(mListAdapter);
 		mChatEditText = (EditText)findViewById(R.id.chatInput);
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
@@ -134,10 +131,8 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 			List<ChatMessage> messages = mDatabase.getMessages(mSender);
 			for (ChatMessage message : messages) {
 				final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
-				List<String> stringList = new ArrayList<String>();
-				stringList.add(from+":");
-				stringList.add(message.getMessage());
-				mListAdapter.add(stringList);
+				final String chatMessage = String.format("%s: %s", from, message.getMessage());
+				mListAdapter.add(chatMessage);
 			}
 			mListAdapter.notifyDataSetChanged();
 			mChatListView.setSelection(mListAdapter.getCount());
@@ -162,10 +157,8 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 			mChatListView.post(new Runnable() {
 				@Override
 				public void run() {
-					List<String> stringList = new ArrayList<String>();
-					stringList.add(from+":");
-					stringList.add(message.getMessage());
-					mListAdapter.add(stringList);
+					final String chatMessage = String.format("%s: %s", from, message.getMessage());
+					mListAdapter.add(chatMessage);
 					mListAdapter.notifyDataSetChanged();
 					Log.d(CLASS, "list adapter count is "+mListAdapter.getCount());
 					mChatListView.setSelection(mListAdapter.getCount());
