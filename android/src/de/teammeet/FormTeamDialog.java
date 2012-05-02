@@ -25,7 +25,7 @@ public class FormTeamDialog extends DialogFragment {
 				EditText teamNameView = (EditText) formTeamView.findViewById(R.id.form_team_dialog_teamname);
 				String teamName = teamNameView.getText().toString();
 				Log.d(CLASS, String.format("chosen team name: %s", teamName));
-				((TabbedRosterActivity) getActivity()).enteredTeamName(teamName);
+				((RosterActivity) getActivity()).enteredTeamName(teamName);
 			}
 		});
 		return builder.create();

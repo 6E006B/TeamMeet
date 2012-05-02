@@ -190,7 +190,7 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		//MenuInflater inflater = getMenuInflater();
 		//inflater.inflate(R.menu.roster_context, menu);
 		Log.d(CLASS, "creating context menu");
-		Set<String> rooms = ((TabbedRosterActivity) getActivity()).getXMPPService().getRooms();
+		Set<String> rooms = ((RosterActivity) getActivity()).getXMPPService().getRooms();
 		if (!rooms.isEmpty()) {
 			SubMenu inviteSubMenu = menu.addSubMenu(Menu.NONE, CONTEXT_MENU_INVITE_PARENT_ID,
 													Menu.NONE, R.string.context_invite);
@@ -225,7 +225,7 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		String contact = getExpandableListChild(mLastContextItemInfo.packedPosition);
 		String teamName = item.getTitle().toString();
 		Log.d(CLASS, String.format("clicked contact '%s'", contact));
-		IXMPPService xmpp = ((TabbedRosterActivity) getActivity()).getXMPPService(); 
+		IXMPPService xmpp = ((RosterActivity) getActivity()).getXMPPService(); 
 		AsyncTask<String, Void, String[]> inviteTask = new InviteTask(xmpp,
 																	  new InviteMateHandler());
 		inviteTask.execute(contact, teamName);

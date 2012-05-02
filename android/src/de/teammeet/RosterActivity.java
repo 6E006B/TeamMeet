@@ -30,8 +30,8 @@ import de.teammeet.tasks.DisconnectTask;
 import de.teammeet.tasks.FetchRosterTask;
 import de.teammeet.xmpp.XMPPService;
 
-public class TabbedRosterActivity extends FragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
-	private static String CLASS = TabbedRosterActivity.class.getSimpleName();
+public class RosterActivity extends FragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
+	private static String CLASS = RosterActivity.class.getSimpleName();
 	private static String CONTACTS_TAB_ID = "contacts_tab";
 	private static String TEAMS_TAB_ID = "teams_tab";
 	private static String SAVED_TAB_KEY = "last_tab";
@@ -83,7 +83,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		@Override
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
-			Toast.makeText(TabbedRosterActivity.this, problem, Toast.LENGTH_LONG).show();
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -101,13 +101,13 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 		@Override
 		public void onTaskCompleted(String[] connection_data) {
 			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
-			Toast.makeText(TabbedRosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
 		}
 	
 		@Override
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to form team: %s", e.getMessage());
-			Toast.makeText(TabbedRosterActivity.this, problem, Toast.LENGTH_LONG).show();
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 	
@@ -117,7 +117,7 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	 */
 	private class DummyFactory implements TabContentFactory {
 		public View createTabContent(String tag) {
-			View dummy = new View(TabbedRosterActivity.this);
+			View dummy = new View(RosterActivity.this);
 			dummy.setMinimumWidth(0);
 			dummy.setMinimumHeight(0);
 			return dummy;
@@ -227,9 +227,6 @@ public class TabbedRosterActivity extends FragmentActivity implements TabHost.On
 	 */
 	private void intialiseViewPager() {
 
-		//List<Fragment> fragments = new Vector<Fragment>();
-		//fragments.add(CONTACTS_FRAGMENT_POS, Fragment.instantiate(this, ContactsFragment.class.getName()));
-		//fragments.add(TEAMS_FRAGMENT_POS, Fragment.instantiate(this, Teams.class.getName()));
 		mPagerAdapter  = new RosterAdapter(getSupportFragmentManager());
 
 		mViewPager = (ViewPager) findViewById(R.id.viewpager);

@@ -32,7 +32,7 @@
         android:icon="@drawable/group_invitation_icon"
         android:label="@string/app_name" >
         <activity
-            android:name=".TabbedRosterActivity"
+            android:name=".RosterActivity"
             android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
