@@ -37,11 +37,11 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
 import de.teammeet.ChatActivity;
-import de.teammeet.ContactsFragment;
 import de.teammeet.GroupChatActivity;
 import de.teammeet.Mate;
 import de.teammeet.R;
 import de.teammeet.RosterActivity;
+import de.teammeet.SettingsActivity;
 import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
@@ -509,7 +509,7 @@ public class XMPPService extends Service implements IXMPPService {
 		final Notification notification = new Notification(icon, tickerText, when);
 
 		final CharSequence contentTitle = "Group Invitation received";
-		final Intent notificationIntent = new Intent(this, ContactsFragment.class);
+		final Intent notificationIntent = new Intent(this, RosterActivity.class);
 		notificationIntent.putExtra(TYPE, TYPE_JOIN);
 		notificationIntent.putExtra(ROOM, room);
 		notificationIntent.putExtra(INVITER, inviter);
