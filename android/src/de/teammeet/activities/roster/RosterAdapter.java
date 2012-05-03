@@ -1,4 +1,4 @@
-package de.teammeet;
+package de.teammeet.activities.roster;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

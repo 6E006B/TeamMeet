@@ -18,7 +18,7 @@
  *
  */
 
-package de.teammeet;
+package de.teammeet.activities.teams;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +36,7 @@ import android.widget.Toast;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 
+import de.teammeet.activities.preferences.SettingsActivity;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
 
 public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMatesUpdateRecipient {

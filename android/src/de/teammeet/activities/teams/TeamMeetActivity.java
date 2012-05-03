@@ -18,7 +18,7 @@
  *
  */
 
-package de.teammeet;
+package de.teammeet.activities.teams;
 
 import java.util.List;
 
@@ -41,9 +41,11 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
+import de.teammeet.R;
+import de.teammeet.activities.preferences.SettingsActivity;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.IXMPPService;
-import de.teammeet.xmpp.XMPPService;
+import de.teammeet.services.xmpp.XMPPService;
 
 public class TeamMeetActivity extends MapActivity {
 

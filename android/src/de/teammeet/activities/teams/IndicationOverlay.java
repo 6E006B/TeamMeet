@@ -18,7 +18,7 @@
  *
  */
 
-package de.teammeet;
+package de.teammeet.activities.teams;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -39,6 +39,8 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.Projection;
+
+import de.teammeet.R;
 
 public class IndicationOverlay extends Overlay {
 	private static final String	CLASS					= IndicationOverlay.class.getSimpleName();

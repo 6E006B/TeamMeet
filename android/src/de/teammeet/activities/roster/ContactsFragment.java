@@ -1,4 +1,4 @@
-package de.teammeet;
+package de.teammeet.activities.roster;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,10 +34,12 @@ import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.TwoLineListItem;
+import de.teammeet.R;
+import de.teammeet.activities.chat.ChatActivity;
 import de.teammeet.interfaces.IXMPPService;
+import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.InviteTask;
-import de.teammeet.xmpp.XMPPService;
 
 
 /**
