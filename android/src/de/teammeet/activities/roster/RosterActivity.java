@@ -1,4 +1,4 @@
-package de.teammeet;
+package de.teammeet.activities.roster;
 
 import org.jivesoftware.smack.XMPPException;
 
@@ -22,13 +22,16 @@ import android.view.View;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.Toast;
+import de.teammeet.R;
+import de.teammeet.activities.preferences.SettingsActivity;
+import de.teammeet.activities.teams.TeamMeetActivity;
 import de.teammeet.interfaces.IXMPPService;
+import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
 import de.teammeet.tasks.FetchRosterTask;
-import de.teammeet.xmpp.XMPPService;
 
 public class RosterActivity extends FragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
 	private static String CLASS = RosterActivity.class.getSimpleName();

@@ -1,6 +1,8 @@
-package de.teammeet;
+package de.teammeet.activities.chat;
 
 import java.util.List;
+
+import org.jivesoftware.smack.XMPPException;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -9,26 +11,28 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
+import de.teammeet.R;
 import de.teammeet.helper.ChatOpenHelper;
-import de.teammeet.interfaces.IChatMessageHandler;
+import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IXMPPService;
-import de.teammeet.xmpp.ChatMessage;
-import de.teammeet.xmpp.XMPPService;
+import de.teammeet.services.xmpp.ChatMessage;
+import de.teammeet.services.xmpp.XMPPService;
 
-public class ChatActivity extends Activity implements IChatMessageHandler {
+public class GroupChatActivity extends Activity implements IGroupMessageHandler {
 
-	private static final String CLASS = ChatActivity.class.getSimpleName();
+	private static final String CLASS = GroupChatActivity.class.getSimpleName();
 
 	private ScrollView mScrollView = null;
 	private TextView mChatTextView = null;
 	private EditText mChatEditText = null;
-	private String mSender = null;
+	private String mGroup = null;
 	private ChatOpenHelper mDatabase = null;
 
 	private IXMPPService mXMPPService = null;
@@ -41,7 +45,7 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceConnected('" +
 						 className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
-			mXMPPService.registerChatMessageHandler(ChatActivity.this);
+			mXMPPService.registerGroupMessageHandler(GroupChatActivity.this);
 		}
 
 		@Override
@@ -55,7 +59,7 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d(CLASS, "onCreate(): started chat activity");
+		Log.d(CLASS, "onCreate(): started group chat");
 		
 		setContentView(R.layout.groupchat);
 
@@ -66,13 +70,24 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				String sendText = v.getText().toString();
-				if (!sendText.equals("")) {
-					Log.d(CLASS, "sending: " + sendText);
-					mXMPPService.sendChatMessage(mSender, sendText);
-					v.setText("");
-				} else {
-					Log.d(CLASS, "not sending empty message");
+				Log.d(CLASS, "sending: " + sendText);
+				try {
+					mXMPPService.sendToGroup(mGroup, sendText);
+				} catch (XMPPException e) {
+					final String errorMessage = "Unable to send message:\n" + e.getMessage();
+					Log.e(CLASS, errorMessage);
+					e.printStackTrace();
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							final Toast toast  = Toast.makeText(GroupChatActivity.this,
+							                                    errorMessage, Toast.LENGTH_LONG);
+							toast.setGravity(Gravity.BOTTOM, 0, 0);
+							toast.show();
+						}
+					});
 				}
+				v.setText("");
 				return true;
 			}
 		});
@@ -103,7 +118,7 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 
 	@Override
 	protected void onPause() {
-		mXMPPService.unregisterChatMessageHandler(this);
+		mXMPPService.unregisterGroupMessageHandler(this);
 		if (mXMPPServiceConnection != null) {
 			unbindService(mXMPPServiceConnection);
 		}
@@ -119,17 +134,13 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 	}
 
 	private void handleIntent(Intent intent) {
-		mSender = intent.getStringExtra(XMPPService.SENDER);
-		if (mSender != null) {
-			int slashIndex = mSender.indexOf('/');
-			if (slashIndex != -1) {
-				mSender = mSender.substring(0, slashIndex);
-			}
-			Log.d(CLASS, "chat with " + mSender);
+		mGroup = intent.getStringExtra(XMPPService.GROUP);
+		if (mGroup != null) {
 			String chatText = "";
-			List<ChatMessage> messages = mDatabase.getMessages(mSender);
+			List<ChatMessage> messages = mDatabase.getMessages(mGroup);
 			for (ChatMessage message : messages) {
-				final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
+				final String from = message.getFrom().
+						substring(message.getFrom().lastIndexOf('/') + 1);
 				chatText += String.format("%s: %s\n", from, message.getMessage());
 			}
 			mChatTextView.setText(chatText);
@@ -140,23 +151,23 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 				}
 			});
 		} else {
-			final String error = "ChatActivity intent has no sender";
+			final String error = "GroupChatActivity intent has no group";
 			Log.e(CLASS, error);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					Toast.makeText(ChatActivity.this, error, Toast.LENGTH_LONG).show();
+					Toast.makeText(GroupChatActivity.this, error, Toast.LENGTH_LONG).show();
 				}
 			});
 		}
 	}
 
 	@Override
-	public boolean handleMessage(ChatMessage message) {
-		Log.d(CLASS, "ChatActivity.handleMessage()");
+	public boolean handleGroupMessage(ChatMessage message) {
+		Log.d(CLASS, "GroupChatActivity.handleGroupMessage()");
 		boolean handled = false;
-		if(message.getTo().startsWith(mSender) || message.getFrom().startsWith(mSender)) {
-			final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
+		if (message.getTo().equals(mGroup)) {
+			final String from = message.getFrom().substring(message.getFrom().lastIndexOf('/') + 1);
 			final String chatText = String.format("%s: %s\n", from, message.getMessage());
 			mScrollView.post(new Runnable() {
 				@Override

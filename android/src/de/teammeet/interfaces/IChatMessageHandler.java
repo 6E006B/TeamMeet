@@ -1,6 +1,6 @@
 package de.teammeet.interfaces;
 
-import de.teammeet.xmpp.ChatMessage;
+import de.teammeet.services.xmpp.ChatMessage;
 
 public interface IChatMessageHandler {
 

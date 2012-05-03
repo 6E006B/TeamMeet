@@ -28,7 +28,7 @@ import org.jivesoftware.smack.XMPPException;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
-import de.teammeet.Mate;
+import de.teammeet.activities.teams.Mate;
 
 public interface IXMPPService {
 

@@ -18,8 +18,9 @@
  *
  */
 
-package de.teammeet;
+package de.teammeet.activities.preferences;
 
+import de.teammeet.R;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;

@@ -4,10 +4,10 @@ import org.jivesoftware.smack.XMPPException;
 
 import android.content.SharedPreferences;
 import android.util.Log;
-import de.teammeet.SettingsActivity;
+import de.teammeet.activities.preferences.SettingsActivity;
 import de.teammeet.interfaces.IAsyncTaskCallback;
 import de.teammeet.interfaces.IXMPPService;
-import de.teammeet.xmpp.XMPPService;
+import de.teammeet.services.xmpp.XMPPService;
 
 public class ConnectTask extends BaseAsyncTask<Void, Void, Void> {
 
