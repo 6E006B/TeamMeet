@@ -3,6 +3,7 @@
 
     <item
         android:id="@+id/roster_menu_connect"
+        android:enabled="false"
         android:title="@string/roster_menu_connect"
         android:titleCondensed="@string/roster_menu_connect_condensed"/>
     <item
