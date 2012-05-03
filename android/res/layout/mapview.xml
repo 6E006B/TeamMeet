@@ -26,4 +26,35 @@
         android:apiKey="@string/maps_api_key"
         android:clickable="true" />
 
+    <SlidingDrawer
+        android:id="@+id/slidingDrawer1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:content="@+id/content"
+        android:handle="@+id/handle" >
+
+        <TextView
+            android:id="@+id/handle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="3dip"
+            android:background="#C4000000"
+            android:gravity="center"
+            android:text="Chat" />
+
+        <LinearLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" 
+            android:background="#C0000000">
+            
+                <TextView
+                    android:id="@+id/textView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Group chat may go here." />
+            
+        </LinearLayout>
+    </SlidingDrawer>
+
 </merge>
