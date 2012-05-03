@@ -36,7 +36,7 @@ import android.widget.Toast;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 
-import de.teammeet.activities.preferences.SettingsActivity;
+import de.teammeet.R;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
 
 public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMatesUpdateRecipient {
