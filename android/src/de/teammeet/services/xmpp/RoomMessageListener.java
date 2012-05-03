@@ -1,4 +1,4 @@
-package de.teammeet.xmpp;
+package de.teammeet.services.xmpp;
 
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.packet.Message;
@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
-import de.teammeet.Mate;
+import de.teammeet.activities.teams.Mate;
 
 public class RoomMessageListener implements PacketListener {
 

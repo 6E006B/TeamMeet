@@ -1,5 +1,6 @@
-package de.teammeet;
+package de.teammeet.activities.roster;
 
+import de.teammeet.R;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;

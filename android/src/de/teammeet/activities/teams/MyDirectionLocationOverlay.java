@@ -1,4 +1,4 @@
-package de.teammeet;
+package de.teammeet.activities.teams;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -12,6 +12,8 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
+
+import de.teammeet.R;
 
 public class MyDirectionLocationOverlay extends MyLocationOverlay {
 
