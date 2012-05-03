@@ -278,17 +278,20 @@ public class ContactsFragment extends Fragment implements RosterListener {
 
 	@Override
 	public void entriesAdded(Collection<String> arg0) {
-		Log.d(CLASS, "Entries have been added to the roster. No action implemented");
+		Log.d(CLASS, "Entries have been added to the roster");
+		redrawOnUiThread();
 	}
 
 	@Override
 	public void entriesDeleted(Collection<String> arg0) {
-		Log.d(CLASS, "Entries have been deleted from the roster. No action implemented");
+		Log.d(CLASS, "Entries have been deleted from the roster");
+		redrawOnUiThread();
 	}
 
 	@Override
 	public void entriesUpdated(Collection<String> arg0) {
-		Log.d(CLASS, "Entries have been updated in the roster. No action implemented");
+		Log.d(CLASS, "Entries have been updated in the roster");
+		redrawOnUiThread();
 	}
 
 	@Override
@@ -305,6 +308,10 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		Log.d(CLASS, String.format("presence of '%s' in group '%s' has changed in the roster.", contact, groupName));
 		*/
 		
+		redrawOnUiThread();
+	}
+	
+	private void redrawOnUiThread() {
 		mContactsList.post(new Runnable() {
 			
 			@Override
