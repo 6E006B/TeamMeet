@@ -64,61 +64,6 @@ public class ContactsFragment extends Fragment {
 	private RosterListener mRosterEventHandler;
 
 
-	private class ExpandableContactEntry {
-		protected Map<String, String> mGroup = null;
-		protected List<Map<String, String>> mChildren = null;
-	
-		public ExpandableContactEntry(String groupName, Collection<RosterEntry> contacts, Roster roster) {
-			mGroup = new HashMap<String, String>();
-			mChildren = new ArrayList<Map<String, String>>();
-			
-			mGroup.put(NAME, groupName);
-
-			for (RosterEntry contact : contacts) {
-				Map<String, String> newChild = new HashMap<String, String>();
-				String jid = contact.getUser();
-				newChild.put(NAME, jid);
-				newChild.put(AVAILABILITY, roster.getPresence(jid).toString());
-				mChildren.add(newChild);
-			}
-		}
-	}
-
-	protected class FetchRosterHandler extends BaseAsyncTaskCallback<Roster> {
-		@Override
-		public void onTaskCompleted(Roster roster) {
-			mRoster = roster;
-			mRoster.addRosterListener(mRosterEventHandler);
-			mContactsList.post(new Runnable() {
-				@Override
-				public void run() {
-					fillExpandableList(mRoster);
-					mAdapter.notifyDataSetChanged();
-				}
-			});
-		}
-
-		@Override
-		public void onTaskAborted(Exception e) {
-			final String problem = String.format("Could not fetch roster: %s", e.getMessage());
-			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
-		}
-	}
-
-	private class InviteMateHandler extends BaseAsyncTaskCallback<String[]> {
-		@Override
-		public void onTaskCompleted(String[] connection_data) {
-			String user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
-			Toast.makeText(getActivity(), user_feedback, Toast.LENGTH_LONG).show();
-		}
-	
-		@Override
-		public void onTaskAborted(Exception e) {
-			String problem = String.format("Failed to invite contact to team: %s", e.getMessage());
-			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
-		}
-	}
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -276,6 +221,61 @@ public class ContactsFragment extends Fragment {
 			newEntry = new ExpandableContactEntry(UNFILED_GROUP, roster.getUnfiledEntries(), roster);
 			mExpandableGroups.add(newEntry.mGroup);
 			mExpandableChildren.add(newEntry.mChildren);
+		}
+	}
+
+	private class ExpandableContactEntry {
+		protected Map<String, String> mGroup = null;
+		protected List<Map<String, String>> mChildren = null;
+	
+		public ExpandableContactEntry(String groupName, Collection<RosterEntry> contacts, Roster roster) {
+			mGroup = new HashMap<String, String>();
+			mChildren = new ArrayList<Map<String, String>>();
+			
+			mGroup.put(NAME, groupName);
+
+			for (RosterEntry contact : contacts) {
+				Map<String, String> newChild = new HashMap<String, String>();
+				String jid = contact.getUser();
+				newChild.put(NAME, jid);
+				newChild.put(AVAILABILITY, roster.getPresence(jid).toString());
+				mChildren.add(newChild);
+			}
+		}
+	}
+
+	protected class FetchRosterHandler extends BaseAsyncTaskCallback<Roster> {
+		@Override
+		public void onTaskCompleted(Roster roster) {
+			mRoster = roster;
+			mRoster.addRosterListener(mRosterEventHandler);
+			mContactsList.post(new Runnable() {
+				@Override
+				public void run() {
+					fillExpandableList(mRoster);
+					mAdapter.notifyDataSetChanged();
+				}
+			});
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			final String problem = String.format("Could not fetch roster: %s", e.getMessage());
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class InviteMateHandler extends BaseAsyncTaskCallback<String[]> {
+		@Override
+		public void onTaskCompleted(String[] connection_data) {
+			String user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
+			Toast.makeText(getActivity(), user_feedback, Toast.LENGTH_LONG).show();
+		}
+	
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to invite contact to team: %s", e.getMessage());
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
 	}
 
