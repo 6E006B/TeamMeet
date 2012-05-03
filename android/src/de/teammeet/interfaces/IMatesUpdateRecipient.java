@@ -20,7 +20,7 @@
 
 package de.teammeet.interfaces;
 
-import de.teammeet.Mate;
+import de.teammeet.activities.teams.Mate;
 
 public interface IMatesUpdateRecipient {
 	public void handleMateUpdate(Mate mate);

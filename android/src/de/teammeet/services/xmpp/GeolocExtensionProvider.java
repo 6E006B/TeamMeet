@@ -1,4 +1,4 @@
-package de.teammeet.xmpp;
+package de.teammeet.services.xmpp;
 
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.PacketExtension;

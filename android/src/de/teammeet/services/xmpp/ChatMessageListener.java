@@ -1,4 +1,4 @@
-package de.teammeet.xmpp;
+package de.teammeet.services.xmpp;
 
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.packet.Message;

@@ -1,4 +1,4 @@
-package de.teammeet.xmpp;
+package de.teammeet.services.xmpp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,12 +35,12 @@ import android.util.Log;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
-import de.teammeet.ChatActivity;
-import de.teammeet.GroupChatActivity;
-import de.teammeet.Mate;
 import de.teammeet.R;
-import de.teammeet.RosterActivity;
-import de.teammeet.SettingsActivity;
+import de.teammeet.activities.chat.ChatActivity;
+import de.teammeet.activities.chat.GroupChatActivity;
+import de.teammeet.activities.preferences.SettingsActivity;
+import de.teammeet.activities.roster.RosterActivity;
+import de.teammeet.activities.teams.Mate;
 import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;

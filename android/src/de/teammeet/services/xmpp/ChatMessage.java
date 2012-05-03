@@ -1,4 +1,4 @@
-package de.teammeet.xmpp;
+package de.teammeet.services.xmpp;
 
 public class ChatMessage {
 

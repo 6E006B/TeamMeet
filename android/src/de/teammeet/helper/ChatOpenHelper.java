@@ -9,7 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import de.teammeet.xmpp.ChatMessage;
+import de.teammeet.services.xmpp.ChatMessage;
 
 public class ChatOpenHelper extends SQLiteOpenHelper {
 
