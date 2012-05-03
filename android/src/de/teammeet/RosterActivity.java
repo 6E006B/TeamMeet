@@ -438,8 +438,10 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 
 	public void enteredTeamName(String teamName) {
 		Log.d(CLASS, String.format("Will create team '%s'", teamName));
-		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-		String conferenceSrv = settings.getString(SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
+		final SharedPreferences settings =
+				PreferenceManager.getDefaultSharedPreferences(RosterActivity.this);
+		final String conferenceSrvKey = getString(R.string.preference_conference_server_key);
+		final String conferenceSrv = settings.getString(conferenceSrvKey, "");
 		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
 	}
 }

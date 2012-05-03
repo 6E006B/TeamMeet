@@ -29,6 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -51,9 +52,12 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 	public MatesOverlay(Context context, Drawable marker) {
 		super(boundCenterBottom(marker));
 		mContext = context;
-		SharedPreferences settings = mContext.getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-		final String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
-		final String server = settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "");
+		final SharedPreferences settings =
+				PreferenceManager.getDefaultSharedPreferences(mContext);
+		final String userIDKey = mContext.getString(R.string.preference_user_id_key);
+		final String userID = settings.getString(userIDKey, "");
+		final String serverKey = mContext.getString(R.string.preference_server_key);
+		final String server = settings.getString(serverKey, "");
 		mOwnID = String.format("%s@%s", userID, server);
 		mMates = new HashMap<String, Mate>();
 		mOverlayItems = new ArrayList<OverlayItem>();
