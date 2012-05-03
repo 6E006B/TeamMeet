@@ -45,7 +45,7 @@ import de.teammeet.tasks.InviteTask;
 /**
  * Demonstrates expandable lists backed by a Simple Map-based adapter
  */
-public class ContactsFragment extends Fragment implements RosterListener {
+public class ContactsFragment extends Fragment {
 	private static final String CLASS = ContactsFragment.class.getSimpleName();
 	private static final String NAME = "name";
 	private static final String AVAILABILITY = "avail";
@@ -61,63 +61,9 @@ public class ContactsFragment extends Fragment implements RosterListener {
 
 	private Roster mRoster = null;
 	private ExpandableListView mContactsList;
+	private RosterListener mRosterEventHandler;
 
 
-	private class ExpandableContactEntry {
-		protected Map<String, String> mGroup = null;
-		protected List<Map<String, String>> mChildren = null;
-	
-		public ExpandableContactEntry(String groupName, Collection<RosterEntry> contacts, Roster roster) {
-			mGroup = new HashMap<String, String>();
-			mChildren = new ArrayList<Map<String, String>>();
-			
-			mGroup.put(NAME, groupName);
-
-			for (RosterEntry contact : contacts) {
-				Map<String, String> newChild = new HashMap<String, String>();
-				String jid = contact.getUser();
-				newChild.put(NAME, jid);
-				newChild.put(AVAILABILITY, roster.getPresence(jid).toString());
-				mChildren.add(newChild);
-			}
-		}
-	}
-
-	protected class FetchRosterHandler extends BaseAsyncTaskCallback<Roster> {
-		@Override
-		public void onTaskCompleted(Roster roster) {
-			mRoster = roster;
-			mRoster.addRosterListener(ContactsFragment.this);
-			mContactsList.post(new Runnable() {
-				@Override
-				public void run() {
-					fillExpandableList(mRoster);
-					mAdapter.notifyDataSetChanged();
-				}
-			});
-		}
-
-		@Override
-		public void onTaskAborted(Exception e) {
-			final String problem = String.format("Could not fetch roster: %s", e.getMessage());
-			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
-		}
-	}
-
-	private class InviteMateHandler extends BaseAsyncTaskCallback<String[]> {
-		@Override
-		public void onTaskCompleted(String[] connection_data) {
-			String user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
-			Toast.makeText(getActivity(), user_feedback, Toast.LENGTH_LONG).show();
-		}
-	
-		@Override
-		public void onTaskAborted(Exception e) {
-			String problem = String.format("Failed to invite contact to team: %s", e.getMessage());
-			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
-		}
-	}
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -134,6 +80,8 @@ public class ContactsFragment extends Fragment implements RosterListener {
 				new String[] { NAME, AVAILABILITY },
 				new int[] { android.R.id.text1, android.R.id.text2}
 				);
+		
+		mRosterEventHandler = new RosterEventHandler();
 	}
 
 	@Override
@@ -177,7 +125,7 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		Log.d(CLASS, "Pausing contacts fragment");
 
 		if (mRoster != null) {
-			mRoster.removeRosterListener(this);
+			mRoster.removeRosterListener(mRosterEventHandler);
 			mRoster = null;
 		}
 
@@ -276,42 +224,107 @@ public class ContactsFragment extends Fragment implements RosterListener {
 		}
 	}
 
-	@Override
-	public void entriesAdded(Collection<String> arg0) {
-		Log.d(CLASS, "Entries have been added to the roster. No action implemented");
-	}
-
-	@Override
-	public void entriesDeleted(Collection<String> arg0) {
-		Log.d(CLASS, "Entries have been deleted from the roster. No action implemented");
-	}
-
-	@Override
-	public void entriesUpdated(Collection<String> arg0) {
-		Log.d(CLASS, "Entries have been updated in the roster. No action implemented");
-	}
-
-	@Override
-	public void presenceChanged(Presence presence) {
-		/*
-		String contact = StringUtils.parseBareAddress(presence.getFrom());
-		String groupName = UNFILED_GROUP;
-		RosterEntry entry = mRoster.getEntry(contact);
-		if (entry != null) {
-			groupName = ((RosterGroup)entry.getGroups().toArray()[0]).getName();
-		} else {
-			Log.d(CLASS, String.format("Couldn't get roster entry for '%s'", contact));
-		}
-		Log.d(CLASS, String.format("presence of '%s' in group '%s' has changed in the roster.", contact, groupName));
-		*/
-		
-		mContactsList.post(new Runnable() {
+	private class ExpandableContactEntry {
+		protected Map<String, String> mGroup = null;
+		protected List<Map<String, String>> mChildren = null;
+	
+		public ExpandableContactEntry(String groupName, Collection<RosterEntry> contacts, Roster roster) {
+			mGroup = new HashMap<String, String>();
+			mChildren = new ArrayList<Map<String, String>>();
 			
-			@Override
-			public void run() {
-				fillExpandableList(mRoster);
-				mAdapter.notifyDataSetChanged();	
+			mGroup.put(NAME, groupName);
+
+			for (RosterEntry contact : contacts) {
+				Map<String, String> newChild = new HashMap<String, String>();
+				String jid = contact.getUser();
+				newChild.put(NAME, jid);
+				newChild.put(AVAILABILITY, roster.getPresence(jid).toString());
+				mChildren.add(newChild);
 			}
-		});
+		}
+	}
+
+	protected class FetchRosterHandler extends BaseAsyncTaskCallback<Roster> {
+		@Override
+		public void onTaskCompleted(Roster roster) {
+			mRoster = roster;
+			mRoster.addRosterListener(mRosterEventHandler);
+			mContactsList.post(new Runnable() {
+				@Override
+				public void run() {
+					fillExpandableList(mRoster);
+					mAdapter.notifyDataSetChanged();
+				}
+			});
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			final String problem = String.format("Could not fetch roster: %s", e.getMessage());
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class InviteMateHandler extends BaseAsyncTaskCallback<String[]> {
+		@Override
+		public void onTaskCompleted(String[] connection_data) {
+			String user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
+			Toast.makeText(getActivity(), user_feedback, Toast.LENGTH_LONG).show();
+		}
+	
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to invite contact to team: %s", e.getMessage());
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class RosterEventHandler implements RosterListener {
+	
+		@Override
+		public void entriesAdded(Collection<String> arg0) {
+			Log.d(CLASS, "Entries have been added to the roster");
+			redrawOnUiThread();
+		}
+	
+		@Override
+		public void entriesDeleted(Collection<String> arg0) {
+			Log.d(CLASS, "Entries have been deleted from the roster");
+			redrawOnUiThread();
+		}
+	
+		@Override
+		public void entriesUpdated(Collection<String> arg0) {
+			Log.d(CLASS, "Entries have been updated in the roster");
+			redrawOnUiThread();
+		}
+	
+		@Override
+		public void presenceChanged(Presence presence) {
+			/*
+			String contact = StringUtils.parseBareAddress(presence.getFrom());
+			String groupName = UNFILED_GROUP;
+			RosterEntry entry = mRoster.getEntry(contact);
+			if (entry != null) {
+				groupName = ((RosterGroup)entry.getGroups().toArray()[0]).getName();
+			} else {
+				Log.d(CLASS, String.format("Couldn't get roster entry for '%s'", contact));
+			}
+			Log.d(CLASS, String.format("presence of '%s' in group '%s' has changed in the roster.", contact, groupName));
+			*/
+			
+			redrawOnUiThread();
+		}
+		
+		private void redrawOnUiThread() {
+			mContactsList.post(new Runnable() {
+				
+				@Override
+				public void run() {
+					fillExpandableList(mRoster);
+					mAdapter.notifyDataSetChanged();	
+				}
+			});
+		}
 	}
 }
