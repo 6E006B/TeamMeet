@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.text.Spanned;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.ArrayAdapter;
@@ -183,7 +185,8 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 			colour = "green";
 		}
 		final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
-		final String chatMessage = String.format("<b><font color=\"%s\">%s:</font></b> %s", colour, from, message.getMessage());
-		return Html.fromHtml(chatMessage);
+		final String sender = String.format("<b><font color=\"%s\">%s:</font></b> ", colour, from);
+		final Spanned senderHTML = Html.fromHtml(sender);
+		return TextUtils.concat(senderHTML, message.getMessage());
 	}
 }
