@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -64,9 +65,11 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		
 		setContentView(R.layout.chat);
 
-		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-		final String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
-		final String server = settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "");
+		final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		final String userIDKey = getString(R.string.preference_user_id_key);
+		final String userID = settings.getString(userIDKey, "");
+		final String serverKey = getString(R.string.preference_server_key);
+		final String server = settings.getString(serverKey, "");
 		mOwnID = String.format("%s@%s", userID, server);
 
 		mChatListView = (ListView)findViewById(R.id.chatListView);
