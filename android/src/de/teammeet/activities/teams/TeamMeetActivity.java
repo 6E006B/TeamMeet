@@ -18,7 +18,7 @@
  *
  */
 
-package de.teammeet;
+package de.teammeet.activities.teams;
 
 import java.util.List;
 
@@ -28,6 +28,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,9 +41,11 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
+import de.teammeet.R;
+import de.teammeet.activities.preferences.SettingsActivity;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.IXMPPService;
-import de.teammeet.xmpp.XMPPService;
+import de.teammeet.services.xmpp.XMPPService;
 
 public class TeamMeetActivity extends MapActivity {
 
@@ -93,9 +96,11 @@ public class TeamMeetActivity extends MapActivity {
 
 		mToastSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
 
-		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-		mFullscreen = settings.getBoolean(SettingsActivity.SETTING_FULLSCREEN, false);
-		mFollowingLocation = settings.getBoolean(SettingsActivity.SETTING_FOLLOW_LOCATION, false);
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		final String fullscreenKey = getString(R.string.preference_fullscreen_key);
+		mFullscreen = settings.getBoolean(fullscreenKey, false);
+		final String followLocationKey = getString(R.string.preference_auto_center_key);
+		mFollowingLocation = settings.getBoolean(followLocationKey, false);
 
 		createOverlays();
 	}

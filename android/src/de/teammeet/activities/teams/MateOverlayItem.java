@@ -1,4 +1,4 @@
-package de.teammeet;
+package de.teammeet.activities.teams;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.OverlayItem;

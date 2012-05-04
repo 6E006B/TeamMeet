@@ -1,4 +1,4 @@
-package de.teammeet;
+package de.teammeet.activities.roster;
 
 import org.jivesoftware.smack.XMPPException;
 
@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -22,13 +23,16 @@ import android.view.View;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.Toast;
+import de.teammeet.R;
+import de.teammeet.activities.preferences.SettingsActivity;
+import de.teammeet.activities.teams.TeamMeetActivity;
 import de.teammeet.interfaces.IXMPPService;
+import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
 import de.teammeet.tasks.FetchRosterTask;
-import de.teammeet.xmpp.XMPPService;
 
 public class RosterActivity extends FragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
 	private static String CLASS = RosterActivity.class.getSimpleName();
@@ -300,11 +304,10 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 			builder.setPositiveButton("Join", new DialogInterface.OnClickListener() {
 			           public void onClick(DialogInterface dialog, int id) {
 			                dialog.dismiss();
-			                SharedPreferences settings =
-			                		getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-			                final String userID =
-			                		settings.getString(SettingsActivity.SETTING_XMPP_USER_ID,
-			                		                   "anonymous");
+							final SharedPreferences settings = PreferenceManager.
+									getDefaultSharedPreferences(RosterActivity.this);
+							final String userIDKey = getString(R.string.preference_user_id_key);
+							final String userID = settings.getString(userIDKey, "anonymous");
 			                try {
 								mXMPPService.joinRoom(room, userID, password);
 							} catch (XMPPException e) {
@@ -438,8 +441,10 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 
 	public void enteredTeamName(String teamName) {
 		Log.d(CLASS, String.format("Will create team '%s'", teamName));
-		SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-		String conferenceSrv = settings.getString(SettingsActivity.SETTING_XMPP_CONFERENCE_SERVER, "");
+		final SharedPreferences settings =
+				PreferenceManager.getDefaultSharedPreferences(RosterActivity.this);
+		final String conferenceSrvKey = getString(R.string.preference_conference_server_key);
+		final String conferenceSrv = settings.getString(conferenceSrvKey, "");
 		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
 	}
 }

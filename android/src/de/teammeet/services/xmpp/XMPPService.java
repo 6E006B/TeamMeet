@@ -1,4 +1,4 @@
-package de.teammeet.xmpp;
+package de.teammeet.services.xmpp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,18 +30,18 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
-import de.teammeet.ChatActivity;
-import de.teammeet.ContactsFragment;
-import de.teammeet.GroupChatActivity;
-import de.teammeet.Mate;
 import de.teammeet.R;
-import de.teammeet.SettingsActivity;
-import de.teammeet.RosterActivity;
+import de.teammeet.activities.chat.ChatActivity;
+import de.teammeet.activities.chat.GroupChatActivity;
+import de.teammeet.activities.preferences.SettingsActivity;
+import de.teammeet.activities.roster.RosterActivity;
+import de.teammeet.activities.teams.Mate;
 import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
@@ -282,9 +282,11 @@ public class XMPPService extends Service implements IXMPPService {
 		acquireGroupsLock();
 		MultiUserChat muc = mRooms.get(roomName);
 		if (muc != null) {
-			SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFS_NAME, 0);
-			String userID = settings.getString(SettingsActivity.SETTING_XMPP_USER_ID, "");
-			String server = settings.getString(SettingsActivity.SETTING_XMPP_SERVER, "");
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+			String userID =
+					settings.getString(getString(R.string.preference_user_id_key), "");
+			String server =
+					settings.getString(getString(R.string.preference_server_key), "");
 			String alternateAddress = String.format("%s@%s", userID, server);
 			muc.destroy("reason", alternateAddress);
 			removeRoom(roomName);
@@ -507,7 +509,7 @@ public class XMPPService extends Service implements IXMPPService {
 		final Notification notification = new Notification(icon, tickerText, when);
 
 		final CharSequence contentTitle = "Group Invitation received";
-		final Intent notificationIntent = new Intent(this, ContactsFragment.class);
+		final Intent notificationIntent = new Intent(this, RosterActivity.class);
 		notificationIntent.putExtra(TYPE, TYPE_JOIN);
 		notificationIntent.putExtra(ROOM, room);
 		notificationIntent.putExtra(INVITER, inviter);

@@ -1,4 +1,4 @@
-package de.teammeet;
+package de.teammeet.activities.chat;
 
 import java.util.List;
 
@@ -18,11 +18,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
+import de.teammeet.R;
 import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IXMPPService;
-import de.teammeet.xmpp.ChatMessage;
-import de.teammeet.xmpp.XMPPService;
+import de.teammeet.services.xmpp.ChatMessage;
+import de.teammeet.services.xmpp.XMPPService;
 
 public class ChatActivity extends Activity implements IChatMessageHandler {
 
