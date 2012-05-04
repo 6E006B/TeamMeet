@@ -142,7 +142,6 @@ public class XMPPService extends Service implements IXMPPService {
 			mXMPP.removePacketListener(mChatMessageListener);
 			mXMPP.removePacketSendingListener(mChatMessageListener);
 		}
-		removeNotifications();
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -209,6 +208,7 @@ public class XMPPService extends Service implements IXMPPService {
 			}
 			mXMPP.disconnect();
 		}
+		removeNotifications();
 		mRooms = null;
 		mRoomInvitationListener = null;
 		mXMPP = null;
