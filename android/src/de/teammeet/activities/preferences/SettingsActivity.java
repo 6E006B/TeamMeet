@@ -23,6 +23,7 @@ package de.teammeet.activities.preferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import de.teammeet.R;
 
 public class SettingsActivity extends PreferenceActivity {
 
