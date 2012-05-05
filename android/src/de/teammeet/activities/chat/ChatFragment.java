@@ -80,6 +80,7 @@ public class ChatFragment extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		Log.d(CLASS, "ChatFragment.onCreateView()");
 		if (container == null) {
             // We have different layouts, and in one of them this
             // fragment's containing frame doesn't exist.  The fragment
@@ -165,6 +166,7 @@ public class ChatFragment extends Fragment {
 	@Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        Log.d(CLASS, "ChatFragment.onSaveInstanceState()");
         outState.putInt("lastState", mListAdapter.getCount());
     }
 
@@ -178,6 +180,18 @@ public class ChatFragment extends Fragment {
 		}
 		mXMPPService = null;
 		super.onPause();
+	}
+
+	@Override
+	public void onStop() {
+		Log.d(CLASS, "ChatFragment.onStop()");
+		super.onStop();
+	}
+
+	@Override
+	public void onDetach() {
+		Log.d(CLASS, "ChatFragment.onDetach()");
+		super.onDetach();
 	}
 
 	@Override
