@@ -28,9 +28,9 @@ import de.teammeet.services.xmpp.ChatMessage;
 import de.teammeet.services.xmpp.XMPPService;
 
 public class ChatFragment extends Fragment {
-	
+
 	private static final String CLASS = ChatFragment.class.getSimpleName();
-	
+
 	private ListView mChatListView = null;
 	private ArrayAdapter<CharSequence> mListAdapter = null;
 	private EditText mChatEditText = null;
@@ -41,7 +41,6 @@ public class ChatFragment extends Fragment {
 
 	private XMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
-
 
 	private class XMPPServiceConnection implements ServiceConnection {
 
@@ -106,7 +105,6 @@ public class ChatFragment extends Fragment {
 			mChatEditText.setEnabled(false);
 		}
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
-
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				String sendText = v.getText().toString();

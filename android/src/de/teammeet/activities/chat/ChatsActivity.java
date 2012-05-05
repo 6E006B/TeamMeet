@@ -107,7 +107,6 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 			Log.d(CLASS, "setting position to " + mChatFragmentList.indexOf(chatFragment));
 			mViewPager.setCurrentItem(mChatFragmentList.indexOf(chatFragment));
 			setTitle(counterpart);
-//			mPagerAdapter.getItem(mPagerAdapter.getItemPosition(chatFragment));
 		} else {
 			Log.e(CLASS, "Intent did not contain a sender of message.");
 		}
