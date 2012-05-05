@@ -7,7 +7,6 @@ import java.util.Vector;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -20,7 +19,7 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 
 	private ViewPager mViewPager;
 	private ChatsAdapter mPagerAdapter;
-	private List<Fragment> mChatFragmentList = new Vector<Fragment>();
+	private List<ChatFragment> mChatFragmentList = new Vector<ChatFragment>();
 
 	private Map<String, ChatFragment> mChatFragmentsMap = new HashMap<String, ChatFragment>();
 

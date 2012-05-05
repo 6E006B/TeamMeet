@@ -8,9 +8,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 public class ChatsAdapter extends FragmentPagerAdapter {
 
-	private List<Fragment> mFragments;
+	private List<ChatFragment> mFragments;
 
-	public ChatsAdapter(FragmentManager fragmentManager, List<Fragment> fragments) {
+	public ChatsAdapter(FragmentManager fragmentManager, List<ChatFragment> fragments) {
 		super(fragmentManager);
 		mFragments = fragments;
 
