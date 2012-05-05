@@ -32,18 +32,15 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 	private String mContact;
 	private String mOwnID;
 	private String mOwnUsername;
-	private XMPPService mXMPPService;
-	private ChatActivity mMessageHandler;
+	private ChatFragment mMessageHandler;
 	private ChatOpenHelper mDatabase;
 	
-	public Chat(int type, String counterpart, XMPPService xmppService,
-			ChatActivity messageHandler) {
+	public Chat(int type, String counterpart, ChatFragment messageHandler) {
 		Log.d(CLASS, String.format("Chat(%d, '%s', ...)", type, counterpart));
 		mType = type;
 		mCounterpart = counterpart;
-		mXMPPService = xmppService;
 		mMessageHandler = messageHandler;
-		mDatabase = new ChatOpenHelper(mXMPPService);
+		mDatabase = new ChatOpenHelper(mMessageHandler.getActivity().getApplicationContext());
 
 		mContact = getUsernameAndServer(mCounterpart);
 
@@ -55,7 +52,7 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 		}
 
 		final SharedPreferences settings = PreferenceManager.
-				getDefaultSharedPreferences(mMessageHandler.getApplicationContext());
+				getDefaultSharedPreferences(mMessageHandler.getActivity().getApplicationContext());
 		final String userIDKey = mMessageHandler.getString(R.string.preference_user_id_key);
 		mOwnUsername = settings.getString(userIDKey, "");
 		final String serverKey = mMessageHandler.getString(R.string.preference_server_key);
@@ -74,16 +71,12 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 		}
 	}
 
-	public Chat(Intent intent, XMPPService xmppService, ChatActivity messageHandler) {
+	public Chat(Intent intent, ChatFragment messageHandler) {
 		this(intent.getIntExtra(XMPPService.TYPE, 0),
 		     intent.getStringExtra(XMPPService.SENDER),
-		     xmppService,
 		     messageHandler);
 	}
 
-	public void setXMPPService(XMPPService xmppService) {
-		mXMPPService = xmppService;
-	}
 	public List<ChatMessage> fetchMessages() {
 		List<ChatMessage> messageList = null;
 		switch (mType) {
@@ -98,16 +91,16 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 		return messageList;
 	}
 
-	public void sendMessage(String message) throws XMPPException {
+	public void sendMessage(String message, XMPPService xmppService) throws XMPPException {
 		if (!message.equals("")) {
 			Log.d(CLASS, "sending: " + message);
 			switch (mType) {
 			case TYPE_NORMAL_CHAT:
-				mXMPPService.sendChatMessage(mCounterpart, message);
+				xmppService.sendChatMessage(mCounterpart, message);
 				break;
 
 			case TYPE_GROUP_CHAT:
-				mXMPPService.sendToGroup(mCounterpart, message);
+				xmppService.sendToGroup(mCounterpart, message);
 				break;
 			}
 		} else {

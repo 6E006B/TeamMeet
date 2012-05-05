@@ -53,12 +53,8 @@
             android:launchMode="singleTop" >
         </activity>
         <activity
-            android:name=".activities.chat.GroupChatActivity"
-            android:launchMode="singleTop" >
-        </activity>
-        <activity
-            android:name=".activities.chat.ChatActivity"
-            android:launchMode="singleTop" >
+            android:name=".activities.chat.ChatsActivity"
+            android:launchMode="singleInstance" >
         </activity>
 
         <uses-library android:name="com.google.android.maps" />
