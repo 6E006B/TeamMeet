@@ -173,8 +173,10 @@ public class ChatFragment extends Fragment {
 	@Override
 	public void onPause() {
 		Log.d(CLASS, "ChatFragment.onPause()");
-		mXMPPService.unregisterChatMessageHandler(mChat);
-		mXMPPService.unregisterGroupMessageHandler(mChat);
+		if (mXMPPService != null) {
+			mXMPPService.unregisterChatMessageHandler(mChat);
+			mXMPPService.unregisterGroupMessageHandler(mChat);
+		}
 		if (mXMPPServiceConnection != null) {
 			getActivity().unbindService(mXMPPServiceConnection);
 		}
