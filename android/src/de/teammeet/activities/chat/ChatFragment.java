@@ -51,6 +51,8 @@ public class ChatFragment extends Fragment {
 						 className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 
+			mChatEditText.setEnabled(true);
+
 			mXMPPService.registerChatMessageHandler(mChat);
 			mXMPPService.registerGroupMessageHandler(mChat);
 		}
@@ -99,6 +101,9 @@ public class ChatFragment extends Fragment {
 		mListAdapter = new ArrayAdapter<CharSequence>(getActivity(), R.layout.chat_item);
 		mChatListView.setAdapter(mListAdapter);
 		mChatEditText = (EditText) rootView.findViewById(R.id.chatInput);
+		if (mXMPPService == null) {
+			mChatEditText.setEnabled(false);
+		}
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
 
 			@Override
