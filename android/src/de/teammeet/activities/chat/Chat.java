@@ -149,7 +149,6 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 
 		final String sender = String.format("<b><font color=\"%s\">%s:</font></b> ", colour, from);
 		final Spanned senderHTML = Html.fromHtml(sender);
-		Log.d(CLASS, "inhere");
 		return TextUtils.concat(senderHTML, message.getMessage());
 	}
 
@@ -174,7 +173,6 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 		if (mType == TYPE_GROUP_CHAT) {
 			Log.d(CLASS, "Chat.handleGroupMessage()");
 			if (isConcerned(message)) {
-				Log.d(CLASS, "isconcerned");
 				mMessageHandler.handleMessage(createMessageSequence(message));
 				handled = true;
 			}

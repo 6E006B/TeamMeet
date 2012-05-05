@@ -101,7 +101,6 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 				chatFragment = ChatFragment.getInstance(type, counterpart);
 				mChatFragmentsMap.put(counterpart, chatFragment);
 				mChatFragmentList.add(chatFragment);
-//				AddTab(this, mTabHost, tabSpec, tabInfo);
 			} else {
 				chatFragment = mChatFragmentsMap.get(counterpart);
 			}
