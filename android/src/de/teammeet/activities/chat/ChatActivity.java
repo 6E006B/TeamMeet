@@ -2,18 +2,16 @@ package de.teammeet.activities.chat;
 
 import java.util.List;
 
+import org.jivesoftware.smack.XMPPException;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
-import android.text.Html;
-import android.text.Spanned;
-import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -22,25 +20,22 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import de.teammeet.R;
-import de.teammeet.helper.ChatOpenHelper;
-import de.teammeet.interfaces.IChatMessageHandler;
-import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.ChatMessage;
 import de.teammeet.services.xmpp.XMPPService;
 
-public class ChatActivity extends Activity implements IChatMessageHandler {
+public class ChatActivity extends Activity {
 
 	private static final String CLASS = ChatActivity.class.getSimpleName();
 
 	private ListView mChatListView = null;
 	private ArrayAdapter<CharSequence> mListAdapter = null;
 	private EditText mChatEditText = null;
-	private String mSender = null;
-	private ChatOpenHelper mDatabase = null;
+	private Chat mChat = null;
+	public Intent mCurrentIntent = null;
 
-	private IXMPPService mXMPPService = null;
+	private XMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
-	private String mOwnID;
+
 
 	private class XMPPServiceConnection implements ServiceConnection {
 
@@ -49,7 +44,13 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceConnected('" +
 						 className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
-			mXMPPService.registerChatMessageHandler(ChatActivity.this);
+
+			Log.d(CLASS, "ChatActivity: " + getIntent().getIntExtra(XMPPService.TYPE, 0));
+			Log.d(CLASS, "ChatActivity: " + getIntent().getStringExtra(XMPPService.SENDER));
+			handleIntent(mCurrentIntent);
+
+			mXMPPService.registerChatMessageHandler(mChat);
+			mXMPPService.registerGroupMessageHandler(mChat);
 		}
 
 		@Override
@@ -67,38 +68,43 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 		
 		setContentView(R.layout.chat);
 
-		final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-		final String userIDKey = getString(R.string.preference_user_id_key);
-		final String userID = settings.getString(userIDKey, "");
-		final String serverKey = getString(R.string.preference_server_key);
-		final String server = settings.getString(serverKey, "");
-		mOwnID = String.format("%s@%s", userID, server);
-
 		mChatListView = (ListView)findViewById(R.id.chatListView);
 		mListAdapter = new ArrayAdapter<CharSequence>(this, R.layout.chat_item);
 		mChatListView.setAdapter(mListAdapter);
 		mChatEditText = (EditText)findViewById(R.id.chatInput);
+
+		mCurrentIntent = getIntent();
+
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
+
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				String sendText = v.getText().toString();
-				if (!sendText.equals("")) {
-					Log.d(CLASS, "sending: " + sendText);
-					mXMPPService.sendChatMessage(mSender, sendText);
+				try {
+					mChat.sendMessage(sendText);
 					v.setText("");
-				} else {
-					Log.d(CLASS, "not sending empty message");
+				} catch (XMPPException e) {
+					final String errorMessage = "Unable to send message:\n" + e.getMessage();
+					Log.e(CLASS, errorMessage);
+					e.printStackTrace();
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							final Toast toast = Toast.makeText(ChatActivity.this, errorMessage,
+							                                   Toast.LENGTH_LONG);
+							toast.setGravity(Gravity.BOTTOM, 0, 0);
+							toast.show();
+						}
+					});
 				}
 				return true;
 			}
 		});
-
-		mDatabase = new ChatOpenHelper(getApplicationContext());
-		handleIntent(getIntent());
 	}
 
 	@Override
 	protected void onResume() {
+		Log.d(CLASS, "ChatActivity.onResume()");
 		super.onResume();
 
 		// create the service (if it isn't already running)
@@ -119,7 +125,9 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 
 	@Override
 	protected void onPause() {
-		mXMPPService.unregisterChatMessageHandler(this);
+		Log.d(CLASS, "ChatActivity.onPause()");
+		mXMPPService.unregisterChatMessageHandler(mChat);
+		mXMPPService.unregisterGroupMessageHandler(mChat);
 		if (mXMPPServiceConnection != null) {
 			unbindService(mXMPPServiceConnection);
 		}
@@ -128,6 +136,11 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 	}
 
 	@Override
+	protected void onDestroy() {
+		Log.d(CLASS, "ChatActivity.onDestroy()");
+		super.onDestroy();
+	}
+	@Override
 	protected void onNewIntent(Intent intent) {
 		Log.d(CLASS, "ChatActivity.onNewIntent()");
 		super.onNewIntent(intent);
@@ -135,58 +148,25 @@ public class ChatActivity extends Activity implements IChatMessageHandler {
 	}
 
 	private void handleIntent(Intent intent) {
-		mSender = intent.getStringExtra(XMPPService.SENDER);
-		if (mSender != null) {
-			int slashIndex = mSender.indexOf('/');
-			if (slashIndex != -1) {
-				mSender = mSender.substring(0, slashIndex);
-			}
-			Log.d(CLASS, "chat with " + mSender);
-			List<ChatMessage> messages = mDatabase.getMessages(mSender);
-			for (ChatMessage message : messages) {
-				mListAdapter.add(createMessageSequence(message));
-			}
-			mListAdapter.notifyDataSetChanged();
-			mChatListView.setSelection(mListAdapter.getCount());
-		} else {
-			final String error = "ChatActivity intent has no sender";
-			Log.e(CLASS, error);
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					Toast.makeText(ChatActivity.this, error, Toast.LENGTH_LONG).show();
-				}
-			});
+		mChat = new Chat(intent, mXMPPService, this);
+		List<ChatMessage> messages = mChat.fetchMessages();
+		for (ChatMessage message : messages) {
+			mListAdapter.add(mChat.createMessageSequence(message));
 		}
+		mListAdapter.notifyDataSetChanged();
+		mChatListView.setSelection(mListAdapter.getCount());
 	}
 
-	@Override
-	public boolean handleMessage(final ChatMessage message) {
-		Log.d(CLASS, "ChatActivity.handleMessage()");
-		boolean handled = false;
-		if(message.getTo().startsWith(mSender) || message.getFrom().startsWith(mSender)) {
-			mChatListView.post(new Runnable() {
-				@Override
-				public void run() {
-					mListAdapter.add(createMessageSequence(message));
-					mListAdapter.notifyDataSetChanged();
-					Log.d(CLASS, "list adapter count is "+mListAdapter.getCount());
-					mChatListView.setSelection(mListAdapter.getCount());
-				}
-			});
-			handled = true;
-		}
-		return handled;
-	}
-
-	private CharSequence createMessageSequence(ChatMessage message) {
-		String colour = "red";
-		if (message.getFrom().startsWith(mOwnID)) {
-			colour = "green";
-		}
-		final String from = message.getFrom().substring(0, message.getFrom().indexOf('@'));
-		final String sender = String.format("<b><font color=\"%s\">%s:</font></b> ", colour, from);
-		final Spanned senderHTML = Html.fromHtml(sender);
-		return TextUtils.concat(senderHTML, message.getMessage());
+	public void handleMessage(final CharSequence message) {
+		Log.d(CLASS, String.format("ChatActivity.handleMessage('%s')", message));
+		mChatListView.post(new Runnable() {
+			@Override
+			public void run() {
+				mListAdapter.add(message);
+				mListAdapter.notifyDataSetChanged();
+				Log.d(CLASS, "list adapter count is "+mListAdapter.getCount());
+				mChatListView.setSelection(mListAdapter.getCount());
+			}
+		});
 	}
 }

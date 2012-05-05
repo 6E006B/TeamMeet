@@ -37,9 +37,8 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
 import de.teammeet.R;
+import de.teammeet.activities.chat.Chat;
 import de.teammeet.activities.chat.ChatActivity;
-import de.teammeet.activities.chat.GroupChatActivity;
-import de.teammeet.activities.preferences.SettingsActivity;
 import de.teammeet.activities.roster.RosterActivity;
 import de.teammeet.activities.teams.Mate;
 import de.teammeet.helper.ChatOpenHelper;
@@ -96,7 +95,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private int mBindCounter = 0;
 
 	private TimerTask mTimerTask = null;
-	private ChatOpenHelper mGroupChatDatabase = null;
+	private ChatOpenHelper mChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
 
 	public class LocalBinder extends Binder {
@@ -110,7 +109,7 @@ public class XMPPService extends Service implements IXMPPService {
 		super.onCreate();
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
-		mGroupChatDatabase = new ChatOpenHelper(this);
+		mChatDatabase = new ChatOpenHelper(this);
 	}
 
 	@Override
@@ -553,7 +552,7 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	public void newGroupMessage(ChatMessage message) {
-		mGroupChatDatabase.addMessage(message);
+		mChatDatabase.addMessage(message);
 
 		boolean handled = false;
 		Log.d(CLASS, String.format("newGroupMessage('%s', '%s', '%d', '%s')",
@@ -589,8 +588,9 @@ public class XMPPService extends Service implements IXMPPService {
 		final Notification notification = new Notification(icon, tickerText, when);
 
 		final CharSequence contentTitle = "Group chat message received";
-		final Intent notificationIntent = new Intent(this, GroupChatActivity.class);
-		notificationIntent.putExtra(GROUP, message.getTo());
+		final Intent notificationIntent = new Intent(this, ChatActivity.class);
+		notificationIntent.putExtra(TYPE, Chat.TYPE_GROUP_CHAT);
+		notificationIntent.putExtra(SENDER, message.getTo());
 		notificationIntent.setAction(Long.toString(when));
 		final PendingIntent contentIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent,
@@ -628,7 +628,7 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	public void handleNewChatMessage(ChatMessage message) {
-		mGroupChatDatabase.addMessage(message);
+		mChatDatabase.addMessage(message);
 
 		boolean handled = false;
 		acquireChatMessageLock();
@@ -662,6 +662,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 		final CharSequence contentTitle = "Chat message received";
 		final Intent notificationIntent = new Intent(this, ChatActivity.class);
+		notificationIntent.putExtra(TYPE, Chat.TYPE_NORMAL_CHAT);
 		notificationIntent.putExtra(SENDER, message.getFrom());
 		notificationIntent.setAction(Long.toString(when));
 		final PendingIntent contentIntent =
