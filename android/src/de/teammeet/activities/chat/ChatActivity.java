@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.jivesoftware.smack.XMPPException;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -19,11 +18,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.SherlockActivity;
+
 import de.teammeet.R;
 import de.teammeet.services.xmpp.ChatMessage;
 import de.teammeet.services.xmpp.XMPPService;
 
-public class ChatActivity extends Activity {
+public class ChatActivity extends SherlockActivity {
 
 	private static final String CLASS = ChatActivity.class.getSimpleName();
 
@@ -63,6 +65,7 @@ public class ChatActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
 		super.onCreate(savedInstanceState);
 		Log.d(CLASS, "onCreate(): started chat activity");
 		
