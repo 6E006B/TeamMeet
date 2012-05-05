@@ -97,6 +97,7 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 		// TODO Auto-generated method stub
 		if (counterpart != null) {
 			ChatFragment chatFragment;
+			Log.d(CLASS, "loading chat fragment for " + counterpart);
 			if (!mChatFragmentsMap.containsKey(counterpart)) {
 				chatFragment = ChatFragment.getInstance(type, counterpart);
 				mChatFragmentsMap.put(counterpart, chatFragment);
@@ -104,7 +105,8 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 			} else {
 				chatFragment = mChatFragmentsMap.get(counterpart);
 			}
-			mViewPager.setCurrentItem(mPagerAdapter.getItemPosition(chatFragment), true);
+			Log.d(CLASS, "setting position to " + mChatFragmentList.indexOf(chatFragment));
+			mViewPager.setCurrentItem(mChatFragmentList.indexOf(chatFragment));
 //			mPagerAdapter.getItem(mPagerAdapter.getItemPosition(chatFragment));
 		} else {
 			Log.e(CLASS, "Intent did not contain a sender of message.");
