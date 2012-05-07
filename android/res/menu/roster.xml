@@ -5,7 +5,8 @@
         android:id="@+id/roster_menu_connect"
         android:enabled="false"
         android:title="@string/roster_menu_connect"
-        android:titleCondensed="@string/roster_menu_connect_condensed"/>
+        android:titleCondensed="@string/roster_menu_connect_condensed"
+        android:showAsAction="ifRoom" />
     <item
         android:id="@+id/roster_menu_show_map"
         android:title="@string/roster_menu_show_map"
@@ -14,7 +15,8 @@
         android:id="@+id/roster_menu_form_team"
         android:enabled="false"
         android:title="@string/roster_menu_form_team"
-        android:titleCondensed="@string/roster_menu_form_team_condensed"/>
+        android:titleCondensed="@string/roster_menu_form_team_condensed"
+        android:showAsAction="ifRoom" />
     <item
         android:id="@+id/roster_menu_settings"
         android:title="@string/roster_menu_settings"
