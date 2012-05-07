@@ -36,6 +36,7 @@ import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
+import de.teammeet.tasks.FetchRoomsTask;
 import de.teammeet.tasks.FetchRosterTask;
 
 public class RosterActivity extends SherlockFragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
@@ -57,13 +58,24 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder binder) {
-			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
+			Log.d(CLASS, "RosterActivity has been (re-)bound to XMPP service ('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 
 			if (mXMPPService.isAuthenticated()) {
 				// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
 				ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
-				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
+				if (contacts != null) {
+					// fragment has been created despite lazy creation
+					new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
+				}
+				
+				// spawn `FetchRoomsTask` but have it handled in the `TeamsFragment`
+				TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
+				if (teams != null) {
+					// fragment has been created despite lazy creation
+					Log.d(CLASS, String.format("teams is '%s'", teams));
+					new FetchRoomsTask(mXMPPService, teams.new FetchRoomsHandler()).execute();
+				}
 			}
 			if (mCurrentIntent != null) {
 				handleIntent(mCurrentIntent);
@@ -86,7 +98,18 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 			invalidateOptionsMenu();
 			// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
 			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
-			new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
+			if (contacts != null) {
+				// fragment has been created despite lazy creation
+				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
+			}
+			
+			// spawn `FetchRoomsTask` but have it handled in the `TeamsFragment`
+			TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
+			if (teams != null) {
+				// fragment has been created despite lazy creation
+				Log.d(CLASS, String.format("teams is '%s'", teams));
+				new FetchRoomsTask(mXMPPService, teams.new FetchRoomsHandler()).execute();
+			}
 		}
 		
 		@Override
@@ -101,8 +124,18 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		public void onTaskCompleted(Void result) {
 			Log.d(CLASS, "you're now disconnected");
 			invalidateOptionsMenu();
+			
 			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
-			contacts.handleDisconnect();
+			if (contacts != null) {
+				// fragment has been created despite lazy creation
+				contacts.handleDisconnect();
+			}
+			
+			TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
+			if (teams != null) {
+				// fragment has been created despite lazy creation
+				teams.handleDisconnect();
+			}
 		}
 	}
 	
