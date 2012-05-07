@@ -43,7 +43,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
 import de.teammeet.R;
-import de.teammeet.activities.roster.RosterActivity;
+import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
@@ -207,7 +207,7 @@ public class TeamMeetActivity extends SherlockMapActivity {
 
 		switch (item.getItemId()) {
 			case android.R.id.home:
-				navigateUpInHierarchy();
+				ActionBarHelper.navigateUpInHierarchy(this);
 				break;
 		
 			case R.id.goto_mylocation:
@@ -232,12 +232,6 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void navigateUpInHierarchy() {
-		Intent intent = new Intent(this, RosterActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		startActivity(intent);
-	}
-	
 	private void toggleFollowingLocation() {
 		mFollowingLocation = !mFollowingLocation;
 		mMyLocationOverlay.followLocation(mFollowingLocation);

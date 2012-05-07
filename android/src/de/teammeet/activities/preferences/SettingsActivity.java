@@ -20,7 +20,6 @@
 
 package de.teammeet.activities.preferences;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
@@ -29,7 +28,7 @@ import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.teammeet.R;
-import de.teammeet.activities.roster.RosterActivity;
+import de.teammeet.helper.ActionBarHelper;
 
 public class SettingsActivity extends SherlockPreferenceActivity {
 
@@ -54,16 +53,10 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 
 		switch (item.getItemId()) {
 			case android.R.id.home:
-				navigateUpInHierarchy();
+				ActionBarHelper.navigateUpInHierarchy(this);
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
-	}
-	
-	private void navigateUpInHierarchy() {
-		Intent intent = new Intent(this, RosterActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		startActivity(intent);
 	}
 }
