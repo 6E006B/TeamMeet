@@ -86,6 +86,8 @@ public class TeamsFragment extends Fragment {
 			Map<String, String> roomStruct = new HashMap<String, String>();
 			roomStruct.put(NAME, room);
 			mExpandableGroups.add(roomStruct);
+			List<Map<String, String>> membersStruct = new ArrayList<Map<String,String>>();
+			mExpandableChildren.add(membersStruct);
 		}
 
 	}
