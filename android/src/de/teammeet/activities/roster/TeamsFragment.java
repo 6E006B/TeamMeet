@@ -1,10 +1,14 @@
 package de.teammeet.activities.roster;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smackx.muc.Occupant;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.SimpleExpandableListAdapter;
+import android.widget.Toast;
 import de.teammeet.R;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
@@ -25,7 +30,7 @@ public class TeamsFragment extends Fragment {
 	private static final String CLASS = TeamsFragment.class.getSimpleName();
 	
 	private static final String NAME = "name";
-	private static final String AVAILABILITY = "avail";
+	private static final String AFFILIATION = "affiliation";
 	
 	private SimpleExpandableListAdapter mAdapter;
 	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
@@ -46,7 +51,7 @@ public class TeamsFragment extends Fragment {
 				new int[] { android.R.id.text1},
 				mExpandableChildren,
 				android.R.layout.simple_expandable_list_item_2,
-				new String[] { NAME, AVAILABILITY },
+				new String[] { NAME, AFFILIATION },
 				new int[] { android.R.id.text1, android.R.id.text2}
 				);
 	}
@@ -81,13 +86,29 @@ public class TeamsFragment extends Fragment {
 	private void fillExpandableList(Set<String> rooms) {
 		mExpandableGroups.clear();
 		mExpandableChildren.clear();
+		
+		IXMPPService xmppService = ((RosterActivity) getActivity()).getXMPPService();
 
 		for (String room : rooms) {
 			Map<String, String> roomStruct = new HashMap<String, String>();
+			List<Map<String, String>> membersStruct = new ArrayList<Map<String,String>>();
+			
 			roomStruct.put(NAME, room);
 			mExpandableGroups.add(roomStruct);
-			List<Map<String, String>> membersStruct = new ArrayList<Map<String,String>>();
-			mExpandableChildren.add(membersStruct);
+			
+			try {
+				Collection<Occupant> participants = xmppService.getParticipants(room);
+				for (Occupant participant : participants) {
+					HashMap<String, String> participantStruct = new HashMap<String, String>();
+					participantStruct.put(NAME, participant.getJid());
+					participantStruct.put(AFFILIATION, participant.getAffiliation());
+					membersStruct.add(participantStruct);
+				}
+				mExpandableChildren.add(membersStruct);
+			} catch (XMPPException e) {
+				Log.e(CLASS, String.format("Failed to fetch members: '%s'", e.getMessage()), e);
+				Toast.makeText(getActivity(), String.format("Failed to fetch participants for room '%s'", room), Toast.LENGTH_LONG).show();
+			}
 		}
 
 	}

@@ -1,6 +1,7 @@
 package de.teammeet.services.xmpp;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.muc.Occupant;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -296,6 +298,16 @@ public class XMPPService extends Service implements IXMPPService {
 	@Override
 	public Set<String> getRooms() {
 		return mRooms.keySet();
+	}
+	
+	@Override
+	public Collection<Occupant> getParticipants(String room) throws XMPPException {
+		MultiUserChat muc = mRooms.get(room);
+		Collection<Occupant> members = new ArrayList<Occupant>();
+		if (muc != null) {
+			members = muc.getParticipants();
+		}
+		return members;
 	}
 	
 	@Override
