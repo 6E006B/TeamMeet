@@ -31,7 +31,6 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
 		super.onCreate(savedInstanceState);
 
 		// Make sure default values are applied.  In a real app, you would

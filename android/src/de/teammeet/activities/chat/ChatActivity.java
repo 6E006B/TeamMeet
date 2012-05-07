@@ -65,7 +65,6 @@ public class ChatActivity extends SherlockActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
 		super.onCreate(savedInstanceState);
 		Log.d(CLASS, "onCreate(): started chat activity");
 		
