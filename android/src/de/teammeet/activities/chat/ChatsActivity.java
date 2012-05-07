@@ -14,6 +14,9 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 
 	private static final String CLASS = ChatsActivity.class.getSimpleName();
 
+	private static final String CHAT_INFORMATION_LIST_KEY = "chat_information_list_key";
+	private static final String ACTIVE_CHAT_WINDOW_KEY = "active_chat_window_key";
+
 	private ViewPager mViewPager;
 	private ChatsAdapter mPagerAdapter;
 	private ArrayList<ChatInformation> mChatInformationList = new ArrayList<ChatInformation>();
@@ -27,9 +30,19 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 		// Inflate the layout
 		setContentView(R.layout.chats);
 
+		if (savedInstanceState != null) {
+			mChatInformationList = savedInstanceState.getParcelableArrayList(CHAT_INFORMATION_LIST_KEY);
+		} else {
+			Log.d(CLASS, "No instance to restore from.");
+		}
+
 		// Intialise ViewPager
 		intialiseViewPager();
-		
+
+		if (savedInstanceState != null) {
+			mViewPager.setCurrentItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
+		}
+
 		handleIntent(getIntent());
 	}
 
@@ -55,6 +68,15 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 		mViewPager = (ViewPager)super.findViewById(R.id.viewpager);
 		mViewPager.setAdapter(mPagerAdapter);
 		mViewPager.setOnPageChangeListener(this);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		Log.d(CLASS, "ChatsActivity.onSaveInstanceState()");
+		outState.putParcelableArrayList(ChatsActivity.CHAT_INFORMATION_LIST_KEY,
+		                                mChatInformationList);
+		outState.putInt(ACTIVE_CHAT_WINDOW_KEY, mViewPager.getCurrentItem());
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
