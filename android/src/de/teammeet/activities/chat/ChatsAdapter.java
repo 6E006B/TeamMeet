@@ -8,21 +8,21 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 public class ChatsAdapter extends FragmentPagerAdapter {
 
-	private List<ChatFragment> mFragments;
+	private List<ChatInformation> mChatInformationList;
 
-	public ChatsAdapter(FragmentManager fragmentManager, List<ChatFragment> fragments) {
+	public ChatsAdapter(FragmentManager fragmentManager, List<ChatInformation> chatInformationList) {
 		super(fragmentManager);
-		mFragments = fragments;
-
+		mChatInformationList = chatInformationList;
 	}
 
 	@Override
 	public Fragment getItem(int position) {
-		return mFragments.get(position);
+		ChatInformation chatInfo = mChatInformationList.get(position);
+		return ChatFragment.getInstance(chatInfo.getType(), chatInfo.getCounterpart());
 	}
 
 	@Override
 	public int getCount() {
-		return mFragments.size();
+		return mChatInformationList.size();
 	}
 }

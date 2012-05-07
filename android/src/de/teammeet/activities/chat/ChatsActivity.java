@@ -1,9 +1,6 @@
 package de.teammeet.activities.chat;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,9 +16,7 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 
 	private ViewPager mViewPager;
 	private ChatsAdapter mPagerAdapter;
-	private List<ChatFragment> mChatFragmentList = new Vector<ChatFragment>();
-
-	private Map<String, ChatFragment> mChatFragmentsMap = new HashMap<String, ChatFragment>();
+	private ArrayList<ChatInformation> mChatInformationList = new ArrayList<ChatInformation>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +50,7 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 	 */
 	private void intialiseViewPager() {
 
-		mPagerAdapter = new ChatsAdapter(super.getSupportFragmentManager(), mChatFragmentList);
+		mPagerAdapter = new ChatsAdapter(super.getSupportFragmentManager(), mChatInformationList);
 
 		mViewPager = (ViewPager)super.findViewById(R.id.viewpager);
 		mViewPager.setAdapter(mPagerAdapter);
@@ -95,17 +90,16 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 	private void handleChatIntent(String counterpart, int type) {
 		// TODO Auto-generated method stub
 		if (counterpart != null) {
-			ChatFragment chatFragment;
+			ChatInformation chatInfo = new ChatInformation(type, counterpart);
 			Log.d(CLASS, "loading chat fragment for " + counterpart);
-			if (!mChatFragmentsMap.containsKey(counterpart)) {
-				chatFragment = ChatFragment.getInstance(type, counterpart);
-				mChatFragmentsMap.put(counterpart, chatFragment);
-				mChatFragmentList.add(chatFragment);
-			} else {
-				chatFragment = mChatFragmentsMap.get(counterpart);
+
+			int position = mChatInformationList.indexOf(chatInfo);
+			if (position == -1) {
+				mChatInformationList.add(chatInfo);
+				position = mChatInformationList.indexOf(chatInfo);
 			}
-			Log.d(CLASS, "setting position to " + mChatFragmentList.indexOf(chatFragment));
-			mViewPager.setCurrentItem(mChatFragmentList.indexOf(chatFragment));
+			Log.d(CLASS, "setting position to " + position);
+			mViewPager.setCurrentItem(position);
 			setTitle(counterpart);
 		} else {
 			Log.e(CLASS, "Intent did not contain a sender of message.");
@@ -126,12 +120,8 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 	@Override
 	public void onPageSelected(int position) {
 		// TODO Auto-generated method stub
-		ChatFragment currentChatFragment = mChatFragmentList.get(position);
-		for (String name : mChatFragmentsMap.keySet()) {
-			if (currentChatFragment == mChatFragmentsMap.get(name)) {
-				setTitle(name);
-			}
-		}
+		ChatInformation chatInfo = mChatInformationList.get(position);
+		setTitle(chatInfo.getCounterpart());
 	}
 
 }
