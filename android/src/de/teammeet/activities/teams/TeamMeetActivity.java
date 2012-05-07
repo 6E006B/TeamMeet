@@ -33,6 +33,7 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockMapActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -42,6 +43,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
 import de.teammeet.R;
+import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
@@ -90,10 +92,12 @@ public class TeamMeetActivity extends SherlockMapActivity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.mapview);
 
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		
 		mToastSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -202,26 +206,30 @@ public class TeamMeetActivity extends SherlockMapActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
+			case android.R.id.home:
+				ActionBarHelper.navigateUpInHierarchy(this);
+				return true;
+		
 			case R.id.goto_mylocation:
 				focusCurrentLocation();
-				break;
+				return true;
 
 			case R.id.auto_center:
 				toggleFollowingLocation();
-				break;
+				return true;
 
 			case R.id.satellite_view:
 				toggleSatelliteView();
-				break;
+				return true;
 
 			case R.id.fullscreen:
 				toggleFullscreen();
-				break;
-
+				return true;
+				
 			default:
-				break;
+				return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
+		
 	}
 
 	private void toggleFollowingLocation() {
