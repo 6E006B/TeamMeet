@@ -20,12 +20,16 @@
 
 package de.teammeet.activities.preferences;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.actionbarsherlock.view.MenuItem;
 
 import de.teammeet.R;
+import de.teammeet.activities.roster.RosterActivity;
 
 public class SettingsActivity extends SherlockPreferenceActivity {
 
@@ -33,6 +37,9 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		
 		// Make sure default values are applied.  In a real app, you would
 		// want this in a shared function that is used to retrieve the
 		// SharedPreferences wherever they are needed.
@@ -40,5 +47,23 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 
 		// Load the preferences from an XML resource
 		addPreferencesFromResource(R.xml.preference_settings);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				navigateUpInHierarchy();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	private void navigateUpInHierarchy() {
+		Intent intent = new Intent(this, RosterActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
 	}
 }
