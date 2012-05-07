@@ -9,9 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-public class Teams extends Fragment {
+public class TeamsFragment extends Fragment {
 
-	private static final String CLASS = Teams.class.getSimpleName();
+	private static final String CLASS = TeamsFragment.class.getSimpleName();
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return (LinearLayout) inflater.inflate(R.layout.teams, container, false);

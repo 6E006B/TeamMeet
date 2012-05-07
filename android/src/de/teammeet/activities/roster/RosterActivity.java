@@ -158,8 +158,8 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 
 		tab = actionBar.newTab();
 		tab.setText(R.string.tab_teams);
-		tab.setTabListener(new TabListener<Teams>(
-					this, TEAMS_TAB_ID, Teams.class));
+		tab.setTabListener(new TabListener<TeamsFragment>(
+					this, TEAMS_TAB_ID, TeamsFragment.class));
 		actionBar.addTab(tab);
 		
 		if (savedInstanceState != null) {
