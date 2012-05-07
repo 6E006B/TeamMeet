@@ -62,7 +62,7 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 
 			if (mXMPPService.isAuthenticated()) {
 				// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-				ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getFragment(mViewPager, RosterAdapter.CONTACTS_FRAGMENT_POS);
+				ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
 				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 			}
 			if (mCurrentIntent != null) {
@@ -83,8 +83,9 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		@Override
 		public void onTaskCompleted(Void nothing) {
 			Log.d(CLASS, "Connect task completed!!");
+			invalidateOptionsMenu();
 			// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-			ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getFragment(mViewPager, RosterAdapter.CONTACTS_FRAGMENT_POS);
+			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
 			new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
 		}
 		
@@ -99,8 +100,8 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		@Override
 		public void onTaskCompleted(Void result) {
 			Log.d(CLASS, "you're now disconnected");
-			//TODO notify contacts fragment
-			ContactsFragment contacts = ((ContactsFragment) mPagerAdapter.getFragment(mViewPager, RosterAdapter.CONTACTS_FRAGMENT_POS));
+			invalidateOptionsMenu();
+			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
 			contacts.handleDisconnect();
 		}
 	}
