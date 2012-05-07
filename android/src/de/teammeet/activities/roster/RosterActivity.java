@@ -20,6 +20,8 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -143,15 +145,34 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		// Inflate the layout
 		setContentView(R.layout.tabbed_roster);
 		
-		// Initialise the TabHost
-		initialiseTabHost(savedInstanceState);
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		actionBar.setDisplayShowTitleEnabled(false);
+		
+		Tab tab = actionBar.newTab();
+		tab.setText(R.string.tab_contacts);
+		tab.setTabListener(new TabListener<ContactsFragment>(
+						this, CONTACTS_TAB_ID, ContactsFragment.class));
+		actionBar.addTab(tab);
+
+		tab = actionBar.newTab();
+		tab.setText(R.string.tab_teams);
+		tab.setTabListener(new TabListener<Teams>(
+					this, TEAMS_TAB_ID, Teams.class));
+		actionBar.addTab(tab);
+		
 		if (savedInstanceState != null) {
 			//set the tab as per the saved state
-			mTabHost.setCurrentTabByTag(savedInstanceState.getString(SAVED_TAB_KEY));
+			actionBar.setSelectedNavigationItem(savedInstanceState.getInt(SAVED_TAB_KEY));
 		}
+		
+		// Initialise the TabHost
+		/*initialiseTabHost(savedInstanceState);
+		
 		
 		// Intialise ViewPager
 		intialiseViewPager();
+		*/
 
 		mCurrentIntent = getIntent();
 	}
@@ -198,7 +219,8 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 	 * @see android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os.Bundle)
 	 */
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putString(SAVED_TAB_KEY, mTabHost.getCurrentTabTag()); //save the tab selected
+		ActionBar bar = getSupportActionBar();
+		outState.putInt(SAVED_TAB_KEY, bar.getSelectedNavigationIndex()); //save the tab selected
 		super.onSaveInstanceState(outState);
 	}
 
@@ -301,29 +323,29 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Group Invitation");
 			builder.setMessage(String.format("%s wants you to join '%s':\n%s",
-			                                 inviter, room, reason));
+											 inviter, room, reason));
 			builder.setCancelable(false);
 			builder.setPositiveButton("Join", new DialogInterface.OnClickListener() {
-			           public void onClick(DialogInterface dialog, int id) {
-			                dialog.dismiss();
+					   public void onClick(DialogInterface dialog, int id) {
+							dialog.dismiss();
 							final SharedPreferences settings = PreferenceManager.
 									getDefaultSharedPreferences(RosterActivity.this);
 							final String userIDKey = getString(R.string.preference_user_id_key);
 							final String userID = settings.getString(userIDKey, "anonymous");
-			                try {
+							try {
 								mXMPPService.joinRoom(room, userID, password);
 							} catch (XMPPException e) {
 								e.printStackTrace();
 								Log.e(CLASS, "Unable to join room.");
 								// TODO show the user
 							}
-			           }
-			       });
+					   }
+				   });
 			builder.setNegativeButton("Decline", new DialogInterface.OnClickListener() {
-			           public void onClick(DialogInterface dialog, int id) {
-			                dialog.dismiss();
-			           }
-			       });
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.dismiss();
+					}
+				});
 			final AlertDialog alert = builder.create();
 			alert.show();
 		} else {
