@@ -4,13 +4,18 @@ import java.util.ArrayList;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
+
 import de.teammeet.R;
+import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.services.xmpp.XMPPService;
 
-public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageChangeListener {
+public class ChatsActivity extends SherlockFragmentActivity implements ViewPager.OnPageChangeListener {
 
 	private static final String CLASS = ChatsActivity.class.getSimpleName();
 
@@ -29,6 +34,8 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 
 		// Inflate the layout
 		setContentView(R.layout.chats);
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 
 		if (savedInstanceState != null) {
 			mChatInformationList = savedInstanceState.getParcelableArrayList(CHAT_INFORMATION_LIST_KEY);
@@ -129,9 +136,19 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 	}
 
 	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			ActionBarHelper.navigateUpInHierarchy(this);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	@Override
 	public void onPageScrollStateChanged(int state) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
