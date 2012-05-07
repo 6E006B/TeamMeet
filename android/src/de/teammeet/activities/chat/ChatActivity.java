@@ -19,9 +19,12 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.MenuItem;
 
 import de.teammeet.R;
+import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.services.xmpp.ChatMessage;
 import de.teammeet.services.xmpp.XMPPService;
 
@@ -69,6 +72,9 @@ public class ChatActivity extends SherlockActivity {
 		Log.d(CLASS, "onCreate(): started chat activity");
 		
 		setContentView(R.layout.chat);
+		
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 
 		mChatListView = (ListView)findViewById(R.id.chatListView);
 		mListAdapter = new ArrayAdapter<CharSequence>(this, R.layout.chat_item);
@@ -93,7 +99,7 @@ public class ChatActivity extends SherlockActivity {
 						@Override
 						public void run() {
 							final Toast toast = Toast.makeText(ChatActivity.this, errorMessage,
-							                                   Toast.LENGTH_LONG);
+															   Toast.LENGTH_LONG);
 							toast.setGravity(Gravity.BOTTOM, 0, 0);
 							toast.show();
 						}
@@ -142,6 +148,18 @@ public class ChatActivity extends SherlockActivity {
 		Log.d(CLASS, "ChatActivity.onDestroy()");
 		super.onDestroy();
 	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				ActionBarHelper.navigateUpInHierarchy(this);
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+	
 	@Override
 	protected void onNewIntent(Intent intent) {
 		Log.d(CLASS, "ChatActivity.onNewIntent()");
