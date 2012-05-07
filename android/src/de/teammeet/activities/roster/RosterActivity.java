@@ -397,32 +397,31 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 			case R.id.roster_menu_connect:
 				Log.d(CLASS, "User clicked 'connect' in menu");
 				clickedConnect();
-				break;
+				return true;
 
 			case R.id.roster_menu_show_map:
 				Log.d(CLASS, "User clicked 'map' in menu");
 				clickedMap();
-				break;
+				return true;
 
 			case R.id.roster_menu_form_team:
 				Log.d(CLASS, "User clicked 'form team' in menu");
 				clickedFormTeam();
-				break;
+				return true;
 
 			case R.id.roster_menu_settings:
 				Log.d(CLASS, "User clicked 'form team' in menu");
 				clickedSettings();
-				break;
+				return true;
 
 			case R.id.roster_menu_exit:
 				Log.d(CLASS, "User clicked 'exit' in menu");
 				clickedExit();
-				break;
+				return true;
 
 			default:
-				break;
+				return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	private void clickedSettings() {

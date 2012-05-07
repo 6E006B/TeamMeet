@@ -208,28 +208,28 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		switch (item.getItemId()) {
 			case android.R.id.home:
 				ActionBarHelper.navigateUpInHierarchy(this);
-				break;
+				return true;
 		
 			case R.id.goto_mylocation:
 				focusCurrentLocation();
-				break;
+				return true;
 
 			case R.id.auto_center:
 				toggleFollowingLocation();
-				break;
+				return true;
 
 			case R.id.satellite_view:
 				toggleSatelliteView();
-				break;
+				return true;
 
 			case R.id.fullscreen:
 				toggleFullscreen();
-				break;
-
+				return true;
+				
 			default:
-				break;
+				return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
+		
 	}
 
 	private void toggleFollowingLocation() {
