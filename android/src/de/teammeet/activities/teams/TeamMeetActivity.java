@@ -33,6 +33,7 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockMapActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -42,6 +43,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
 import de.teammeet.R;
+import de.teammeet.activities.roster.RosterActivity;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
@@ -94,6 +96,9 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.mapview);
 
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		
 		mToastSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -202,6 +207,10 @@ public class TeamMeetActivity extends SherlockMapActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
+			case android.R.id.home:
+				navigateUpInHierarchy();
+				break;
+		
 			case R.id.goto_mylocation:
 				focusCurrentLocation();
 				break;
@@ -224,6 +233,12 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	private void navigateUpInHierarchy() {
+		Intent intent = new Intent(this, RosterActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
+	}
+	
 	private void toggleFollowingLocation() {
 		mFollowingLocation = !mFollowingLocation;
 		mMyLocationOverlay.followLocation(mFollowingLocation);
