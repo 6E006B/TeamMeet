@@ -21,14 +21,17 @@
 package de.teammeet.activities.preferences;
 
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
+
 import de.teammeet.R;
 
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends SherlockPreferenceActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
 		super.onCreate(savedInstanceState);
 
 		// Make sure default values are applied.  In a real app, you would
