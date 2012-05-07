@@ -36,7 +36,7 @@ import android.widget.Toast;
 import android.widget.TwoLineListItem;
 import de.teammeet.R;
 import de.teammeet.activities.chat.Chat;
-import de.teammeet.activities.chat.ChatActivity;
+import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
@@ -103,7 +103,7 @@ public class ContactsFragment extends Fragment {
 				TextView textView = (TextView) listItem.getChildAt(0);
 				final String contact = textView.getText().toString();
 				Log.d(CLASS, String.format("clicked on child: %s", contact));
-				Intent intent = new Intent(getActivity(), ChatActivity.class);
+				Intent intent = new Intent(getActivity(), ChatsActivity.class);
 				intent.putExtra(XMPPService.TYPE, Chat.TYPE_NORMAL_CHAT);
 				intent.putExtra(XMPPService.SENDER, contact);
 				startActivity(intent);
