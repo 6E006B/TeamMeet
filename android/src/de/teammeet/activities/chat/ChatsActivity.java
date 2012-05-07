@@ -2,12 +2,18 @@ package de.teammeet.activities.chat;
 
 import java.util.ArrayList;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 
@@ -22,9 +28,12 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 	private static final String CHAT_INFORMATION_LIST_KEY = "chat_information_list_key";
 	private static final String ACTIVE_CHAT_WINDOW_KEY = "active_chat_window_key";
 
+	private ActionBar mActionBar;
 	private ViewPager mViewPager;
 	private ChatsAdapter mPagerAdapter;
+	private TabsAdapter mTabsAdapter;
 	private ArrayList<ChatInformation> mChatInformationList = new ArrayList<ChatInformation>();
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +43,10 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 
 		// Inflate the layout
 		setContentView(R.layout.chats);
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar = getSupportActionBar();
+		mActionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		mActionBar.setDisplayShowTitleEnabled(false);
 
 		if (savedInstanceState != null) {
 			mChatInformationList = savedInstanceState.getParcelableArrayList(CHAT_INFORMATION_LIST_KEY);
@@ -46,7 +57,12 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 		// Intialise ViewPager
 		intialiseViewPager();
 
+		mTabsAdapter = new TabsAdapter(this, mActionBar, mViewPager);
+
 		if (savedInstanceState != null) {
+			for (ChatInformation chatInfo : mChatInformationList) {
+				addTab(chatInfo);
+			}
 			mViewPager.setCurrentItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
 		}
 
@@ -128,11 +144,19 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 				position = mChatInformationList.indexOf(chatInfo);
 			}
 			Log.d(CLASS, "setting position to " + position);
+			addTab(chatInfo);
 			mViewPager.setCurrentItem(position);
-			setTitle(counterpart);
 		} else {
 			Log.e(CLASS, "Intent did not contain a sender of message.");
 		}
+	}
+
+	private void addTab(ChatInformation chatInfo) {
+		Bundle args = new Bundle();
+        args.putInt(XMPPService.TYPE, chatInfo.getType());
+        args.putString(XMPPService.SENDER, chatInfo.getCounterpart());
+		mTabsAdapter.addTab(mActionBar.newTab().setText(chatInfo.getUsername()),
+		                    ChatFragment.class, args);
 	}
 
 	@Override
@@ -160,7 +184,8 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 	public void onPageSelected(int position) {
 		// TODO Auto-generated method stub
 		ChatInformation chatInfo = mChatInformationList.get(position);
-		setTitle(chatInfo.getCounterpart());
+		mActionBar.setSelectedNavigationItem(position);
+//		setTitle(chatInfo.getCounterpart());
 	}
 
 
