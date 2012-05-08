@@ -42,6 +42,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
+import de.teammeet.MapGestureDetectorOverlay;
 import de.teammeet.R;
 import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.interfaces.IXMPPService;
