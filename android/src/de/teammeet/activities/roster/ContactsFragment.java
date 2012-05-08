@@ -13,7 +13,11 @@ import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.packet.Presence;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -40,6 +44,7 @@ import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
+import de.teammeet.tasks.FetchRosterTask;
 import de.teammeet.tasks.InviteTask;
 
 
@@ -55,14 +60,16 @@ public class ContactsFragment extends Fragment {
 	//private static final int DIALOG_INVITE_MATE_ID = 0x7e000001;
 	private static final int CONTEXT_MENU_INVITE_PARENT_ID = 0x7e000002;
 	private static final int CONTEXT_MENU_INVITE_ROOM_ID = 0x7e000003;
+
+	private BroadcastReceiver mConnectReceiver;
+	private BroadcastReceiver mDisconnectReceiver;
+	private Roster mRoster = null;
+	private RosterListener mRosterEventHandler;
+	private ExpandableListView mContactsList;
 	private SimpleExpandableListAdapter mAdapter;
 	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
 	private List<List<Map<String, String>>> mExpandableChildren = new ArrayList<List<Map<String, String>>>();
 	private ExpandableListContextMenuInfo mLastContextItemInfo;
-
-	private Roster mRoster = null;
-	private ExpandableListView mContactsList;
-	private RosterListener mRosterEventHandler;
 
 
 	@Override
@@ -120,6 +127,14 @@ public class ContactsFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 		Log.d(CLASS, "Resuming contacts fragment");
+
+		mConnectReceiver = new ConnectReceiver();
+		IntentFilter connectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_connected));
+		getActivity().registerReceiver(mConnectReceiver, connectFilter);
+
+		mDisconnectReceiver = new DisconnectReceiver();
+		IntentFilter disconnectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_disconnected));
+		getActivity().registerReceiver(mDisconnectReceiver, disconnectFilter);
 	}
 
 	@Override
@@ -130,6 +145,10 @@ public class ContactsFragment extends Fragment {
 			mRoster.removeRosterListener(mRosterEventHandler);
 			mRoster = null;
 		}
+
+		Activity activity = getActivity();
+		activity.unregisterReceiver(mConnectReceiver);
+		activity.unregisterReceiver(mDisconnectReceiver);
 
 		super.onPause();
 	}
@@ -187,7 +206,7 @@ public class ContactsFragment extends Fragment {
 		final int group_position = ExpandableListView.getPackedPositionGroup(packedPosition);
 		final int child_position = ExpandableListView.getPackedPositionChild(packedPosition);
 		final Map<String, String> child = (Map<String, String>) mAdapter.getChild(group_position,
-																		   child_position);
+																				  child_position);
 		return child.get(NAME);
 	}
 	
@@ -324,9 +343,29 @@ public class ContactsFragment extends Fragment {
 				@Override
 				public void run() {
 					fillExpandableList(mRoster);
-					mAdapter.notifyDataSetChanged();	
+					mAdapter.notifyDataSetChanged();
 				}
 			});
+		}
+	}
+
+	public class ConnectReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, String.format("*** Received CONNECT broadcast in '%s'", ContactsFragment.this));
+			
+			IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
+			new FetchRosterTask(service, new FetchRosterHandler()).execute();
+		}
+	}
+
+	public class DisconnectReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, String.format("*** Received DISCONNECT broadcast in '%s'", ContactsFragment.this));
+			handleDisconnect();
 		}
 	}
 }
