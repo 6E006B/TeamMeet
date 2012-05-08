@@ -96,6 +96,7 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		public void onTaskCompleted(Void nothing) {
 			Log.d(CLASS, "Connect task completed!!");
 			invalidateOptionsMenu();
+			
 			// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
 			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
 			if (contacts != null) {
@@ -110,6 +111,12 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 				Log.d(CLASS, String.format("teams is '%s'", teams));
 				new FetchRoomsTask(mXMPPService, teams.new FetchRoomsHandler()).execute();
 			}
+			
+			// broadcast connected
+			Log.d(CLASS, "Sending CONNECT broadcast");
+			Intent bcastConnected = new Intent();
+			bcastConnected.setAction(getString(R.string.broadcast_connected));
+			sendStickyBroadcast(bcastConnected);
 		}
 		
 		@Override
@@ -136,6 +143,12 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 				// fragment has been created despite lazy creation
 				teams.handleDisconnect();
 			}
+			
+			// broadcast disconnected
+			Log.d(CLASS, "Removing CONNECT broadcast");
+			Intent bcastConnected = new Intent();
+			bcastConnected.setAction(getString(R.string.broadcast_connected));
+			removeStickyBroadcast(bcastConnected);
 		}
 	}
 	

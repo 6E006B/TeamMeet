@@ -10,6 +10,10 @@ import java.util.Set;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.muc.Occupant;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -32,12 +36,14 @@ public class TeamsFragment extends Fragment {
 	private static final String NAME = "name";
 	private static final String AFFILIATION = "affiliation";
 	
+	private BroadcastReceiver mConnectReceiver;
+	
+	private ExpandableListView mTeamsList;
 	private SimpleExpandableListAdapter mAdapter;
 	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
 	private List<List<Map<String, String>>> mExpandableChildren = new ArrayList<List<Map<String, String>>>();
 
-	private ExpandableListView mTeamsList;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -75,6 +81,9 @@ public class TeamsFragment extends Fragment {
 			// service has been connected before this fragment and its view were created
 			new FetchRoomsTask(service, new FetchRoomsHandler()).execute();
 		}
+		mConnectReceiver = new ConnectReceiver();
+		IntentFilter connectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_connected));
+		getActivity().registerReceiver(mConnectReceiver, connectFilter);
 	}
 
 	@Override
@@ -141,5 +150,14 @@ public class TeamsFragment extends Fragment {
 				});
 				}
 		}
+	}
+	
+	public class ConnectReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, String.format("*** Received CONNECT broadcast in '%s'", TeamsFragment.this));
+		}
+		
 	}
 }
