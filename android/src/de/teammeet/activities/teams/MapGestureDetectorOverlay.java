@@ -1,4 +1,4 @@
-package de.teammeet;
+package de.teammeet.activities.teams;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -22,6 +22,10 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.Projection;
+
+import de.teammeet.R;
+import de.teammeet.R.color;
+import de.teammeet.R.integer;
 
 public class MapGestureDetectorOverlay extends Overlay implements OnGestureListener {
 
