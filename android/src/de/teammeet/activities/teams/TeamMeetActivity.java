@@ -39,7 +39,6 @@ import com.actionbarsherlock.app.SherlockMapActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
@@ -53,7 +52,6 @@ public class TeamMeetActivity extends SherlockMapActivity {
 	final String						CLASS						= TeamMeetActivity.class.getSimpleName();
 
 	private MapView						mMapView					= null;
-	private MapController				mMapController				= null;
 	private List<Overlay>				mListOfOverlays				= null;
 
 	private MyDirectionLocationOverlay	mMyLocationOverlay			= null;
@@ -130,7 +128,6 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		Log.d(CLASS, "mMapView:" + mMapView.toString());
 		mMapView.setBuiltInZoomControls(true);
 		mMapView.setSatellite(mSatelliteView);
-		mMapController = mMapView.getController();
 		mListOfOverlays = mMapView.getOverlays();
 
 		mMyLocationOverlay.enableMyLocation();
