@@ -10,6 +10,7 @@ import java.util.Set;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.muc.Occupant;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,7 +38,7 @@ public class TeamsFragment extends Fragment {
 	private static final String AFFILIATION = "affiliation";
 	
 	private BroadcastReceiver mConnectReceiver;
-	
+	private BroadcastReceiver mDisconnectReceiver;
 	private ExpandableListView mTeamsList;
 	private SimpleExpandableListAdapter mAdapter;
 	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
@@ -80,12 +81,20 @@ public class TeamsFragment extends Fragment {
 		mConnectReceiver = new ConnectReceiver();
 		IntentFilter connectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_connected));
 		getActivity().registerReceiver(mConnectReceiver, connectFilter);
+
+		mDisconnectReceiver = new DisconnectReceiver();
+		IntentFilter disconnectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_disconnected));
+		getActivity().registerReceiver(mDisconnectReceiver, disconnectFilter);
 	}
 
 	@Override
 	public void onPause() {
 		Log.d(CLASS, "Pausing teams fragement");
-		getActivity().unregisterReceiver(mConnectReceiver);
+
+		Activity activity = getActivity();
+		activity.unregisterReceiver(mConnectReceiver);
+		activity.unregisterReceiver(mDisconnectReceiver);
+
 		super.onPause();
 	}
 
@@ -145,7 +154,7 @@ public class TeamsFragment extends Fragment {
 			});
 		}
 	}
-	
+
 	public class ConnectReceiver extends BroadcastReceiver {
 
 		@Override
@@ -155,6 +164,14 @@ public class TeamsFragment extends Fragment {
 			IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
 			new FetchRoomsTask(service, new FetchRoomsHandler()).execute();
 		}
-		
+	}
+
+	public class DisconnectReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, String.format("*** Received DISCONNECT broadcast in '%s'", TeamsFragment.this));
+			handleDisconnect();
+		}
 	}
 }

@@ -99,6 +99,11 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 			Intent bcastConnected = new Intent();
 			bcastConnected.setAction(getString(R.string.broadcast_connected));
 			removeStickyBroadcast(bcastConnected);
+
+			Log.d(CLASS, "Sending DISCONNECT broadcast");
+			Intent bcastDisconnected = new Intent();
+			bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
+			sendStickyBroadcast(bcastDisconnected);
 		}
 	}
 	

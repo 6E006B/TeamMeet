@@ -13,6 +13,7 @@ import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.packet.Presence;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -60,7 +61,8 @@ public class ContactsFragment extends Fragment {
 	private static final int CONTEXT_MENU_INVITE_PARENT_ID = 0x7e000002;
 	private static final int CONTEXT_MENU_INVITE_ROOM_ID = 0x7e000003;
 
-	private ConnectReceiver mConnectReceiver;
+	private BroadcastReceiver mConnectReceiver;
+	private BroadcastReceiver mDisconnectReceiver;
 	private Roster mRoster = null;
 	private RosterListener mRosterEventHandler;
 	private ExpandableListView mContactsList;
@@ -129,6 +131,10 @@ public class ContactsFragment extends Fragment {
 		mConnectReceiver = new ConnectReceiver();
 		IntentFilter connectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_connected));
 		getActivity().registerReceiver(mConnectReceiver, connectFilter);
+
+		mDisconnectReceiver = new DisconnectReceiver();
+		IntentFilter disconnectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_disconnected));
+		getActivity().registerReceiver(mDisconnectReceiver, disconnectFilter);
 	}
 
 	@Override
@@ -140,7 +146,9 @@ public class ContactsFragment extends Fragment {
 			mRoster = null;
 		}
 
-		getActivity().unregisterReceiver(mConnectReceiver);
+		Activity activity = getActivity();
+		activity.unregisterReceiver(mConnectReceiver);
+		activity.unregisterReceiver(mDisconnectReceiver);
 
 		super.onPause();
 	}
@@ -335,12 +343,12 @@ public class ContactsFragment extends Fragment {
 				@Override
 				public void run() {
 					fillExpandableList(mRoster);
-					mAdapter.notifyDataSetChanged();	
+					mAdapter.notifyDataSetChanged();
 				}
 			});
 		}
 	}
-	
+
 	public class ConnectReceiver extends BroadcastReceiver {
 
 		@Override
@@ -350,6 +358,14 @@ public class ContactsFragment extends Fragment {
 			IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
 			new FetchRosterTask(service, new FetchRosterHandler()).execute();
 		}
-		
+	}
+
+	public class DisconnectReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, String.format("*** Received DISCONNECT broadcast in '%s'", ContactsFragment.this));
+			handleDisconnect();
+		}
 	}
 }
