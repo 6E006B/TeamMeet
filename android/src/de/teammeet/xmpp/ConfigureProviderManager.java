@@ -4,10 +4,6 @@ import org.jivesoftware.smack.provider.PrivacyProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smackx.GroupChatInvitation;
 import org.jivesoftware.smackx.PrivateDataManager;
-import org.jivesoftware.smackx.bytestreams.ibb.provider.CloseIQProvider;
-import org.jivesoftware.smackx.bytestreams.ibb.provider.DataPacketProvider;
-import org.jivesoftware.smackx.bytestreams.ibb.provider.OpenIQProvider;
-import org.jivesoftware.smackx.bytestreams.socks5.provider.BytestreamsProvider;
 import org.jivesoftware.smackx.packet.AttentionExtension;
 import org.jivesoftware.smackx.packet.ChatStateExtension;
 import org.jivesoftware.smackx.packet.LastActivity;
@@ -118,11 +114,11 @@ public class ConfigureProviderManager {
 
         //   FileTransfer
         pm.addIQProvider("si","http://jabber.org/protocol/si", new StreamInitiationProvider());
-        pm.addIQProvider("query","http://jabber.org/protocol/bytestreams", new BytestreamsProvider());
-        pm.addIQProvider("open","http://jabber.org/protocol/ibb", new OpenIQProvider());
-        pm.addIQProvider("data","http://jabber.org/protocol/ibb", new DataPacketProvider());
-        pm.addIQProvider("close","http://jabber.org/protocol/ibb", new CloseIQProvider());
-        pm.addExtensionProvider("data","http://jabber.org/protocol/ibb", new DataPacketProvider());
+//        pm.addIQProvider("query","http://jabber.org/protocol/bytestreams", new BytestreamsProvider());
+//        pm.addIQProvider("open","http://jabber.org/protocol/ibb", new OpenIQProvider());
+//        pm.addIQProvider("data","http://jabber.org/protocol/ibb", new DataPacketProvider());
+//        pm.addIQProvider("close","http://jabber.org/protocol/ibb", new CloseIQProvider());
+//        pm.addExtensionProvider("data","http://jabber.org/protocol/ibb", new DataPacketProvider());
 
         //  Privacy
         pm.addIQProvider("query","jabber:iq:privacy", new PrivacyProvider());
