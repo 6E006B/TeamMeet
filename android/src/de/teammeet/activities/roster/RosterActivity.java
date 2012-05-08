@@ -48,76 +48,6 @@ public class RosterActivity extends SherlockFragmentActivity {
 	private RosterAdapter mPagerAdapter;
 	
 	
-	private class XMPPServiceConnection implements ServiceConnection {
-
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder binder) {
-			Log.d(CLASS, "RosterActivity has been (re-)bound to XMPP service ('" + className + "')");
-			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
-			handleIntent(mCurrentIntent);
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName className) {
-			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceDisconnected('" + className + "')");
-			mXMPPService = null;
-		}
-	};
-
-	private class ConnectHandler extends BaseAsyncTaskCallback<Void> {
-		@Override
-		public void onTaskCompleted(Void nothing) {
-			Log.d(CLASS, "Connect task completed!!");
-			invalidateOptionsMenu();
-
-			// broadcast connected
-			Log.d(CLASS, "Sending CONNECT broadcast");
-			Intent bcastConnected = new Intent();
-			bcastConnected.setAction(getString(R.string.broadcast_connected));
-			sendStickyBroadcast(bcastConnected);
-		}
-
-		@Override
-		public void onTaskAborted(Exception e) {
-			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
-			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
-		}
-	}
-
-	private class DisconnectHandler extends BaseAsyncTaskCallback<Void> {
-		@Override
-		public void onTaskCompleted(Void result) {
-			Log.d(CLASS, "you're now disconnected");
-			invalidateOptionsMenu();
-
-			// broadcast disconnected
-			Log.d(CLASS, "Removing CONNECT broadcast");
-			Intent bcastConnected = new Intent();
-			bcastConnected.setAction(getString(R.string.broadcast_connected));
-			removeStickyBroadcast(bcastConnected);
-
-			Log.d(CLASS, "Sending DISCONNECT broadcast");
-			Intent bcastDisconnected = new Intent();
-			bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
-			sendStickyBroadcast(bcastDisconnected);
-		}
-	}
-	
-	private class FormTeamHandler extends BaseAsyncTaskCallback<String[]> {
-		@Override
-		public void onTaskCompleted(String[] connection_data) {
-			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
-			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
-		}
-	
-		@Override
-		public void onTaskAborted(Exception e) {
-			String problem = String.format("Failed to form team: %s", e.getMessage());
-			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
-		}
-	}
-
-
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
@@ -404,5 +334,74 @@ public class RosterActivity extends SherlockFragmentActivity {
 		final String conferenceSrvKey = getString(R.string.preference_conference_server_key);
 		final String conferenceSrv = settings.getString(conferenceSrvKey, "");
 		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
+	}
+
+
+	private class XMPPServiceConnection implements ServiceConnection {
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder binder) {
+			Log.d(CLASS, "RosterActivity has been (re-)bound to XMPP service ('" + className + "')");
+			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
+			handleIntent(mCurrentIntent);
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName className) {
+			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceDisconnected('" + className + "')");
+			mXMPPService = null;
+		}
+	};
+
+	private class ConnectHandler extends BaseAsyncTaskCallback<Void> {
+		@Override
+		public void onTaskCompleted(Void nothing) {
+			Log.d(CLASS, "Connect task completed!!");
+			invalidateOptionsMenu();
+
+			// broadcast connected
+			Log.d(CLASS, "Sending CONNECT broadcast");
+			Intent bcastConnected = new Intent();
+			bcastConnected.setAction(getString(R.string.broadcast_connected));
+			sendStickyBroadcast(bcastConnected);
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class DisconnectHandler extends BaseAsyncTaskCallback<Void> {
+		@Override
+		public void onTaskCompleted(Void result) {
+			Log.d(CLASS, "you're now disconnected");
+			invalidateOptionsMenu();
+
+			// broadcast disconnected
+			Log.d(CLASS, "Removing CONNECT broadcast");
+			Intent bcastConnected = new Intent();
+			bcastConnected.setAction(getString(R.string.broadcast_connected));
+			removeStickyBroadcast(bcastConnected);
+
+			Log.d(CLASS, "Sending DISCONNECT broadcast");
+			Intent bcastDisconnected = new Intent();
+			bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
+			sendStickyBroadcast(bcastDisconnected);
+		}
+	}
+
+	private class FormTeamHandler extends BaseAsyncTaskCallback<String[]> {
+		@Override
+		public void onTaskCompleted(String[] connection_data) {
+			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
+			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to form team: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+		}
 	}
 }
