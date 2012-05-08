@@ -76,11 +76,7 @@ public class TeamsFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 		Log.d(CLASS, "Resuming teams fragment");
-		IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
-		if (service != null && service.isAuthenticated()) {
-			// service has been connected before this fragment and its view were created
-			new FetchRoomsTask(service, new FetchRoomsHandler()).execute();
-		}
+
 		mConnectReceiver = new ConnectReceiver();
 		IntentFilter connectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_connected));
 		getActivity().registerReceiver(mConnectReceiver, connectFilter);
@@ -89,6 +85,7 @@ public class TeamsFragment extends Fragment {
 	@Override
 	public void onPause() {
 		Log.d(CLASS, "Pausing teams fragement");
+		getActivity().unregisterReceiver(mConnectReceiver);
 		super.onPause();
 	}
 
@@ -139,16 +136,13 @@ public class TeamsFragment extends Fragment {
 		@Override
 		public void onTaskCompleted(Set<String> rooms) {
 			mRooms = rooms;
-			if (mTeamsList != null) {
-				// the service as well as its view have been created
-				mTeamsList.post(new Runnable() {
-					@Override
-					public void run() {
-						fillExpandableList(mRooms);
-						mAdapter.notifyDataSetChanged();
-					}
-				});
+			mTeamsList.post(new Runnable() {
+				@Override
+				public void run() {
+					fillExpandableList(mRooms);
+					mAdapter.notifyDataSetChanged();
 				}
+			});
 		}
 	}
 	
@@ -157,6 +151,9 @@ public class TeamsFragment extends Fragment {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Log.d(CLASS, String.format("*** Received CONNECT broadcast in '%s'", TeamsFragment.this));
+			
+			IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
+			new FetchRoomsTask(service, new FetchRoomsHandler()).execute();
 		}
 		
 	}
