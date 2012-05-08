@@ -133,7 +133,6 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 	}
 
 	private void handleChatIntent(String counterpart, int type) {
-		// TODO Auto-generated method stub
 		if (counterpart != null) {
 			ChatInformation chatInfo = new ChatInformation(type, counterpart);
 			Log.d(CLASS, "loading chat fragment for " + counterpart);
@@ -142,9 +141,9 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 			if (position == -1) {
 				mChatInformationList.add(chatInfo);
 				position = mChatInformationList.indexOf(chatInfo);
+				addTab(chatInfo);
 			}
 			Log.d(CLASS, "setting position to " + position);
-			addTab(chatInfo);
 			mViewPager.setCurrentItem(position);
 		} else {
 			Log.e(CLASS, "Intent did not contain a sender of message.");
@@ -183,7 +182,7 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 	@Override
 	public void onPageSelected(int position) {
 		// TODO Auto-generated method stub
-		ChatInformation chatInfo = mChatInformationList.get(position);
+//		ChatInformation chatInfo = mChatInformationList.get(position);
 		mActionBar.setSelectedNavigationItem(position);
 //		setTitle(chatInfo.getCounterpart());
 	}
