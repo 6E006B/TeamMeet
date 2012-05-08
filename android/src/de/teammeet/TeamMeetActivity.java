@@ -41,6 +41,8 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
 import de.teammeet.helper.ToastDisposerSingleton;
+import de.teammeet.MapGestureDetectorOverlay;
+import de.teammeet.R;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.xmpp.XMPPService;
 
