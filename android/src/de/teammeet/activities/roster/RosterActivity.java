@@ -12,17 +12,21 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
 import de.teammeet.R;
 import de.teammeet.activities.preferences.SettingsActivity;
 import de.teammeet.activities.teams.TeamMeetActivity;
@@ -32,9 +36,10 @@ import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
+import de.teammeet.tasks.FetchRoomsTask;
 import de.teammeet.tasks.FetchRosterTask;
 
-public class RosterActivity extends FragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
+public class RosterActivity extends SherlockFragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
 	private static String CLASS = RosterActivity.class.getSimpleName();
 	private static String CONTACTS_TAB_ID = "contacts_tab";
 	private static String TEAMS_TAB_ID = "teams_tab";
@@ -53,13 +58,24 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder binder) {
-			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
+			Log.d(CLASS, "RosterActivity has been (re-)bound to XMPP service ('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 
 			if (mXMPPService.isAuthenticated()) {
 				// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-				ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getFragment(mViewPager, RosterAdapter.CONTACTS_FRAGMENT_POS);
-				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
+				ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
+				if (contacts != null) {
+					// fragment has been created despite lazy creation
+					new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
+				}
+				
+				// spawn `FetchRoomsTask` but have it handled in the `TeamsFragment`
+				TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
+				if (teams != null) {
+					// fragment has been created despite lazy creation
+					Log.d(CLASS, String.format("teams is '%s'", teams));
+					new FetchRoomsTask(mXMPPService, teams.new FetchRoomsHandler()).execute();
+				}
 			}
 			if (mCurrentIntent != null) {
 				handleIntent(mCurrentIntent);
@@ -79,9 +95,21 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 		@Override
 		public void onTaskCompleted(Void nothing) {
 			Log.d(CLASS, "Connect task completed!!");
+			invalidateOptionsMenu();
 			// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-			ContactsFragment contacts = (ContactsFragment) mPagerAdapter.getFragment(mViewPager, RosterAdapter.CONTACTS_FRAGMENT_POS);
-			new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
+			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
+			if (contacts != null) {
+				// fragment has been created despite lazy creation
+				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
+			}
+			
+			// spawn `FetchRoomsTask` but have it handled in the `TeamsFragment`
+			TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
+			if (teams != null) {
+				// fragment has been created despite lazy creation
+				Log.d(CLASS, String.format("teams is '%s'", teams));
+				new FetchRoomsTask(mXMPPService, teams.new FetchRoomsHandler()).execute();
+			}
 		}
 		
 		@Override
@@ -95,9 +123,19 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 		@Override
 		public void onTaskCompleted(Void result) {
 			Log.d(CLASS, "you're now disconnected");
-			//TODO notify contacts fragment
-			ContactsFragment contacts = ((ContactsFragment) mPagerAdapter.getFragment(mViewPager, RosterAdapter.CONTACTS_FRAGMENT_POS));
-			contacts.handleDisconnect();
+			invalidateOptionsMenu();
+			
+			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
+			if (contacts != null) {
+				// fragment has been created despite lazy creation
+				contacts.handleDisconnect();
+			}
+			
+			TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
+			if (teams != null) {
+				// fragment has been created despite lazy creation
+				teams.handleDisconnect();
+			}
 		}
 	}
 	
@@ -141,15 +179,34 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 		// Inflate the layout
 		setContentView(R.layout.tabbed_roster);
 		
-		// Initialise the TabHost
-		initialiseTabHost(savedInstanceState);
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		actionBar.setDisplayShowTitleEnabled(false);
+		
+		Tab tab = actionBar.newTab();
+		tab.setText(R.string.tab_contacts);
+		tab.setTabListener(new TabListener<ContactsFragment>(
+						this, CONTACTS_TAB_ID, ContactsFragment.class));
+		actionBar.addTab(tab);
+
+		tab = actionBar.newTab();
+		tab.setText(R.string.tab_teams);
+		tab.setTabListener(new TabListener<TeamsFragment>(
+					this, TEAMS_TAB_ID, TeamsFragment.class));
+		actionBar.addTab(tab);
+		
 		if (savedInstanceState != null) {
 			//set the tab as per the saved state
-			mTabHost.setCurrentTabByTag(savedInstanceState.getString(SAVED_TAB_KEY));
+			actionBar.setSelectedNavigationItem(savedInstanceState.getInt(SAVED_TAB_KEY));
 		}
+		
+		// Initialise the TabHost
+		/*initialiseTabHost(savedInstanceState);
+		
 		
 		// Intialise ViewPager
 		intialiseViewPager();
+		*/
 
 		mCurrentIntent = getIntent();
 	}
@@ -196,7 +253,8 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 	 * @see android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os.Bundle)
 	 */
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putString(SAVED_TAB_KEY, mTabHost.getCurrentTabTag()); //save the tab selected
+		ActionBar bar = getSupportActionBar();
+		outState.putInt(SAVED_TAB_KEY, bar.getSelectedNavigationIndex()); //save the tab selected
 		super.onSaveInstanceState(outState);
 	}
 
@@ -299,29 +357,29 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Group Invitation");
 			builder.setMessage(String.format("%s wants you to join '%s':\n%s",
-			                                 inviter, room, reason));
+											 inviter, room, reason));
 			builder.setCancelable(false);
 			builder.setPositiveButton("Join", new DialogInterface.OnClickListener() {
-			           public void onClick(DialogInterface dialog, int id) {
-			                dialog.dismiss();
+					   public void onClick(DialogInterface dialog, int id) {
+							dialog.dismiss();
 							final SharedPreferences settings = PreferenceManager.
 									getDefaultSharedPreferences(RosterActivity.this);
 							final String userIDKey = getString(R.string.preference_user_id_key);
 							final String userID = settings.getString(userIDKey, "anonymous");
-			                try {
+							try {
 								mXMPPService.joinRoom(room, userID, password);
 							} catch (XMPPException e) {
 								e.printStackTrace();
 								Log.e(CLASS, "Unable to join room.");
 								// TODO show the user
 							}
-			           }
-			       });
+					   }
+				   });
 			builder.setNegativeButton("Decline", new DialogInterface.OnClickListener() {
-			           public void onClick(DialogInterface dialog, int id) {
-			                dialog.dismiss();
-			           }
-			       });
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.dismiss();
+					}
+				});
 			final AlertDialog alert = builder.create();
 			alert.show();
 		} else {
@@ -331,7 +389,7 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.roster, menu);
 		return true;
 	}
@@ -372,32 +430,31 @@ public class RosterActivity extends FragmentActivity implements TabHost.OnTabCha
 			case R.id.roster_menu_connect:
 				Log.d(CLASS, "User clicked 'connect' in menu");
 				clickedConnect();
-				break;
+				return true;
 
 			case R.id.roster_menu_show_map:
 				Log.d(CLASS, "User clicked 'map' in menu");
 				clickedMap();
-				break;
+				return true;
 
 			case R.id.roster_menu_form_team:
 				Log.d(CLASS, "User clicked 'form team' in menu");
 				clickedFormTeam();
-				break;
+				return true;
 
 			case R.id.roster_menu_settings:
 				Log.d(CLASS, "User clicked 'form team' in menu");
 				clickedSettings();
-				break;
+				return true;
 
 			case R.id.roster_menu_exit:
 				Log.d(CLASS, "User clicked 'exit' in menu");
 				clickedExit();
-				break;
+				return true;
 
 			default:
-				break;
+				return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	private void clickedSettings() {

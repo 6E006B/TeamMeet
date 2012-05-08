@@ -30,24 +30,25 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.google.android.maps.MapActivity;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockMapActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
 import de.teammeet.R;
-import de.teammeet.activities.preferences.SettingsActivity;
+import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
 
-public class TeamMeetActivity extends MapActivity {
+public class TeamMeetActivity extends SherlockMapActivity {
 
 	final String						CLASS						= TeamMeetActivity.class.getSimpleName();
 
@@ -94,6 +95,9 @@ public class TeamMeetActivity extends MapActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.mapview);
 
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		
 		mToastSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -192,36 +196,40 @@ public class TeamMeetActivity extends MapActivity {
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(final Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.map, menu);
 		return true;
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(final MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
+			case android.R.id.home:
+				ActionBarHelper.navigateUpInHierarchy(this);
+				return true;
+		
 			case R.id.goto_mylocation:
 				focusCurrentLocation();
-				break;
+				return true;
 
 			case R.id.auto_center:
 				toggleFollowingLocation();
-				break;
+				return true;
 
 			case R.id.satellite_view:
 				toggleSatelliteView();
-				break;
+				return true;
 
 			case R.id.fullscreen:
 				toggleFullscreen();
-				break;
-
+				return true;
+				
 			default:
-				break;
+				return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
+		
 	}
 
 	private void toggleFollowingLocation() {

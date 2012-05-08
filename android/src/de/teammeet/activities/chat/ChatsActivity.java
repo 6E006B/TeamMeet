@@ -4,22 +4,29 @@ import java.util.ArrayList;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
+
 import de.teammeet.R;
+import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.services.xmpp.XMPPService;
 
-public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageChangeListener {
+public class ChatsActivity extends SherlockFragmentActivity implements ViewPager.OnPageChangeListener {
 
 	private static final String CLASS = ChatsActivity.class.getSimpleName();
 
 	private static final String CHAT_INFORMATION_LIST_KEY = "chat_information_list_key";
 	private static final String ACTIVE_CHAT_WINDOW_KEY = "active_chat_window_key";
 
+	private ActionBar mActionBar;
 	private ViewPager mViewPager;
-	private ChatsAdapter mPagerAdapter;
+	private TabsAdapter mTabsAdapter;
 	private ArrayList<ChatInformation> mChatInformationList = new ArrayList<ChatInformation>();
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +36,10 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 
 		// Inflate the layout
 		setContentView(R.layout.chats);
+		mActionBar = getSupportActionBar();
+		mActionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		mActionBar.setDisplayShowTitleEnabled(false);
 
 		if (savedInstanceState != null) {
 			mChatInformationList = savedInstanceState.getParcelableArrayList(CHAT_INFORMATION_LIST_KEY);
@@ -36,11 +47,14 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 			Log.d(CLASS, "No instance to restore from.");
 		}
 
-		// Intialise ViewPager
 		intialiseViewPager();
 
 		if (savedInstanceState != null) {
-			mViewPager.setCurrentItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
+			for (ChatInformation chatInfo : mChatInformationList) {
+				addTab(chatInfo);
+			}
+//			mViewPager.setCurrentItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
+			mActionBar.setSelectedNavigationItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
 		}
 
 		handleIntent(getIntent());
@@ -62,12 +76,9 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 	 * Initialise ViewPager
 	 */
 	private void intialiseViewPager() {
-
-		mPagerAdapter = new ChatsAdapter(super.getSupportFragmentManager(), mChatInformationList);
-
 		mViewPager = (ViewPager)super.findViewById(R.id.viewpager);
-		mViewPager.setAdapter(mPagerAdapter);
 		mViewPager.setOnPageChangeListener(this);
+		mTabsAdapter = new TabsAdapter(this, mActionBar, mViewPager);
 	}
 
 	@Override
@@ -110,7 +121,6 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 	}
 
 	private void handleChatIntent(String counterpart, int type) {
-		// TODO Auto-generated method stub
 		if (counterpart != null) {
 			ChatInformation chatInfo = new ChatInformation(type, counterpart);
 			Log.d(CLASS, "loading chat fragment for " + counterpart);
@@ -119,19 +129,37 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 			if (position == -1) {
 				mChatInformationList.add(chatInfo);
 				position = mChatInformationList.indexOf(chatInfo);
+				addTab(chatInfo);
 			}
 			Log.d(CLASS, "setting position to " + position);
 			mViewPager.setCurrentItem(position);
-			setTitle(counterpart);
 		} else {
 			Log.e(CLASS, "Intent did not contain a sender of message.");
+		}
+	}
+
+	private void addTab(ChatInformation chatInfo) {
+		Bundle args = new Bundle();
+        args.putInt(XMPPService.TYPE, chatInfo.getType());
+        args.putString(XMPPService.SENDER, chatInfo.getCounterpart());
+		mTabsAdapter.addTab(mActionBar.newTab().setText(chatInfo.getUsername()),
+		                    ChatFragment.class, args);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			ActionBarHelper.navigateUpInHierarchy(this);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
 		}
 	}
 
 	@Override
 	public void onPageScrollStateChanged(int state) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -142,8 +170,8 @@ public class ChatsActivity extends FragmentActivity implements ViewPager.OnPageC
 	@Override
 	public void onPageSelected(int position) {
 		// TODO Auto-generated method stub
-		ChatInformation chatInfo = mChatInformationList.get(position);
-		setTitle(chatInfo.getCounterpart());
+//		ChatInformation chatInfo = mChatInformationList.get(position);
+		mActionBar.setSelectedNavigationItem(position);
+//		setTitle(chatInfo.getCounterpart());
 	}
-
 }

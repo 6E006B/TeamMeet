@@ -21,16 +21,24 @@
 package de.teammeet.activities.preferences;
 
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import de.teammeet.R;
 
-public class SettingsActivity extends PreferenceActivity {
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.actionbarsherlock.view.MenuItem;
+
+import de.teammeet.R;
+import de.teammeet.helper.ActionBarHelper;
+
+public class SettingsActivity extends SherlockPreferenceActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		
 		// Make sure default values are applied.  In a real app, you would
 		// want this in a shared function that is used to retrieve the
 		// SharedPreferences wherever they are needed.
@@ -38,5 +46,17 @@ public class SettingsActivity extends PreferenceActivity {
 
 		// Load the preferences from an XML resource
 		addPreferencesFromResource(R.xml.preference_settings);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				ActionBarHelper.navigateUpInHierarchy(this);
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 }
