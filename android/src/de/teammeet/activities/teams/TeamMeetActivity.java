@@ -32,6 +32,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockMapActivity;
@@ -44,15 +45,12 @@ import com.google.android.maps.Overlay;
 
 import de.teammeet.R;
 import de.teammeet.helper.ActionBarHelper;
-import de.teammeet.helper.ToastDisposerSingleton;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
 
 public class TeamMeetActivity extends SherlockMapActivity {
 
 	final String						CLASS						= TeamMeetActivity.class.getSimpleName();
-
-	private ToastDisposerSingleton		mToastSingleton				= null;
 
 	private MapView						mMapView					= null;
 	private MapController				mMapController				= null;
@@ -98,8 +96,6 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		
-		mToastSingleton = ToastDisposerSingleton.getInstance(getApplicationContext());
-
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		final String fullscreenKey = getString(R.string.preference_fullscreen_key);
 		mFullscreen = settings.getBoolean(fullscreenKey, false);
@@ -148,7 +144,8 @@ public class TeamMeetActivity extends SherlockMapActivity {
 			Log.d(CLASS, "TeamMeetActivity.onResume() bind to XMPP service succeeded");
 		} else {
 			Log.e(CLASS, "TeamMeetActivity.onResume() bind to XMPP service failed");
-			mToastSingleton.showError("Couldn't connect to XMPP service.");
+			Toast.makeText(getApplicationContext(), "Error: Couldn't connect to XMPP service.",
+			               Toast.LENGTH_LONG).show();
 		}
 	}
 
