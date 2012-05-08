@@ -26,7 +26,7 @@ public class RosterAdapter extends FragmentPagerAdapter {
 			newFragment = new ContactsFragment();
 			break;
 		case TEAMS_FRAGMENT_POS:
-			newFragment = new Teams();
+			newFragment = new TeamsFragment();
 			break;
 		}
 		
