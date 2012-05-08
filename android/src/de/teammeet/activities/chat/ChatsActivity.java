@@ -30,7 +30,6 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 
 	private ActionBar mActionBar;
 	private ViewPager mViewPager;
-	private ChatsAdapter mPagerAdapter;
 	private TabsAdapter mTabsAdapter;
 	private ArrayList<ChatInformation> mChatInformationList = new ArrayList<ChatInformation>();
 
@@ -54,16 +53,14 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 			Log.d(CLASS, "No instance to restore from.");
 		}
 
-		// Intialise ViewPager
 		intialiseViewPager();
-
-		mTabsAdapter = new TabsAdapter(this, mActionBar, mViewPager);
 
 		if (savedInstanceState != null) {
 			for (ChatInformation chatInfo : mChatInformationList) {
 				addTab(chatInfo);
 			}
-			mViewPager.setCurrentItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
+//			mViewPager.setCurrentItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
+			mActionBar.setSelectedNavigationItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
 		}
 
 		handleIntent(getIntent());
@@ -85,12 +82,9 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 	 * Initialise ViewPager
 	 */
 	private void intialiseViewPager() {
-
-		mPagerAdapter = new ChatsAdapter(super.getSupportFragmentManager(), mChatInformationList);
-
 		mViewPager = (ViewPager)super.findViewById(R.id.viewpager);
-		mViewPager.setAdapter(mPagerAdapter);
 		mViewPager.setOnPageChangeListener(this);
+		mTabsAdapter = new TabsAdapter(this, mActionBar, mViewPager);
 	}
 
 	@Override
