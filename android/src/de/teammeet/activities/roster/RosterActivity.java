@@ -261,7 +261,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 		switch (item.getItemId()) {
 			case R.id.roster_menu_connect:
 				Log.d(CLASS, "User clicked 'connect' in menu");
-				clickedConnect();
+				clickedConnect(item);
 				return true;
 
 			case R.id.roster_menu_show_map:
@@ -311,7 +311,8 @@ public class RosterActivity extends SherlockFragmentActivity {
 		startActivity(intent);
 	}
 
-	private void clickedConnect() {
+	private void clickedConnect(MenuItem connectMenu) {
+		connectMenu.setEnabled(false);
 		if (mXMPPService.isAuthenticated()) {
 			new DisconnectTask((XMPPService)mXMPPService, new DisconnectHandler()).execute();
 		} else {
