@@ -39,6 +39,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 
 import de.teammeet.R;
+import de.teammeet.activities.chat.Chat;
 import de.teammeet.interfaces.IMatesUpdateRecipient;
 
 public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMatesUpdateRecipient {
@@ -61,9 +62,10 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 				PreferenceManager.getDefaultSharedPreferences(mContext);
 		final String userIDKey = mContext.getString(R.string.preference_user_id_key);
 		final String userID = settings.getString(userIDKey, "");
-		final String serverKey = mContext.getString(R.string.preference_server_key);
-		final String server = settings.getString(serverKey, "");
-		mOwnID = String.format("%s@%s", userID, server);
+//		final String serverKey = mContext.getString(R.string.preference_server_key);
+//		final String server = settings.getString(serverKey, "");
+//		mOwnID = String.format("%s@%s", userID, server);
+		mOwnID = userID;
 		mMates = new HashMap<String, Mate>();
 		mOverlayItems = new ArrayList<OverlayItem>();
 		populate();
@@ -72,7 +74,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 	@Override
 	public void handleMateUpdate(Mate mate) {
 		Log.d(CLASS, "MatesOverlay.handleMateUpdate() : " + mate.getID());
-		if (!mate.getID().equals(mOwnID)) {
+		if (!Chat.getPath(mate.getID()).equals(mOwnID)) {
 			acquireLock();
 			try {
 				if (mMates.containsKey(mate.getID())) {
@@ -119,7 +121,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 	@Override
 	protected boolean onTap(int index) {
 		final String mateID = ((MateOverlayItem)mOverlayItems.get(index)).getMate().getID();
-		final String mateNick = mateID.substring(mateID.lastIndexOf("/")+1);
+		final String mateNick = Chat.getPath(mateID);
 		Toast.makeText(mContext, mateNick, Toast.LENGTH_SHORT).show();
 		return super.onTap(index);
 	}
