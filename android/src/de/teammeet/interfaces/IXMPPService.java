@@ -20,12 +20,11 @@
 
 package de.teammeet.interfaces;
 
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smackx.muc.Occupant;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
@@ -86,5 +85,5 @@ public interface IXMPPService {
 
 	Set<String> getRooms();
 
-	Collection<Occupant> getParticipants(String room) throws XMPPException;
+	Iterator<String> getOccupants(String room) throws XMPPException;
 }
