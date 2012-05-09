@@ -36,8 +36,6 @@ import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
-import de.teammeet.tasks.FetchRoomsTask;
-import de.teammeet.tasks.FetchRosterTask;
 
 public class RosterActivity extends SherlockFragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
 	private static String CLASS = RosterActivity.class.getSimpleName();
@@ -60,28 +58,7 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.d(CLASS, "RosterActivity has been (re-)bound to XMPP service ('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
-
-			if (mXMPPService.isAuthenticated()) {
-				// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-				ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
-				if (contacts != null) {
-					// fragment has been created despite lazy creation
-					new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
-				}
-				
-				// spawn `FetchRoomsTask` but have it handled in the `TeamsFragment`
-				TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
-				if (teams != null) {
-					// fragment has been created despite lazy creation
-					Log.d(CLASS, String.format("teams is '%s'", teams));
-					new FetchRoomsTask(mXMPPService, teams.new FetchRoomsHandler()).execute();
-				}
-			}
-			if (mCurrentIntent != null) {
-				handleIntent(mCurrentIntent);
-			} else {
-				Log.d(CLASS, "Skipping handling of intent since it hasn't been set yet *lazy*");
-			}
+			handleIntent(mCurrentIntent);
 		}
 
 		@Override
@@ -96,22 +73,14 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		public void onTaskCompleted(Void nothing) {
 			Log.d(CLASS, "Connect task completed!!");
 			invalidateOptionsMenu();
-			// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
-			if (contacts != null) {
-				// fragment has been created despite lazy creation
-				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
-			}
-			
-			// spawn `FetchRoomsTask` but have it handled in the `TeamsFragment`
-			TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
-			if (teams != null) {
-				// fragment has been created despite lazy creation
-				Log.d(CLASS, String.format("teams is '%s'", teams));
-				new FetchRoomsTask(mXMPPService, teams.new FetchRoomsHandler()).execute();
-			}
+
+			// broadcast connected
+			Log.d(CLASS, "Sending CONNECT broadcast");
+			Intent bcastConnected = new Intent();
+			bcastConnected.setAction(getString(R.string.broadcast_connected));
+			sendStickyBroadcast(bcastConnected);
 		}
-		
+
 		@Override
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
@@ -124,18 +93,17 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		public void onTaskCompleted(Void result) {
 			Log.d(CLASS, "you're now disconnected");
 			invalidateOptionsMenu();
-			
-			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
-			if (contacts != null) {
-				// fragment has been created despite lazy creation
-				contacts.handleDisconnect();
-			}
-			
-			TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
-			if (teams != null) {
-				// fragment has been created despite lazy creation
-				teams.handleDisconnect();
-			}
+
+			// broadcast disconnected
+			Log.d(CLASS, "Removing CONNECT broadcast");
+			Intent bcastConnected = new Intent();
+			bcastConnected.setAction(getString(R.string.broadcast_connected));
+			removeStickyBroadcast(bcastConnected);
+
+			Log.d(CLASS, "Sending DISCONNECT broadcast");
+			Intent bcastDisconnected = new Intent();
+			bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
+			sendStickyBroadcast(bcastDisconnected);
 		}
 	}
 	
