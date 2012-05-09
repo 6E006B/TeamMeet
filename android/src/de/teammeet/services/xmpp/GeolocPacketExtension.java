@@ -10,15 +10,15 @@ public class GeolocPacketExtension implements PacketExtension {
 
 	private int mLongitude = 0;
 	private int mLatitude = 0;
-	private float mAccuracy = 0;
+	private int mAccuracy = 0;
 
 	public static final String NAMESPACE = "https://teammeet.de/teammeet.ns";
 	public static final String GEOLOC = "geoloc";
 	public static final String LON = "lon";
 	public static final String LAT = "lat";
-	public static final String ERR = "err";
+	public static final String ACCURACY = "err";
 
-	public GeolocPacketExtension(int longitude, int latitude, float accuracy) {
+	public GeolocPacketExtension(int longitude, int latitude, int accuracy) {
 		mLongitude = longitude;
 		mLatitude = latitude;
 		mAccuracy = accuracy;
@@ -41,14 +41,14 @@ public class GeolocPacketExtension implements PacketExtension {
 						     "<%s>" +
 				             "<%s>%d</%s>" +
 						     "<%s>%d</%s>" +
-				             "<%s>%f</%s>" +
+				             "<%s>%d</%s>" +
 						     "</%s>" +
 				             "</x>",
 				             getNamespace(),
 				             GEOLOC,
 				             LON, mLongitude, LON,
 				             LAT, mLatitude, LAT,
-				             ERR, mAccuracy, ERR,
+				             ACCURACY, mAccuracy, ACCURACY,
 				             GEOLOC);
 	}	
 
@@ -60,7 +60,7 @@ public class GeolocPacketExtension implements PacketExtension {
 		return mLongitude;
 	}
 
-	public float getAccuracy() {
+	public int getAccuracy() {
 		return mAccuracy;
 	}
 }

@@ -345,7 +345,7 @@ public class XMPPService extends Service implements IXMPPService {
 						accuracy = lastFix.getAccuracy();
 					}
 					try {
-						sendLocation(location, accuracy);
+						sendLocation(location, (int)accuracy);
 					} catch (XMPPException e) {
 						e.printStackTrace();
 						Log.e(CLASS, "Error while sending location: " + e.toString());
@@ -369,9 +369,10 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void sendLocation(GeoPoint location, float accuracy) throws XMPPException {
+	public void sendLocation(GeoPoint location, int accuracy) throws XMPPException {
 		if (mXMPP != null) {
 			if (mXMPP.isAuthenticated()) {
+				Log.d(CLASS, String.format("sending new location: %s", location.toString()));
 				Message message = new Message();
 				GeolocPacketExtension geoloc = new GeolocPacketExtension(location.getLongitudeE6(),
 				                                                         location.getLatitudeE6(),

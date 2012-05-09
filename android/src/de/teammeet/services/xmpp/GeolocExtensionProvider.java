@@ -17,7 +17,7 @@ public class GeolocExtensionProvider implements PacketExtensionProvider {
 		GeolocPacketExtension geoloc = null;
 		int lon = 0;
 		int lat = 0;
-		float err = 0f;
+		int accuracy = 0;
 
 		// iterate over all XML tags
 		boolean done = false;
@@ -30,8 +30,8 @@ public class GeolocExtensionProvider implements PacketExtensionProvider {
 					lon = Integer.parseInt(parser.nextText());
 				} else if (parser.getName().equals(GeolocPacketExtension.LAT)) {
 					lat = Integer.parseInt(parser.nextText());
-				} else if (parser.getName().equals(GeolocPacketExtension.ERR)) {
-					err = Float.parseFloat(parser.nextText());
+				} else if (parser.getName().equals(GeolocPacketExtension.ACCURACY)) {
+					accuracy = Integer.parseInt(parser.nextText());
 				} else {
 					throw new InvalidProtocolException(String.format("Found invalid opening tag '%s'", parser.getName())); 
 				}
@@ -47,8 +47,8 @@ public class GeolocExtensionProvider implements PacketExtensionProvider {
 		// check we've got everything we need
 		if (lon != 0 &&
 		    lat != 0 &&
-		    err != 0f) {
-			geoloc = new GeolocPacketExtension(lon, lat, err);
+		    accuracy != 0) {
+			geoloc = new GeolocPacketExtension(lon, lat, accuracy);
 		} else {
 			throw new InvalidProtocolException("Missing value in Geoloc message");
 		}

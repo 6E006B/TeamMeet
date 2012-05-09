@@ -17,12 +17,14 @@ public class RoomMessageListener implements PacketListener {
 	private String mGroup = null;
 
 	public RoomMessageListener(XMPPService xmppService, String group) {
+		Log.d(CLASS, "new RoomMessageListener for " + group);
 		mXMPPService  = xmppService;
 		mGroup = group;
 	}
 
 	@Override
 	public void processPacket(Packet packet) {
+		Log.d(CLASS, "RoomMessageListener.processPacket() in " + mGroup);
 		String from = packet.getFrom();
 		String xml = packet.toXML();
 		GeolocPacketExtension geoloc = (GeolocPacketExtension) packet
@@ -31,12 +33,14 @@ public class RoomMessageListener implements PacketListener {
 			int lon = geoloc.getLongitude();
 			int lat = geoloc.getLatitude();
 			GeoPoint location = new GeoPoint(lat, lon);
-			float accuracy = geoloc.getAccuracy();
+			int accuracy = geoloc.getAccuracy();
 			Log.d(CLASS,
 			      String.format("received location update from '%s' - lon: %d lat: %d acc: %d",
 			                    from, lon, lat, accuracy));
 			Mate mate = new Mate(from, location, accuracy);
 			mXMPPService.updateMate(mate);
+		} else {
+			Log.d(CLASS, "packet did not contain geoloc extension.");
 		}
 		final Message message = (Message)packet;
 		final String text = message.getBody();
