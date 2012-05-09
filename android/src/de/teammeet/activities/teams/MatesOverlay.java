@@ -84,7 +84,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 				releaseLock();
 			}
 			populate();
-			mMapView.invalidate();
+			mMapView.postInvalidate();
 		}
 	}
 
