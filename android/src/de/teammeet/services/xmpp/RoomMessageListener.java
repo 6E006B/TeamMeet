@@ -32,8 +32,9 @@ public class RoomMessageListener implements PacketListener {
 			int lat = geoloc.getLatitude();
 			GeoPoint location = new GeoPoint(lat, lon);
 			float accuracy = geoloc.getAccuracy();
-			Log.d(CLASS, "geoloc - longitude: " + lon + " latitude: " + lat  + " accuracy: " + 
-						 accuracy);
+			Log.d(CLASS,
+			      String.format("received location update from '%s' - lon: %d lat: %d acc: %d",
+			                    from, lon, lat, accuracy));
 			Mate mate = new Mate(from, location, accuracy);
 			mXMPPService.updateMate(mate);
 		}
