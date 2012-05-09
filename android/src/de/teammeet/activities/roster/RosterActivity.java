@@ -15,9 +15,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.View;
-import android.widget.TabHost;
-import android.widget.TabHost.TabContentFactory;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -36,10 +33,8 @@ import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.CreateGroupTask;
 import de.teammeet.tasks.DisconnectTask;
-import de.teammeet.tasks.FetchRoomsTask;
-import de.teammeet.tasks.FetchRosterTask;
 
-public class RosterActivity extends SherlockFragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
+public class RosterActivity extends SherlockFragmentActivity {
 	private static String CLASS = RosterActivity.class.getSimpleName();
 	private static String CONTACTS_TAB_ID = "contacts_tab";
 	private static String TEAMS_TAB_ID = "teams_tab";
@@ -49,127 +44,9 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
 	private Intent mCurrentIntent = null;
 	
-	private TabHost mTabHost;
 	private ViewPager mViewPager;
 	private RosterAdapter mPagerAdapter;
 	
-	
-	private class XMPPServiceConnection implements ServiceConnection {
-
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder binder) {
-			Log.d(CLASS, "RosterActivity has been (re-)bound to XMPP service ('" + className + "')");
-			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
-
-			if (mXMPPService.isAuthenticated()) {
-				// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-				ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
-				if (contacts != null) {
-					// fragment has been created despite lazy creation
-					new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
-				}
-				
-				// spawn `FetchRoomsTask` but have it handled in the `TeamsFragment`
-				TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
-				if (teams != null) {
-					// fragment has been created despite lazy creation
-					Log.d(CLASS, String.format("teams is '%s'", teams));
-					new FetchRoomsTask(mXMPPService, teams.new FetchRoomsHandler()).execute();
-				}
-			}
-			if (mCurrentIntent != null) {
-				handleIntent(mCurrentIntent);
-			} else {
-				Log.d(CLASS, "Skipping handling of intent since it hasn't been set yet *lazy*");
-			}
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName className) {
-			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceDisconnected('" + className + "')");
-			mXMPPService = null;
-		}
-	};
-
-	private class ConnectHandler extends BaseAsyncTaskCallback<Void> {
-		@Override
-		public void onTaskCompleted(Void nothing) {
-			Log.d(CLASS, "Connect task completed!!");
-			invalidateOptionsMenu();
-			// spawn `FetchRosterTask` but have it handled in the `ContactsFragment`
-			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
-			if (contacts != null) {
-				// fragment has been created despite lazy creation
-				new FetchRosterTask(mXMPPService, contacts.new FetchRosterHandler()).execute();
-			}
-			
-			// spawn `FetchRoomsTask` but have it handled in the `TeamsFragment`
-			TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
-			if (teams != null) {
-				// fragment has been created despite lazy creation
-				Log.d(CLASS, String.format("teams is '%s'", teams));
-				new FetchRoomsTask(mXMPPService, teams.new FetchRoomsHandler()).execute();
-			}
-		}
-		
-		@Override
-		public void onTaskAborted(Exception e) {
-			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
-			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
-		}
-	}
-
-	private class DisconnectHandler extends BaseAsyncTaskCallback<Void> {
-		@Override
-		public void onTaskCompleted(Void result) {
-			Log.d(CLASS, "you're now disconnected");
-			invalidateOptionsMenu();
-			
-			ContactsFragment contacts = (ContactsFragment) getSupportFragmentManager().findFragmentByTag(CONTACTS_TAB_ID);
-			if (contacts != null) {
-				// fragment has been created despite lazy creation
-				contacts.handleDisconnect();
-			}
-			
-			TeamsFragment teams = (TeamsFragment) getSupportFragmentManager().findFragmentByTag(TEAMS_TAB_ID);
-			if (teams != null) {
-				// fragment has been created despite lazy creation
-				teams.handleDisconnect();
-			}
-		}
-	}
-	
-	private class FormTeamHandler extends BaseAsyncTaskCallback<String[]> {
-		@Override
-		public void onTaskCompleted(String[] connection_data) {
-			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
-			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
-		}
-	
-		@Override
-		public void onTaskAborted(Exception e) {
-			String problem = String.format("Failed to form team: %s", e.getMessage());
-			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
-		}
-	}
-	
-
-	/**
-	 * A simple factory that returns dummy views to the Tabhost
-	 */
-	private class DummyFactory implements TabContentFactory {
-		public View createTabContent(String tag) {
-			View dummy = new View(RosterActivity.this);
-			dummy.setMinimumWidth(0);
-			dummy.setMinimumHeight(0);
-			return dummy;
-		}
-
-	}
-	
-	/** (non-Javadoc)
-	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-	 */
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -199,14 +76,9 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 			//set the tab as per the saved state
 			actionBar.setSelectedNavigationItem(savedInstanceState.getInt(SAVED_TAB_KEY));
 		}
-		
-		// Initialise the TabHost
-		/*initialiseTabHost(savedInstanceState);
-		
-		
+
 		// Intialise ViewPager
-		intialiseViewPager();
-		*/
+		//intialiseViewPager();
 
 		mCurrentIntent = getIntent();
 	}
@@ -234,12 +106,12 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 	@Override
 	protected void onPause() {
 		Log.d(CLASS, "Pausing tabbed roster activity");
-		
+
 		if (mXMPPServiceConnection != null) {
 			unbindService(mXMPPServiceConnection);
 		}
 		mXMPPService = null;
-		
+
 		super.onPause();
 	}
 
@@ -264,26 +136,7 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 	public IXMPPService getXMPPService() {
 		return mXMPPService;
 	}
-	
 
-	/**
-	 * Initialise the Tab Host
-	 */
-	private void initialiseTabHost(Bundle args) {
-		mTabHost = (TabHost)findViewById(android.R.id.tabhost);
-		mTabHost.setup();
-		addTab(mTabHost.newTabSpec(CONTACTS_TAB_ID).setIndicator(getString(R.string.tab_contacts)));
-		addTab(mTabHost.newTabSpec(TEAMS_TAB_ID).setIndicator(getString(R.string.tab_teams)));
-		mTabHost.setOnTabChangedListener(this);
-	}
-
-	private void addTab(TabHost.TabSpec tabSpec) {
-		// Attach a Tab view factory to the spec
-		tabSpec.setContent(new DummyFactory());
-		mTabHost.addTab(tabSpec);
-	}
-
-	
 	/**
 	 * Initialise ViewPager
 	 */
@@ -293,31 +146,10 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 
 		mViewPager = (ViewPager) findViewById(R.id.viewpager);
 		mViewPager.setAdapter(mPagerAdapter);
-		mViewPager.setOnPageChangeListener(this);
+		//mViewPager.setOnPageChangeListener(this);
 
 	}
 
-	public void onTabChanged(String tag) {
-		int pos = mTabHost.getCurrentTab();
-		/* avoid race condition between changing tab and changing orientation
-		 * destroys the ViewPager.
-		 */
-		if (mViewPager != null) {
-			mViewPager.setCurrentItem(pos);
-		}
-	}
-
-	@Override
-	public void onPageSelected(int position) {
-		mTabHost.setCurrentTab(position);
-	}
-
-	@Override
-	public void onPageScrollStateChanged(int state) {}
-
-	@Override
-	public void onPageScrolled(int arg0, float arg1, int arg2) {}
-	
 	private void handleIntent(Intent intent) {
 		Log.d(CLASS, "handling intent");
 		Bundle extras = intent.getExtras();
@@ -393,7 +225,7 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		inflater.inflate(R.menu.roster, menu);
 		return true;
 	}
-	
+
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MenuItem connectMenu = menu.findItem(R.id.roster_menu_connect);
@@ -403,23 +235,23 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		int connectTitle = R.string.roster_menu_connect;
 		CharSequence connectTitleCondensed = res.getString(R.string.roster_menu_connect_condensed);
 		boolean enableConnect = false;
-		boolean enableFormTeam = false;
-		
+		boolean showFormTeam = false;
+
 		if (mXMPPService != null) {
 			enableConnect = true;
-			
+
 			if (mXMPPService.isAuthenticated()) {
 			Log.d(CLASS, "setting menu option to 'disconnect'");
 			connectTitle = R.string.roster_menu_disconnect;
 			connectTitleCondensed = res.getString(R.string.roster_menu_disconnect_condensed);
-			enableFormTeam = true;
+			showFormTeam = true;
 			}
 		}
 		connectMenu.setTitle(connectTitle);
 		connectMenu.setTitleCondensed(connectTitleCondensed);
 		connectMenu.setEnabled(enableConnect);
-		formTeamMenu.setEnabled(enableFormTeam);
-		
+		formTeamMenu.setVisible(showFormTeam);
+
 		return true;
 	}
 
@@ -493,7 +325,6 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		FragmentManager fm = getSupportFragmentManager();
 		//TODO check how to spawn dialog fragment from activity
 		dialog.show(fm, null);
-		
 	}
 
 	public void enteredTeamName(String teamName) {
@@ -503,5 +334,74 @@ public class RosterActivity extends SherlockFragmentActivity implements TabHost.
 		final String conferenceSrvKey = getString(R.string.preference_conference_server_key);
 		final String conferenceSrv = settings.getString(conferenceSrvKey, "");
 		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
+	}
+
+
+	private class XMPPServiceConnection implements ServiceConnection {
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder binder) {
+			Log.d(CLASS, "RosterActivity has been (re-)bound to XMPP service ('" + className + "')");
+			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
+			handleIntent(mCurrentIntent);
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName className) {
+			Log.d(CLASS, "RosterActivity.XMPPServiceConnection.onServiceDisconnected('" + className + "')");
+			mXMPPService = null;
+		}
+	};
+
+	private class ConnectHandler extends BaseAsyncTaskCallback<Void> {
+		@Override
+		public void onTaskCompleted(Void nothing) {
+			Log.d(CLASS, "Connect task completed!!");
+			invalidateOptionsMenu();
+
+			// broadcast connected
+			Log.d(CLASS, "Sending CONNECT broadcast");
+			Intent bcastConnected = new Intent();
+			bcastConnected.setAction(getString(R.string.broadcast_connected));
+			sendStickyBroadcast(bcastConnected);
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class DisconnectHandler extends BaseAsyncTaskCallback<Void> {
+		@Override
+		public void onTaskCompleted(Void result) {
+			Log.d(CLASS, "you're now disconnected");
+			invalidateOptionsMenu();
+
+			// broadcast disconnected
+			Log.d(CLASS, "Removing CONNECT broadcast");
+			Intent bcastConnected = new Intent();
+			bcastConnected.setAction(getString(R.string.broadcast_connected));
+			removeStickyBroadcast(bcastConnected);
+
+			Log.d(CLASS, "Sending DISCONNECT broadcast");
+			Intent bcastDisconnected = new Intent();
+			bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
+			sendStickyBroadcast(bcastDisconnected);
+		}
+	}
+
+	private class FormTeamHandler extends BaseAsyncTaskCallback<String[]> {
+		@Override
+		public void onTaskCompleted(String[] connection_data) {
+			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
+			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to form team: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+		}
 	}
 }

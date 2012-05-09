@@ -13,7 +13,7 @@
         android:titleCondensed="@string/roster_menu_show_map_condensed"/>
     <item
         android:id="@+id/roster_menu_form_team"
-        android:enabled="false"
+        android:visible="false"
         android:title="@string/roster_menu_form_team"
         android:titleCondensed="@string/roster_menu_form_team_condensed"
         android:showAsAction="ifRoom" />

@@ -10,6 +10,11 @@ import java.util.Set;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.muc.Occupant;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -32,12 +37,14 @@ public class TeamsFragment extends Fragment {
 	private static final String NAME = "name";
 	private static final String AFFILIATION = "affiliation";
 	
+	private BroadcastReceiver mConnectReceiver;
+	private BroadcastReceiver mDisconnectReceiver;
+	private ExpandableListView mTeamsList;
 	private SimpleExpandableListAdapter mAdapter;
 	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
 	private List<List<Map<String, String>>> mExpandableChildren = new ArrayList<List<Map<String, String>>>();
 
-	private ExpandableListView mTeamsList;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -70,16 +77,24 @@ public class TeamsFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 		Log.d(CLASS, "Resuming teams fragment");
-		IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
-		if (service != null && service.isAuthenticated()) {
-			// service has been connected before this fragment and its view were created
-			new FetchRoomsTask(service, new FetchRoomsHandler()).execute();
-		}
+
+		mConnectReceiver = new ConnectReceiver();
+		IntentFilter connectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_connected));
+		getActivity().registerReceiver(mConnectReceiver, connectFilter);
+
+		mDisconnectReceiver = new DisconnectReceiver();
+		IntentFilter disconnectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_disconnected));
+		getActivity().registerReceiver(mDisconnectReceiver, disconnectFilter);
 	}
 
 	@Override
 	public void onPause() {
 		Log.d(CLASS, "Pausing teams fragement");
+
+		Activity activity = getActivity();
+		activity.unregisterReceiver(mConnectReceiver);
+		activity.unregisterReceiver(mDisconnectReceiver);
+
 		super.onPause();
 	}
 
@@ -130,16 +145,33 @@ public class TeamsFragment extends Fragment {
 		@Override
 		public void onTaskCompleted(Set<String> rooms) {
 			mRooms = rooms;
-			if (mTeamsList != null) {
-				// the service as well as its view have been created
-				mTeamsList.post(new Runnable() {
-					@Override
-					public void run() {
-						fillExpandableList(mRooms);
-						mAdapter.notifyDataSetChanged();
-					}
-				});
+			mTeamsList.post(new Runnable() {
+				@Override
+				public void run() {
+					fillExpandableList(mRooms);
+					mAdapter.notifyDataSetChanged();
 				}
+			});
+		}
+	}
+
+	public class ConnectReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, String.format("*** Received CONNECT broadcast in '%s'", TeamsFragment.this));
+			
+			IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
+			new FetchRoomsTask(service, new FetchRoomsHandler()).execute();
+		}
+	}
+
+	public class DisconnectReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, String.format("*** Received DISCONNECT broadcast in '%s'", TeamsFragment.this));
+			handleDisconnect();
 		}
 	}
 }
