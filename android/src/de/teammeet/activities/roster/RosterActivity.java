@@ -241,10 +241,10 @@ public class RosterActivity extends SherlockFragmentActivity {
 			enableConnect = true;
 
 			if (mXMPPService.isAuthenticated()) {
-			Log.d(CLASS, "setting menu option to 'disconnect'");
-			connectTitle = R.string.roster_menu_disconnect;
-			connectTitleCondensed = res.getString(R.string.roster_menu_disconnect_condensed);
-			showFormTeam = true;
+				Log.d(CLASS, "setting menu option to 'disconnect'");
+				connectTitle = R.string.roster_menu_disconnect;
+				connectTitleCondensed = res.getString(R.string.roster_menu_disconnect_condensed);
+				showFormTeam = true;
 			}
 		}
 		connectMenu.setTitle(connectTitle);
