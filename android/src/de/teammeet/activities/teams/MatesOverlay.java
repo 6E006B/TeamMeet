@@ -68,7 +68,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 	@Override
 	public void handleMateUpdate(Mate mate) {
 		Log.d(CLASS, "MatesOverlay.handleMateUpdate() : " + mate.getID());
-		if (mate.getID().equals(mOwnID)) {
+		if (!mate.getID().equals(mOwnID)) {
 			acquireLock();
 			try {
 				if (mMates.containsKey(mate.getID())) {
