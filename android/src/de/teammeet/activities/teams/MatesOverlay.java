@@ -28,6 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -98,6 +99,8 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 
 	@Override
 	protected OverlayItem createItem(int index) {
+//		Log.d(CLASS, "MatesOverlay.createItem("+index+") on position: " +
+//				mOverlayItems.get(index).getPoint().toString());
 		return mOverlayItems.get(index);
 	}
 
@@ -119,5 +122,14 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 		final String mateNick = mateID.substring(mateID.lastIndexOf("/")+1);
 		Toast.makeText(mContext, mateNick, Toast.LENGTH_SHORT).show();
 		return super.onTap(index);
+	}
+
+	@Override
+	public boolean draw(Canvas canvas, MapView mapView, boolean shadow, long when) {
+		boolean isRedrawNeeded = mOverlayItems.size() > 0;
+		if (isRedrawNeeded) {
+			super.draw(canvas, mapView, shadow, when);
+		}
+		return isRedrawNeeded;
 	}
 }
