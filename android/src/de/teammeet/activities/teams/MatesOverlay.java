@@ -34,6 +34,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 
 import de.teammeet.R;
@@ -47,12 +48,14 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 	private String mOwnID = null;
 	private Map<String, Mate> mMates = null;
 	private List<OverlayItem> mOverlayItems = null;
+	private MapView mMapView = null;
 	private final ReentrantLock	mLock = new ReentrantLock();
 
 
-	public MatesOverlay(Context context, Drawable marker) {
+	public MatesOverlay(Context context, Drawable marker, MapView mapView) {
 		super(boundCenterBottom(marker));
 		mContext = context;
+		mMapView = mapView;
 		final SharedPreferences settings =
 				PreferenceManager.getDefaultSharedPreferences(mContext);
 		final String userIDKey = mContext.getString(R.string.preference_user_id_key);
@@ -81,6 +84,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 				releaseLock();
 			}
 			populate();
+			mMapView.invalidate();
 		}
 	}
 
