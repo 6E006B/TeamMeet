@@ -44,7 +44,6 @@ import com.google.android.maps.Overlay;
 
 import de.teammeet.R;
 import de.teammeet.helper.ActionBarHelper;
-import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
 
 public class TeamMeetActivity extends SherlockMapActivity {
@@ -57,13 +56,16 @@ public class TeamMeetActivity extends SherlockMapActivity {
 	private MyDirectionLocationOverlay	mMyLocationOverlay			= null;
 	private MatesOverlay				mMatesOverlay				= null;
 	private IndicationOverlay			mIndicationOverlay			= null;
+	private MapGestureDetectorOverlay mMapGestureOverlay = null;
+
 
 	private boolean						mFollowingLocation			= false;
 	private boolean						mSatelliteView				= false;
 	private boolean						mFullscreen					= false;
 
-	private IXMPPService mXMPPService = null;
+	private XMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
+
 
 	private class XMPPServiceConnection implements ServiceConnection {
 
@@ -72,6 +74,7 @@ public class TeamMeetActivity extends SherlockMapActivity {
 			Log.d(CLASS, "TeamMeetActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 
+			mMapGestureOverlay.setXMPPService(mXMPPService);
 			// register to get status updates
 			mXMPPService.registerMatesUpdates(mMatesOverlay);
 			mXMPPService.startLocationTransmission(mMyLocationOverlay);
@@ -82,6 +85,7 @@ public class TeamMeetActivity extends SherlockMapActivity {
 			Log.d(CLASS, "TeamMeetActivity.XMPPServiceConnection.onServiceDisconnected('" + className +
 					"')");
 			mXMPPService = null;
+			mMapGestureOverlay.setXMPPService(null);
 		}
 	};
 
@@ -176,7 +180,8 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		mListOfOverlays.add(mMatesOverlay);
 //		mListOfOverlays.add(mIndicationOverlay);
 		mListOfOverlays.add(mMyLocationOverlay);
-		mListOfOverlays.add(new MapGestureDetectorOverlay(mMapView, getResources()));
+		mMapGestureOverlay = new MapGestureDetectorOverlay(mMapView, getResources());
+		mListOfOverlays.add(mMapGestureOverlay);
 	}
 
 	private void unregisterMatesUpdates() {

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jivesoftware.smack.XMPPException;
+
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -24,8 +26,7 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.Projection;
 
 import de.teammeet.R;
-import de.teammeet.R.color;
-import de.teammeet.R.integer;
+import de.teammeet.services.xmpp.XMPPService;
 
 public class MapGestureDetectorOverlay extends Overlay implements OnGestureListener {
 
@@ -33,6 +34,7 @@ public class MapGestureDetectorOverlay extends Overlay implements OnGestureListe
 	private GestureDetector gestureDetector;
 	private OnGestureListener onGestureListener;
 	private MapView mMapView = null;
+	private XMPPService mXMPPService = null;
 	private GeoPoint mIndicatorLocation = null;
 
 	private final ReentrantLock	mLock					= new ReentrantLock();
@@ -72,6 +74,10 @@ public class MapGestureDetectorOverlay extends Overlay implements OnGestureListe
 		setOnGestureListener(onGestureListener);
 	}
 
+	public void setXMPPService(XMPPService xmppService) {
+		mXMPPService = xmppService;
+	}
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event, MapView mapView) {
 		if (gestureDetector.onTouchEvent(event)) {
@@ -99,26 +105,35 @@ public class MapGestureDetectorOverlay extends Overlay implements OnGestureListe
 	@Override
 	public void onLongPress(MotionEvent event) {
 		Log.e(CLASS, "longpress!!!1 " + event.toString());
-		float x = event.getX();
-		float y = event.getY();
-		Log.d(CLASS, String.format("x: %f y: %f", x, y));
-		Log.d(CLASS, String.format("x: %d y: %d", (int)x, (int)y));
-		mIndicatorLocation  = mMapView.getProjection().fromPixels((int)x, (int)y);
-		Geocoder geoCoder = new Geocoder(mMapView.getContext(), Locale.getDefault());
-		try {
-			List<Address> addresses = geoCoder.getFromLocation(mIndicatorLocation.getLatitudeE6() / 1E6,
-					mIndicatorLocation.getLongitudeE6() / 1E6, 1);
-
-			List<String> addressStringList = new LinkedList<String>();
-			if (addresses.size() > 0) {
-				for (int i = 0; i < addresses.get(0).getMaxAddressLineIndex(); i++)
-					addressStringList.add(addresses.get(0).getAddressLine(i));
+		if (mXMPPService != null) {
+			float x = event.getX();
+			float y = event.getY();
+			Log.d(CLASS, String.format("x: %f y: %f", x, y));
+			Log.d(CLASS, String.format("x: %d y: %d", (int)x, (int)y));
+			mIndicatorLocation  = mMapView.getProjection().fromPixels((int)x, (int)y);
+			Geocoder geoCoder = new Geocoder(mMapView.getContext(), Locale.getDefault());
+			try {
+				List<Address> addresses = geoCoder.getFromLocation(mIndicatorLocation.getLatitudeE6() / 1E6,
+						mIndicatorLocation.getLongitudeE6() / 1E6, 1);
+	
+				List<String> addressStringList = new LinkedList<String>();
+				String addressString = "";
+				if (addresses.size() > 0) {
+					for (int i = 0; i < addresses.get(0).getMaxAddressLineIndex(); i++) {
+						addressStringList.add(addresses.get(0).getAddressLine(i));
+						addressString += addresses.get(0).getAddressLine(i) + "\n";
+					}
+				}
+				// Collections.reverse(addressStringList);
+				mAddressOfPoint = addressStringList;
+				mXMPPService.sendIndicator(mIndicatorLocation, addressString);
+			} catch (IOException e) {
+				Log.e(CLASS, "Error using Geocoder: " + e.getLocalizedMessage());
+				e.printStackTrace();
+			} catch (XMPPException e) {
+				Log.e(CLASS, "Error sending Indicator: " + e.getLocalizedMessage());
+				e.printStackTrace();
 			}
-			// Collections.reverse(addressStringList);
-			mAddressOfPoint = addressStringList;
-		} catch (IOException e) {
-			Log.e(CLASS, "Error using Geocoder: " + e.getLocalizedMessage());
-			e.printStackTrace();
 		}
 		if (onGestureListener != null) {
 			onGestureListener.onLongPress(event);
