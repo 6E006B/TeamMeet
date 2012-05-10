@@ -12,7 +12,7 @@ public class GeolocPacketExtension implements PacketExtension {
 	private int mLatitude = 0;
 	private int mAccuracy = 0;
 
-	public static final String NAMESPACE = "https://teammeet.de/teammeet.ns";
+	public static final String NAMESPACE = "https://teammeet.de/teammeet_geoloc.ns";
 	public static final String GEOLOC = "geoloc";
 	public static final String LON = "lon";
 	public static final String LAT = "lat";
