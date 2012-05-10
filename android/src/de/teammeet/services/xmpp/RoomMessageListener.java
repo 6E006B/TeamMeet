@@ -42,6 +42,20 @@ public class RoomMessageListener implements PacketListener {
 		} else {
 			Log.d(CLASS, "packet did not contain geoloc extension.");
 		}
+		Log.d(CLASS, "now checking for indicator");
+		IndicatorPacketExtension indicator = (IndicatorPacketExtension) packet
+				.getExtension(IndicatorPacketExtension.NAMESPACE);
+		if (indicator != null) {
+			Log.d(CLASS, "found indicator packet");
+			int lon = indicator.getLongitude();
+			int lat = indicator.getLatitude();
+			GeoPoint location = new GeoPoint(lat, lon);
+			String info = indicator.getInfo();
+			Log.d(CLASS, "received indicator from '" + from + "' - lon: " + lon + " lat: " + lat +
+			      " info: " + info);
+		} else {
+			Log.d(CLASS, "packet did not contain indicator extension.");
+		}
 		final Message message = (Message)packet;
 		final String text = message.getBody();
 		Log.d(CLASS, "Message body: " + text);
