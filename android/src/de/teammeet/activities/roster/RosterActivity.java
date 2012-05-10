@@ -373,6 +373,12 @@ public class RosterActivity extends SherlockFragmentActivity {
 			invalidateOptionsMenu();
 
 			// broadcast connected
+			Log.d(CLASS, "Removing DISCONNECT broadcast");
+			Intent bcastDisconnected = new Intent();
+			bcastDisconnected.addCategory(getString(R.string.broadcast_connection_state));
+			bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
+			removeStickyBroadcast(bcastDisconnected);
+
 			Log.d(CLASS, "Sending CONNECT broadcast");
 			Intent bcastConnected = new Intent();
 			bcastConnected.addCategory(getString(R.string.broadcast_connection_state));
