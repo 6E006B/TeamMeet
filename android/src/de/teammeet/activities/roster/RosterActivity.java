@@ -344,7 +344,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 	public void enteredTeamName(String teamName) {
 		Log.d(CLASS, String.format("Will create team '%s'", teamName));
 		final SharedPreferences settings =
-				PreferenceManager.getDefaultSharedPreferences(RosterActivity.this);
+				PreferenceManager.getDefaultSharedPreferences(this);
 		final String conferenceSrvKey = getString(R.string.preference_conference_server_key);
 		final String conferenceSrv = settings.getString(conferenceSrvKey, "");
 		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
