@@ -81,6 +81,7 @@
     <string name="text_contact_to_invite">Contact to invite:</string>
     <string name="notification_service_title">TeamMeet is running.</string>
     <string name="notification_service_text">Click to bring to front.</string>
+    <string name="broadcast_connection_state">de.teammeet.intent.category.XMPP_CONNECTION_STATE</string>
     <string name="broadcast_connected">de.teammeet.intent.action.CONNECTED</string>
     <string name="broadcast_disconnected">de.teammeet.indent.action.DISCONNECTED</string>
 
