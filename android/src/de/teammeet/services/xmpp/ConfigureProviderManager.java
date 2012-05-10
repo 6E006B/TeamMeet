@@ -160,5 +160,6 @@ public class ConfigureProviderManager {
         
         // TeamMeet
         pm.addExtensionProvider("x", GeolocPacketExtension.NAMESPACE, new GeolocExtensionProvider());
+        pm.addExtensionProvider("x", IndicatorPacketExtension.NAMESPACE, new IndicatorExtensionProvider());
     }
 }
