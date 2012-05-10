@@ -350,6 +350,19 @@ public class RosterActivity extends SherlockFragmentActivity {
 		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
 	}
 
+	private void toggleConnectionStateBroadcast(int oldStateAction, int newStateAction) {
+		Log.d(CLASS, "Cutting off old connection broadcast");
+		Intent intent = new Intent();
+		intent.addCategory(getString(R.string.broadcast_connection_state));
+		intent.setAction(getString(oldStateAction));
+		removeStickyBroadcast(intent);
+
+		Log.d(CLASS, "Turning on new connection broadcast");
+		intent = new Intent();
+		intent.addCategory(getString(R.string.broadcast_connection_state));
+		intent.setAction(getString(newStateAction));
+		sendStickyBroadcast(intent);
+	}
 
 	private class XMPPServiceConnection implements ServiceConnection {
 		@Override
@@ -373,17 +386,8 @@ public class RosterActivity extends SherlockFragmentActivity {
 			invalidateOptionsMenu();
 
 			// broadcast connected
-			Log.d(CLASS, "Removing DISCONNECT broadcast");
-			Intent bcastDisconnected = new Intent();
-			bcastDisconnected.addCategory(getString(R.string.broadcast_connection_state));
-			bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
-			removeStickyBroadcast(bcastDisconnected);
-
-			Log.d(CLASS, "Sending CONNECT broadcast");
-			Intent bcastConnected = new Intent();
-			bcastConnected.addCategory(getString(R.string.broadcast_connection_state));
-			bcastConnected.setAction(getString(R.string.broadcast_connected));
-			sendStickyBroadcast(bcastConnected);
+			toggleConnectionStateBroadcast(R.string.broadcast_disconnected,
+										   R.string.broadcast_connected);
 		}
 
 		@Override
@@ -400,17 +404,8 @@ public class RosterActivity extends SherlockFragmentActivity {
 			invalidateOptionsMenu();
 
 			// broadcast disconnected
-			Log.d(CLASS, "Removing CONNECT broadcast");
-			Intent bcastConnected = new Intent();
-			bcastConnected.addCategory(getString(R.string.broadcast_connection_state));
-			bcastConnected.setAction(getString(R.string.broadcast_connected));
-			removeStickyBroadcast(bcastConnected);
-
-			Log.d(CLASS, "Sending DISCONNECT broadcast");
-			Intent bcastDisconnected = new Intent();
-			bcastDisconnected.addCategory(getString(R.string.broadcast_connection_state));
-			bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
-			sendStickyBroadcast(bcastDisconnected);
+			toggleConnectionStateBroadcast(R.string.broadcast_connected,
+										   R.string.broadcast_disconnected);
 		}
 	}
 
