@@ -1,6 +1,7 @@
 package de.teammeet.activities.roster;
 
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.util.StringUtils;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -177,19 +178,22 @@ public class RosterActivity extends SherlockFragmentActivity {
 		final String reason = intent.getStringExtra(XMPPService.REASON);
 		final String password = intent.getStringExtra(XMPPService.PASSWORD);
 		final String from = intent.getStringExtra(XMPPService.FROM);
+
+		Log.d(CLASS, String.format("room: '%s' inviter: '%s' reason: '%s' password: '%s' from: '%s'",
+									room, inviter, reason, password, from));
+
 		// cleanup the extras so that this is only executed once, not every time the activity is
 		// brought to foreground again
-		intent.removeExtra(XMPPService.ROOM);
-		intent.removeExtra(XMPPService.INVITER);
-		intent.removeExtra(XMPPService.REASON);
-		intent.removeExtra(XMPPService.PASSWORD);
-		intent.removeExtra(XMPPService.FROM);
-		Log.d(CLASS, String.format("room: '%s' inviter: '%s' reason: '%s' password: '%s' from: '%s'", room, inviter, reason, password, from));
+		cleanupJoinIntent(intent);
+
 		if (room != null && inviter != null && reason != null && from != null) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Group Invitation");
 			builder.setMessage(String.format("%s wants you to join '%s':\n%s",
-											 inviter, room, reason));
+											 StringUtils.parseName(inviter),
+											 StringUtils.parseName(room),
+											 reason)
+											);
 			builder.setCancelable(false);
 			builder.setPositiveButton("Join", new DialogInterface.OnClickListener() {
 					   public void onClick(DialogInterface dialog, int id) {
@@ -201,9 +205,10 @@ public class RosterActivity extends SherlockFragmentActivity {
 							try {
 								mXMPPService.joinRoom(room, userID, password);
 							} catch (XMPPException e) {
-								e.printStackTrace();
-								Log.e(CLASS, "Unable to join room.");
-								// TODO show the user
+								String problem = String.format("Unable to join room '%s': %s",
+																room, e.getMessage());
+								Log.e(CLASS, problem, e);
+								Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 							}
 					   }
 				   });
@@ -217,6 +222,14 @@ public class RosterActivity extends SherlockFragmentActivity {
 		} else {
 			Log.e(CLASS, "Cannot handle invite: Missing parameters.");
 		}
+	}
+
+	private void cleanupJoinIntent(Intent intent) {
+		intent.removeExtra(XMPPService.ROOM);
+		intent.removeExtra(XMPPService.INVITER);
+		intent.removeExtra(XMPPService.REASON);
+		intent.removeExtra(XMPPService.PASSWORD);
+		intent.removeExtra(XMPPService.FROM);
 	}
 
 	@Override
