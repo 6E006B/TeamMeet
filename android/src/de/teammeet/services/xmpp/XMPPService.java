@@ -150,10 +150,12 @@ public class XMPPService extends Service implements IXMPPService {
 		}).start();
 		
 		Intent bcastConnected = new Intent();
+		bcastConnected.addCategory(getString(R.string.broadcast_connection_state));
 		bcastConnected.setAction(getString(R.string.broadcast_connected));
 		removeStickyBroadcast(bcastConnected);
 		
 		Intent bcastDisconnected = new Intent();
+		bcastDisconnected.addCategory(getString(R.string.broadcast_connection_state));
 		bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
 		removeStickyBroadcast(bcastDisconnected);
 
