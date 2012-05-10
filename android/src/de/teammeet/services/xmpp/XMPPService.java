@@ -313,6 +313,7 @@ public class XMPPService extends Service implements IXMPPService {
 		MultiUserChat muc = mRooms.get(room);
 		Iterator<String> occupants;
 		if (muc != null) {
+			Log.d(CLASS, String.format("My nick in room is '%s'", muc.getNickname()));
 			occupants = muc.getOccupants();
 		} else {
 			throw new XMPPException(String.format("No such room '%s'", room));
@@ -320,6 +321,18 @@ public class XMPPService extends Service implements IXMPPService {
 		return occupants;
 	}
 	
+	@Override
+	public String getNickname(String room) throws XMPPException {
+		MultiUserChat muc = mRooms.get(room);
+		String nick;
+		if (muc != null) {
+			nick = muc.getNickname();
+		} else {
+			throw new XMPPException(String.format("No such room '%s'", room));
+		}
+		return nick;
+	}
+
 	@Override
 	public void invite(String contact, String roomName) throws XMPPException {
 		MultiUserChat muc = mRooms.get(roomName);

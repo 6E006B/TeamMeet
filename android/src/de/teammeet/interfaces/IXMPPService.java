@@ -86,4 +86,6 @@ public interface IXMPPService {
 	Set<String> getRooms();
 
 	Iterator<String> getOccupants(String room) throws XMPPException;
+
+	String getNickname(String room) throws XMPPException;
 }

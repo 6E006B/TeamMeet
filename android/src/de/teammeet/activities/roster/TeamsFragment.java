@@ -107,17 +107,29 @@ public class TeamsFragment extends Fragment {
 		for (String room : rooms) {
 			Map<String, String> roomStruct = new HashMap<String, String>();
 			List<Map<String, String>> membersStruct = new ArrayList<Map<String,String>>();
+			String me = "";
 			
 			roomStruct.put(NAME, room);
 			mExpandableGroups.add(roomStruct);
 			
 			try {
+				me = xmppService.getNickname(room);
+			} catch (XMPPException e) {
+				String problem = String.format("Failed to fetch own nickname from room '%s': %s",
+												room, e.getMessage());
+				Log.e(CLASS, problem, e);
+				Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
+			}
+
+			try {
 				Iterator<String> occupants = xmppService.getOccupants(room);
 				while (occupants.hasNext()) {
 					String nick = StringUtils.parseResource(occupants.next());
-					HashMap<String, String> occupantStruct = new HashMap<String, String>();
-					occupantStruct.put(NAME, nick);
-					membersStruct.add(occupantStruct);
+					if (!nick.equals(me)) {
+						HashMap<String, String> occupantStruct = new HashMap<String, String>();
+						occupantStruct.put(NAME, nick);
+						membersStruct.add(occupantStruct);
+					}
 				}
 				mExpandableChildren.add(membersStruct);
 			} catch (XMPPException e) {
