@@ -212,16 +212,15 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, "XMPPService.disconnect()");
 		stopLocationTransmission();
 		if (mXMPP != null) {
+			mXMPP.disconnect();
 			if (mRoomInvitationListener != null) {
 				MultiUserChat.removeInvitationListener(mXMPP, mRoomInvitationListener);
 			}
-			mXMPP.disconnect();
 		}
 		removeNotifications();
 		mRooms = null;
 		mRoomInvitationListener = null;
 		mXMPP = null;
-//		stopSelf();
 	}
 
 	@Override
@@ -412,12 +411,23 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void sendIndicator(GeoPoint location) throws XMPPException {
-		Message message = new Message();
-		IndicatorPacketExtension indication = new IndicatorPacketExtension(location.getLatitudeE6(),
-				location.getLongitudeE6());
-		message.addExtension(indication);
-		sendAllGroups(message);
+	public void sendIndicator(GeoPoint location, String info) throws XMPPException {
+		if (mXMPP != null) {
+			if (mXMPP.isAuthenticated()) {
+				Message message = new Message();
+				IndicatorPacketExtension indication =
+						new IndicatorPacketExtension(location.getLatitudeE6(),
+						                             location.getLongitudeE6(),
+						                             info);
+				message.addExtension(indication);
+				message.addBody("", "");
+				sendAllGroups(message);
+			} else {
+				throw new XMPPException("Not authenticated.");
+			}
+		} else {
+			throw new XMPPException("Not connected.");
+		}
 	}
 
 	private void sendAllGroups(Message message) throws XMPPException {
