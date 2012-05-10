@@ -1,14 +1,14 @@
 package de.teammeet.activities.roster;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smackx.muc.Occupant;
+import org.jivesoftware.smack.util.StringUtils;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -57,9 +57,9 @@ public class TeamsFragment extends Fragment {
 				new String[] { NAME },
 				new int[] { android.R.id.text1},
 				mExpandableChildren,
-				android.R.layout.simple_expandable_list_item_2,
-				new String[] { NAME, AFFILIATION },
-				new int[] { android.R.id.text1, android.R.id.text2}
+				android.R.layout.simple_expandable_list_item_1,
+				new String[] { NAME },
+				new int[] { android.R.id.text1 }
 				);
 	}
 
@@ -107,22 +107,35 @@ public class TeamsFragment extends Fragment {
 		for (String room : rooms) {
 			Map<String, String> roomStruct = new HashMap<String, String>();
 			List<Map<String, String>> membersStruct = new ArrayList<Map<String,String>>();
+			String me = "";
 			
 			roomStruct.put(NAME, room);
 			mExpandableGroups.add(roomStruct);
 			
 			try {
-				Collection<Occupant> participants = xmppService.getParticipants(room);
-				for (Occupant participant : participants) {
-					HashMap<String, String> participantStruct = new HashMap<String, String>();
-					participantStruct.put(NAME, participant.getJid());
-					participantStruct.put(AFFILIATION, participant.getAffiliation());
-					membersStruct.add(participantStruct);
+				me = xmppService.getNickname(room);
+			} catch (XMPPException e) {
+				String problem = String.format("Failed to fetch own nickname from room '%s': %s",
+												room, e.getMessage());
+				Log.e(CLASS, problem, e);
+				Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
+			}
+
+			try {
+				Iterator<String> occupants = xmppService.getOccupants(room);
+				while (occupants.hasNext()) {
+					String nick = StringUtils.parseResource(occupants.next());
+					if (!nick.equals(me)) {
+						HashMap<String, String> occupantStruct = new HashMap<String, String>();
+						occupantStruct.put(NAME, nick);
+						membersStruct.add(occupantStruct);
+					}
 				}
 				mExpandableChildren.add(membersStruct);
 			} catch (XMPPException e) {
-				Log.e(CLASS, String.format("Failed to fetch members: '%s'", e.getMessage()), e);
-				Toast.makeText(getActivity(), String.format("Failed to fetch participants for room '%s'", room), Toast.LENGTH_LONG).show();
+				String problem = String.format("Failed to fetch occupants for room '%s': %s", room, e.getMessage());
+				Log.e(CLASS, problem, e);
+				Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 			}
 		}
 
