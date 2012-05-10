@@ -396,10 +396,12 @@ public class XMPPService extends Service implements IXMPPService {
 			if (mXMPP.isAuthenticated()) {
 				Log.d(CLASS, String.format("sending new location: %s", location.toString()));
 				Message message = new Message();
-				GeolocPacketExtension geoloc = new GeolocPacketExtension(location.getLongitudeE6(),
-				                                                         location.getLatitudeE6(),
-				                                                         accuracy);
-				message.addExtension(geoloc);
+				MatePacket matePacket = new MatePacket(location.getLongitudeE6(),
+				                                       location.getLatitudeE6(),
+				                                       accuracy);
+				TeamMeetPacketExtension teamMeetPacket = new TeamMeetPacketExtension(matePacket,
+				                                                                     null);
+				message.addExtension(teamMeetPacket);
 				message.addBody("", "");
 				sendAllGroups(message);
 			} else {
@@ -415,11 +417,12 @@ public class XMPPService extends Service implements IXMPPService {
 		if (mXMPP != null) {
 			if (mXMPP.isAuthenticated()) {
 				Message message = new Message();
-				IndicatorPacketExtension indication =
-						new IndicatorPacketExtension(location.getLatitudeE6(),
-						                             location.getLongitudeE6(),
-						                             info);
-				message.addExtension(indication);
+				IndicatorPacket indicatorPacket = new IndicatorPacket(location.getLatitudeE6(),
+				 						                             location.getLongitudeE6(),
+										                             info);
+				TeamMeetPacketExtension teamMeetPacket =
+						new TeamMeetPacketExtension(null, indicatorPacket);
+				message.addExtension(teamMeetPacket);
 				message.addBody("", "");
 				sendAllGroups(message);
 			} else {

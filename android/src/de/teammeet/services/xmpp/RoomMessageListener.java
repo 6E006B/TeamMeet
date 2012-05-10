@@ -27,13 +27,14 @@ public class RoomMessageListener implements PacketListener {
 		Log.d(CLASS, "RoomMessageListener.processPacket() in " + mGroup);
 		String from = packet.getFrom();
 		String xml = packet.toXML();
-		GeolocPacketExtension geoloc = (GeolocPacketExtension) packet
-				.getExtension(GeolocPacketExtension.NAMESPACE);
-		if (geoloc != null) {
-			int lon = geoloc.getLongitude();
-			int lat = geoloc.getLatitude();
+		TeamMeetPacketExtension teamMeetPacket = (TeamMeetPacketExtension) packet
+				.getExtension(TeamMeetPacketExtension.NAMESPACE);
+		if (teamMeetPacket.hasMatePacket()) {
+			MatePacket matePacket = teamMeetPacket.getMatePacket();
+			int lon = matePacket.getLongitude();
+			int lat = matePacket.getLatitude();
 			GeoPoint location = new GeoPoint(lat, lon);
-			int accuracy = geoloc.getAccuracy();
+			int accuracy = matePacket.getAccuracy();
 			Log.d(CLASS,
 			      String.format("received location update from '%s' - lon: %d lat: %d acc: %d",
 			                    from, lon, lat, accuracy));
@@ -43,14 +44,13 @@ public class RoomMessageListener implements PacketListener {
 			Log.d(CLASS, "packet did not contain geoloc extension.");
 		}
 		Log.d(CLASS, "now checking for indicator");
-		IndicatorPacketExtension indicator = (IndicatorPacketExtension) packet
-				.getExtension(IndicatorPacketExtension.NAMESPACE);
-		if (indicator != null) {
+		if (teamMeetPacket.hasIndicatorPacket()) {
 			Log.d(CLASS, "found indicator packet");
-			int lon = indicator.getLongitude();
-			int lat = indicator.getLatitude();
+			IndicatorPacket indicatorPacket = teamMeetPacket.getIndicatorPacket();
+			int lon = indicatorPacket.getLongitude();
+			int lat = indicatorPacket.getLatitude();
 			GeoPoint location = new GeoPoint(lat, lon);
-			String info = indicator.getInfo();
+			String info = indicatorPacket.getInfo();
 			Log.d(CLASS, "received indicator from '" + from + "' - lon: " + lon + " lat: " + lat +
 			      " info: " + info);
 		} else {
