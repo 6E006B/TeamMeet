@@ -159,7 +159,6 @@ public class ConfigureProviderManager {
         pm.addExtensionProvider("attention", "urn:xmpp:attention:0", new AttentionExtension.Provider());
         
         // TeamMeet
-        pm.addExtensionProvider("x", GeolocPacketExtension.NAMESPACE, new GeolocExtensionProvider());
-        pm.addExtensionProvider("x", IndicatorPacketExtension.NAMESPACE, new IndicatorExtensionProvider());
+        pm.addExtensionProvider("x", TeamMeetPacketExtension.NAMESPACE, new TeamMeetExtensionProvider());
     }
 }
