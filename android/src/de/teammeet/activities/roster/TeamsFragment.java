@@ -80,10 +80,12 @@ public class TeamsFragment extends Fragment {
 
 		mConnectReceiver = new ConnectReceiver();
 		IntentFilter connectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_connected));
+		connectFilter.addCategory(getActivity().getString(R.string.broadcast_connection_state));
 		getActivity().registerReceiver(mConnectReceiver, connectFilter);
 
 		mDisconnectReceiver = new DisconnectReceiver();
 		IntentFilter disconnectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_disconnected));
+		disconnectFilter.addCategory(getActivity().getString(R.string.broadcast_connection_state));
 		getActivity().registerReceiver(mDisconnectReceiver, disconnectFilter);
 	}
 

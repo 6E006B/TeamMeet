@@ -373,8 +373,15 @@ public class RosterActivity extends SherlockFragmentActivity {
 			invalidateOptionsMenu();
 
 			// broadcast connected
+			Log.d(CLASS, "Removing DISCONNECT broadcast");
+			Intent bcastDisconnected = new Intent();
+			bcastDisconnected.addCategory(getString(R.string.broadcast_connection_state));
+			bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
+			removeStickyBroadcast(bcastDisconnected);
+
 			Log.d(CLASS, "Sending CONNECT broadcast");
 			Intent bcastConnected = new Intent();
+			bcastConnected.addCategory(getString(R.string.broadcast_connection_state));
 			bcastConnected.setAction(getString(R.string.broadcast_connected));
 			sendStickyBroadcast(bcastConnected);
 		}
@@ -395,11 +402,13 @@ public class RosterActivity extends SherlockFragmentActivity {
 			// broadcast disconnected
 			Log.d(CLASS, "Removing CONNECT broadcast");
 			Intent bcastConnected = new Intent();
+			bcastConnected.addCategory(getString(R.string.broadcast_connection_state));
 			bcastConnected.setAction(getString(R.string.broadcast_connected));
 			removeStickyBroadcast(bcastConnected);
 
 			Log.d(CLASS, "Sending DISCONNECT broadcast");
 			Intent bcastDisconnected = new Intent();
+			bcastDisconnected.addCategory(getString(R.string.broadcast_connection_state));
 			bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
 			sendStickyBroadcast(bcastDisconnected);
 		}
