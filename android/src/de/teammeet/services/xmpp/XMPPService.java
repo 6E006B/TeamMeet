@@ -100,6 +100,8 @@ public class XMPPService extends Service implements IXMPPService {
 	private ChatOpenHelper mChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
 
+	private android.app.Notification.Builder mServiceNotificationBuilder;
+
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
 			return XMPPService.this;
@@ -532,6 +534,7 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	private void showXMPPServiceNotification() {
+		Log.d(CLASS, "XMPPService.showXMPPServiceNotification()");
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
 
@@ -539,17 +542,19 @@ public class XMPPService extends Service implements IXMPPService {
         CharSequence text = getText(R.string.notification_service_text);
 		int icon = R.drawable.group_invitation_icon;
 		CharSequence tickerText = String.format("%s %s", title, text);
-		long when = System.currentTimeMillis();
 
-		Notification notification = new Notification(icon, tickerText, when);
-		
-		Context context = getApplicationContext();
 		Intent notificationIntent = new Intent(this, RosterActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
 		                                                        PendingIntent.FLAG_CANCEL_CURRENT);
 
-		notification.setLatestEventInfo(context, title, text, contentIntent);
-		notification.flags |= Notification.FLAG_NO_CLEAR;
+		mServiceNotificationBuilder = new Notification.Builder(getApplicationContext());
+		mServiceNotificationBuilder.setContentTitle(title);
+		mServiceNotificationBuilder.setContentText(text);
+		mServiceNotificationBuilder.setTicker(tickerText);
+		mServiceNotificationBuilder.setSmallIcon(icon);
+		mServiceNotificationBuilder.setOngoing(true);
+		mServiceNotificationBuilder.setContentIntent(contentIntent);
+		Notification notification = mServiceNotificationBuilder.getNotification();
 
 		notificationManager.notify(NOTIFICATION_XMPP_SERVICE_ID, notification);
 	}
