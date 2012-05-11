@@ -43,16 +43,13 @@ public class RoomMessageListener implements PacketListener {
 		} else {
 			Log.d(CLASS, "packet did not contain geoloc extension.");
 		}
-		Log.d(CLASS, "now checking for indicator");
 		if (teamMeetPacket.hasIndicatorPacket()) {
-			Log.d(CLASS, "found indicator packet");
 			IndicatorPacket indicatorPacket = teamMeetPacket.getIndicatorPacket();
-			int lon = indicatorPacket.getLongitude();
-			int lat = indicatorPacket.getLatitude();
-			String info = indicatorPacket.getInfo();
-			Log.d(CLASS, "received indicator from '" + from + "' - lon: " + lon + " lat: " + lat +
-			      " info: " + info);
-			mXMPPService.broadcastIndicator(lon, lat, info);
+			Log.d(CLASS, "received indicator from '" + from +
+			             "' - lon: " + indicatorPacket.getLongitude() +
+			             " lat: " + indicatorPacket.getLatitude() +
+			             " info: " + indicatorPacket.getInfo());
+			mXMPPService.broadcastIndicator(indicatorPacket);
 		} else {
 			Log.d(CLASS, "packet did not contain indicator extension.");
 		}

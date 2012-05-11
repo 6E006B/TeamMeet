@@ -434,15 +434,27 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
-	public void broadcastIndicator(int lon, int lat, String info) {
-		// TODO Auto-generated method stub
+	public void broadcastIndicator(IndicatorPacket indicatorPacket) {
+		final int lon = indicatorPacket.getLongitude();
+		final int lat = indicatorPacket.getLatitude();
+		final String info = indicatorPacket.getInfo();
+		final boolean remove = indicatorPacket.isRemove();
+
 		Intent intent = new Intent(getString(R.string.broadcast_action_indicator));
 		intent.addCategory(getString(R.string.broadcast_category_location));
 		intent.setData(Uri.parse(String.format("location:%d/%d", lon, lat)));
 		intent.putExtra(TeamMeetPacketExtension.LON, lon);
 		intent.putExtra(TeamMeetPacketExtension.LAT, lat);
 		intent.putExtra(TeamMeetPacketExtension.INFO, info);
-		sendStickyBroadcast(intent);
+		intent.putExtra(TeamMeetPacketExtension.REMOVE, remove);
+		if (remove) {
+			removeStickyBroadcast(intent);
+			Intent removeIntent = (Intent) intent.clone();
+			removeIntent.setAction(getString(R.string.broadcast_action_indicator_remove));
+			sendBroadcast(removeIntent);
+		} else {
+			sendStickyBroadcast(intent);
+		}
 	}
 
 	public void removeAllIndicators() {
