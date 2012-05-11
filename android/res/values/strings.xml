@@ -83,5 +83,7 @@
     <string name="notification_service_text">Click to bring to front.</string>
     <string name="broadcast_connected">de.teammeet.intent.action.CONNECTED</string>
     <string name="broadcast_disconnected">de.teammeet.indent.action.DISCONNECTED</string>
+    <string name="broadcast_action_indicator">de.teammeet.intent.action.INDICATOR</string>
+    <string name="broadcast_category_location">de.teammeet.intent.category.LOCATION</string>
 
 </resources>
