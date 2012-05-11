@@ -96,6 +96,7 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 		int lon = 0;
 		int lat = 0;
 		String info = null;
+		boolean remove = false;
 
 		// iterate over all XML tags
 		boolean done = false;
@@ -108,6 +109,8 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 					lat = Integer.parseInt(parser.nextText());
 				} else if (parser.getName().equals(TeamMeetPacketExtension.INFO)) {
 					info = parser.nextText();
+				} else if (parser.getName().equals(TeamMeetPacketExtension.REMOVE)) {
+					remove = true;
 				} else {
 					throw new InvalidProtocolException(String.format("Found invalid opening tag '%s'", parser.getName())); 
 				}
@@ -122,7 +125,7 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 
 		// check we've got everything we need
 		if (lon != 0 && lat != 0 && info != null) {
-			indicatorPacket = new IndicatorPacket(lon, lat, info);
+			indicatorPacket = new IndicatorPacket(lon, lat, info, remove);
 		} else {
 			throw new InvalidProtocolException("Missing value in Indicator message");
 		}

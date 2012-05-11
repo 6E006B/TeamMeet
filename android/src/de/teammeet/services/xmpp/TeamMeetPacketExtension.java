@@ -16,6 +16,7 @@ public class TeamMeetPacketExtension implements PacketExtension {
 	public static final String LAT = "lat";
 	public static final String ACCURACY = "err";
 	public static final String INFO = "info";
+	public static final String REMOVE = "remove";
 
 	private MatePacket mMatePacket;
 	private IndicatorPacket mIndicatorPacket;
