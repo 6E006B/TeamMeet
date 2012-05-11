@@ -204,6 +204,9 @@ public class RosterActivity extends SherlockFragmentActivity {
 							final String userID = settings.getString(userIDKey, "anonymous");
 							try {
 								mXMPPService.joinRoom(room, userID, password);
+
+								Intent newTeam = new Intent(getString(R.string.broadcast_teams_updated));
+								sendBroadcast(newTeam);
 							} catch (XMPPException e) {
 								String problem = String.format("Unable to join room '%s': %s",
 																room, e.getMessage());
