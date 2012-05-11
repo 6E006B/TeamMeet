@@ -128,15 +128,8 @@ public class ContactsFragment extends Fragment {
 		super.onResume();
 		Log.d(CLASS, "Resuming contacts fragment");
 
-		mConnectReceiver = new ConnectReceiver();
-		IntentFilter connectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_connected));
-		connectFilter.addCategory(getActivity().getString(R.string.broadcast_connection_state));
-		getActivity().registerReceiver(mConnectReceiver, connectFilter);
-
-		mDisconnectReceiver = new DisconnectReceiver();
-		IntentFilter disconnectFilter = new IntentFilter(getActivity().getString(R.string.broadcast_disconnected));
-		disconnectFilter.addCategory(getActivity().getString(R.string.broadcast_connection_state));
-		getActivity().registerReceiver(mDisconnectReceiver, disconnectFilter);
+		mConnectReceiver = getConnectReceiverInstance();
+		mDisconnectReceiver = getDisconnectReceiverInstance();
 	}
 
 	@Override
@@ -245,6 +238,30 @@ public class ContactsFragment extends Fragment {
 			mExpandableGroups.add(newEntry.mGroup);
 			mExpandableChildren.add(newEntry.mChildren);
 		}
+	}
+
+	private ConnectReceiver getConnectReceiverInstance() {
+		ConnectReceiver instance = new ConnectReceiver();
+
+		IntentFilter filter = new IntentFilter();
+		filter.addCategory(getActivity().getString(R.string.broadcast_connection_state));
+		filter.addAction(getActivity().getString(R.string.broadcast_connected));
+
+		getActivity().registerReceiver(instance, filter);
+
+		return instance;
+	}
+
+	private DisconnectReceiver getDisconnectReceiverInstance() {
+		DisconnectReceiver instance = new DisconnectReceiver();
+
+		IntentFilter filter = new IntentFilter();
+		filter.addCategory(getActivity().getString(R.string.broadcast_connection_state));
+		filter.addAction(getActivity().getString(R.string.broadcast_disconnected));
+
+		getActivity().registerReceiver(instance, filter);
+
+		return instance;
 	}
 
 	private class ExpandableContactEntry {
