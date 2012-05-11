@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -431,6 +432,21 @@ public class XMPPService extends Service implements IXMPPService {
 		} else {
 			throw new XMPPException("Not connected.");
 		}
+	}
+
+	public void broadcastIndicator(int lon, int lat, String info) {
+		// TODO Auto-generated method stub
+		Intent intent = new Intent(getString(R.string.broadcast_action_indicator));
+		intent.addCategory(getString(R.string.broadcast_category_location));
+		intent.setData(Uri.parse(String.format("location:%d/%d", lon, lat)));
+		intent.putExtra(TeamMeetPacketExtension.LON, lon);
+		intent.putExtra(TeamMeetPacketExtension.LAT, lat);
+		intent.putExtra(TeamMeetPacketExtension.INFO, info);
+		sendStickyBroadcast(intent);
+	}
+
+	public void removeAllIndicators() {
+		//TODO: cleanup function to clear all sticky indicators on exit
 	}
 
 	private void sendAllGroups(Message message) throws XMPPException {

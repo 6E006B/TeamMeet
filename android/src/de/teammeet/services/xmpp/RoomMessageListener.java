@@ -49,10 +49,10 @@ public class RoomMessageListener implements PacketListener {
 			IndicatorPacket indicatorPacket = teamMeetPacket.getIndicatorPacket();
 			int lon = indicatorPacket.getLongitude();
 			int lat = indicatorPacket.getLatitude();
-			GeoPoint location = new GeoPoint(lat, lon);
 			String info = indicatorPacket.getInfo();
 			Log.d(CLASS, "received indicator from '" + from + "' - lon: " + lon + " lat: " + lat +
 			      " info: " + info);
+			mXMPPService.broadcastIndicator(lon, lat, info);
 		} else {
 			Log.d(CLASS, "packet did not contain indicator extension.");
 		}
