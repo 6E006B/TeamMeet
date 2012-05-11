@@ -38,6 +38,7 @@ public class TeamsFragment extends Fragment {
 	
 	private BroadcastReceiver mConnectReceiver;
 	private BroadcastReceiver mDisconnectReceiver;
+	private BroadcastReceiver mTeamsUpdateReceiver;
 	private ExpandableListView mTeamsList;
 	private SimpleExpandableListAdapter mAdapter;
 	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
@@ -79,6 +80,7 @@ public class TeamsFragment extends Fragment {
 
 		mConnectReceiver = getConnectReceiverInstance();
 		mDisconnectReceiver = getDisconnectReceiverInstance();
+		mTeamsUpdateReceiver = getTeamUpdateReceiverInstance();
 	}
 
 	@Override
@@ -88,6 +90,7 @@ public class TeamsFragment extends Fragment {
 		Activity activity = getActivity();
 		activity.unregisterReceiver(mConnectReceiver);
 		activity.unregisterReceiver(mDisconnectReceiver);
+		activity.unregisterReceiver(mTeamsUpdateReceiver);
 
 		super.onPause();
 	}
@@ -170,6 +173,17 @@ public class TeamsFragment extends Fragment {
 		return instance;
 	}
 
+	private TeamUpdateReceiver getTeamUpdateReceiverInstance() {
+		TeamUpdateReceiver instance = new TeamUpdateReceiver();
+
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(getActivity().getString(R.string.broadcast_teams_updated));
+
+		getActivity().registerReceiver(instance, filter);
+
+		return instance;
+	}
+
 	protected class FetchRoomsHandler extends BaseAsyncTaskCallback<Set<String>> {
 		private Set<String> mRooms;
 
@@ -203,6 +217,17 @@ public class TeamsFragment extends Fragment {
 		public void onReceive(Context context, Intent intent) {
 			Log.d(CLASS, String.format("*** Received DISCONNECT broadcast in '%s'", TeamsFragment.this));
 			handleDisconnect();
+		}
+	}
+
+	public class TeamUpdateReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, String.format("*** Received TEAMS_UPDATED broadcast in '%s'", TeamsFragment.this));
+
+			IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
+			new FetchRoomsTask(service, new FetchRoomsHandler()).execute();
 		}
 	}
 }

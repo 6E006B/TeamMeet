@@ -414,6 +414,9 @@ public class RosterActivity extends SherlockFragmentActivity {
 		public void onTaskCompleted(String[] connection_data) {
 			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
 			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+
+			Intent newTeam = new Intent(getString(R.string.broadcast_teams_updated));
+			sendBroadcast(newTeam);
 		}
 
 		@Override
