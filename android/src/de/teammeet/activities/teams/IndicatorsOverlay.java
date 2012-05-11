@@ -48,7 +48,6 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 	private static final String	CLASS = IndicatorsOverlay.class.getSimpleName();
 
 	private Context mContext = null;
-	private String mOwnID = null;
 	private Map<GeoPoint, String> mIndicators = null;
 	private List<OverlayItem> mOverlayItems = null;
 	private IndicatorBroadcastReceiver mIndicatorReceiver = null;
@@ -131,7 +130,7 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 		}
 		return isRedrawNeeded;
 	}
-	
+
 	private class IndicatorBroadcastReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
