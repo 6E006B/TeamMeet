@@ -28,7 +28,7 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 			if (eventType == XmlPullParser.START_TAG) {
 				if (parser.getName().equals(TeamMeetPacketExtension.TEAMMEET)) {
 					Log.d(CLASS, "Found teammeet tag");
-				} else if (parser.getName().equals(TeamMeetPacketExtension.TEAMMEET)) {
+				} else if (parser.getName().equals(TeamMeetPacketExtension.MATE)) {
 					matePacket = parseMatePacketExtension(parser);
 				} else if (parser.getName().equals(TeamMeetPacketExtension.INDICATOR)) {
 					indicatorPacket = parseIndicatorPacketExtension(parser);
