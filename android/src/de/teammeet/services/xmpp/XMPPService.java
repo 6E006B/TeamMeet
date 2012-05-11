@@ -447,6 +447,8 @@ public class XMPPService extends Service implements IXMPPService {
 
 	public void removeAllIndicators() {
 		//TODO: cleanup function to clear all sticky indicators on exit
+		//TODO: we will need to have the same for specific groups only to be able to remove all
+		//      sticky broadcasts once we leave the group (team)
 	}
 
 	private void sendAllGroups(Message message) throws XMPPException {
