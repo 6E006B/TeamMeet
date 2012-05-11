@@ -55,7 +55,7 @@ public class TeamMeetActivity extends SherlockMapActivity {
 
 	private MyDirectionLocationOverlay	mMyLocationOverlay			= null;
 	private MatesOverlay				mMatesOverlay				= null;
-	private IndicationOverlay			mIndicationOverlay			= null;
+	private IndicatorsOverlay			mIndicatorsOverlay			= null;
 	private MapGestureDetectorOverlay mMapGestureOverlay = null;
 
 
@@ -103,8 +103,6 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		mFullscreen = settings.getBoolean(fullscreenKey, false);
 		final String followLocationKey = getString(R.string.preference_auto_center_key);
 		mFollowingLocation = settings.getBoolean(followLocationKey, false);
-
-		createOverlays();
 	}
 
 	@Override
@@ -134,9 +132,8 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		mMapView.setSatellite(mSatelliteView);
 		mListOfOverlays = mMapView.getOverlays();
 
-		mMyLocationOverlay.enableMyLocation();
-		mMyLocationOverlay.enableCompass();
-		mMyLocationOverlay.followLocation(mFollowingLocation);
+		createOverlays();
+
 		addOverlays();
 
 		// now connect to the service
@@ -171,16 +168,22 @@ public class TeamMeetActivity extends SherlockMapActivity {
 	private void createOverlays() {
 		mMatesOverlay = new MatesOverlay(this, getResources().getDrawable(R.drawable.matepos),
 		                                 mMapView);
-		mIndicationOverlay = new IndicationOverlay(getResources());
+		mMapGestureOverlay = new MapGestureDetectorOverlay(mMapView, getResources());
+		mIndicatorsOverlay = new IndicatorsOverlay(getApplicationContext(),
+		                                           getResources().getDrawable(R.drawable.matepos),
+		                                           mMapView);
 		mMyLocationOverlay = new MyDirectionLocationOverlay(getApplicationContext(),
-		                                             (MapView) findViewById(R.id.mapview));
+		                                                    (MapView) findViewById(R.id.mapview));
+
+		mMyLocationOverlay.enableMyLocation();
+		mMyLocationOverlay.enableCompass();
+		mMyLocationOverlay.followLocation(mFollowingLocation);
 	}
 
 	private void addOverlays() {
 		mListOfOverlays.add(mMatesOverlay);
-//		mListOfOverlays.add(mIndicationOverlay);
+		mListOfOverlays.add(mIndicatorsOverlay);
 		mListOfOverlays.add(mMyLocationOverlay);
-		mMapGestureOverlay = new MapGestureDetectorOverlay(mMapView, getResources());
 		mListOfOverlays.add(mMapGestureOverlay);
 	}
 
