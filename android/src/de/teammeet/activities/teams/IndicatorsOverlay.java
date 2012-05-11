@@ -51,8 +51,10 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 	private Map<GeoPoint, String> mIndicators = null;
 	private List<OverlayItem> mOverlayItems = null;
 	private IndicatorBroadcastReceiver mIndicatorReceiver = null;
+	private IndicatorRemoveBroadcastReceiver mIndicatorRemoveReceiver = null;
 	private MapView mMapView = null;
 	private final ReentrantLock	mLock = new ReentrantLock();
+
 
 	public IndicatorsOverlay(Context context, Drawable marker, MapView mapView) {
 		super(boundCenterBottom(marker));
@@ -61,12 +63,40 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 		mIndicators = new HashMap<GeoPoint, String>();
 		mOverlayItems = new ArrayList<OverlayItem>();
 		populate();
+
+		registerBroadcastReceivers();
+	}
+
+	private void registerBroadcastReceivers() {
+		registerIndicatorBroadcastReceiver();
+		registerIndicatorRemoveBroadcastReceiver();
+	}
+
+	private void registerIndicatorBroadcastReceiver() {
 		mIndicatorReceiver = new IndicatorBroadcastReceiver();
+
 		IntentFilter filter =
 				new IntentFilter(mContext.getString(R.string.broadcast_action_indicator));
 		filter.addCategory(mContext.getString(R.string.broadcast_category_location));
 		filter.addDataScheme("location");
+
 		mContext.registerReceiver(mIndicatorReceiver, filter);
+	}
+
+	private void registerIndicatorRemoveBroadcastReceiver() {
+		mIndicatorRemoveReceiver = new IndicatorRemoveBroadcastReceiver();
+
+		IntentFilter removeFilter =
+				new IntentFilter(mContext.getString(R.string.broadcast_action_indicator_remove));
+		removeFilter.addCategory(mContext.getString(R.string.broadcast_category_location));
+		removeFilter.addDataScheme("location");
+
+		mContext.registerReceiver(mIndicatorRemoveReceiver, removeFilter);
+	}
+
+	public void unregisterBroadcastReceivers() {
+		mContext.unregisterReceiver(mIndicatorReceiver);
+		mContext.unregisterReceiver(mIndicatorRemoveReceiver);
 	}
 
 	public void handleIndicatorUpdate(int lon, int lat, String info) {
@@ -85,6 +115,30 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 		}
 		populate();
 		mMapView.postInvalidate();
+	}
+
+	public void removeIndicator(int lon, int lat) {
+		Log.d(CLASS, "IndicatorsOverlay.handleIndicatorUpdate()");
+		GeoPoint location = new GeoPoint(lon, lat);
+		boolean changed = false;
+		acquireLock();
+		try {
+			if (mIndicators.containsKey(location)) {
+				mIndicators.remove(location);
+				for (OverlayItem overlayItem : mOverlayItems) {
+					if (location.equals(overlayItem.getPoint())) {
+						mOverlayItems.remove(overlayItem);
+					}
+				}
+				changed = true;
+			}
+		} finally {
+			releaseLock();
+		}
+		if (changed) {
+			populate();
+			mMapView.postInvalidate();
+		}
 	}
 
 	private void acquireLock() {
@@ -140,6 +194,18 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 			String info = intent.getStringExtra(TeamMeetPacketExtension.INFO);
 			if (lon != -1 && lat != -1 && info != null) {
 				handleIndicatorUpdate(lon, lat, info);
+			}
+		}
+	}
+
+	private class IndicatorRemoveBroadcastReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, "*** Received INDICATOR_REMOVE broadcast");
+			int lon = intent.getIntExtra(TeamMeetPacketExtension.LON, -1);
+			int lat = intent.getIntExtra(TeamMeetPacketExtension.LAT, -1);
+			if (lon != -1 && lat != -1) {
+				removeIndicator(lon, lat);
 			}
 		}
 	}
