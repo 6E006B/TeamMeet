@@ -33,6 +33,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
@@ -100,7 +101,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private ChatOpenHelper mChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
 
-	private android.app.Notification.Builder mServiceNotificationBuilder;
+	private NotificationCompat.Builder mServiceNotificationBuilder;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -547,7 +548,7 @@ public class XMPPService extends Service implements IXMPPService {
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
 		                                                        PendingIntent.FLAG_CANCEL_CURRENT);
 
-		mServiceNotificationBuilder = new Notification.Builder(getApplicationContext());
+		mServiceNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
 		mServiceNotificationBuilder.setContentTitle(title);
 		mServiceNotificationBuilder.setContentText(text);
 		mServiceNotificationBuilder.setTicker(tickerText);
