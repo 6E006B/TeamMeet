@@ -151,12 +151,7 @@ public class XMPPService extends Service implements IXMPPService {
 			mXMPP.removePacketListener(mChatMessageListener);
 			mXMPP.removePacketSendingListener(mChatMessageListener);
 		}
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				disconnect();
-			}
-		}).start();
+		disconnect();
 
 		removeAllIndicators();
 
@@ -225,7 +220,9 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, "XMPPService.disconnect()");
 		stopLocationTransmission();
 		if (mXMPP != null) {
-			mXMPP.disconnect();
+			if (mXMPP.isConnected()) {
+				mXMPP.disconnect();
+			}
 			if (mRoomInvitationListener != null) {
 				MultiUserChat.removeInvitationListener(mXMPP, mRoomInvitationListener);
 			}
