@@ -102,6 +102,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private MyLocationOverlay mLocationOverlay = null;
 
 	private NotificationCompat.Builder mServiceNotificationBuilder;
+	private NotificationCompat.Builder mInvitationNotificationBuilder;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -590,9 +591,6 @@ public class XMPPService extends Service implements IXMPPService {
 		final int icon = R.drawable.group_invitation_icon;
 		final CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
 		                                        room, inviter, reason);
-		final long when = System.currentTimeMillis();
-
-		final Notification notification = new Notification(icon, tickerText, when);
 
 		final CharSequence contentTitle = "Group Invitation received";
 		final Intent notificationIntent = new Intent(this, RosterActivity.class);
@@ -602,16 +600,21 @@ public class XMPPService extends Service implements IXMPPService {
 		notificationIntent.putExtra(REASON, reason);
 		notificationIntent.putExtra(PASSWORD, password);
 		notificationIntent.putExtra(FROM, message.getFrom());
-		notificationIntent.setAction(Long.toString(when));
 		final PendingIntent contentIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent,
 				                          PendingIntent.FLAG_UPDATE_CURRENT);
 
 		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
 
-		notification.setLatestEventInfo(this, contentTitle, tickerText, contentIntent);
-	    notification.defaults = Notification.DEFAULT_ALL;
-	    notification.flags |= Notification.FLAG_AUTO_CANCEL;
+		mInvitationNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
+		mInvitationNotificationBuilder.setContentTitle(contentTitle);
+		mInvitationNotificationBuilder.setContentText(tickerText);
+		mInvitationNotificationBuilder.setTicker(tickerText);
+		mInvitationNotificationBuilder.setSmallIcon(icon);
+		mInvitationNotificationBuilder.setAutoCancel(true);
+		mInvitationNotificationBuilder.setDefaults(Notification.DEFAULT_ALL);
+		mInvitationNotificationBuilder.setContentIntent(contentIntent);
+		Notification notification = mInvitationNotificationBuilder.getNotification();
 
 		notificationManager.notify(NOTIFICATION_GROUP_INVITATION_ID, notification);
 	}
