@@ -25,8 +25,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
@@ -149,7 +151,9 @@ public class XMPPService extends Service implements IXMPPService {
 				disconnect();
 			}
 		}).start();
-		
+
+		removeAllIndicators();
+
 		Intent bcastConnected = new Intent();
 		bcastConnected.setAction(getString(R.string.broadcast_connected));
 		removeStickyBroadcast(bcastConnected);
@@ -458,9 +462,23 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	public void removeAllIndicators() {
-		//TODO: cleanup function to clear all sticky indicators on exit
 		//TODO: we will need to have the same for specific groups only to be able to remove all
 		//      sticky broadcasts once we leave the group (team)
+		BroadcastReceiver indicatorRemover = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {}
+		};
+		IntentFilter filter =
+				new IntentFilter(getString(R.string.broadcast_action_indicator));
+		filter.addCategory(getString(R.string.broadcast_category_location));
+		filter.addDataScheme("location");
+		Intent intent = registerReceiver(indicatorRemover, filter);
+		while (intent != null) {
+			removeStickyBroadcast(intent);
+			unregisterReceiver(indicatorRemover);
+			intent = registerReceiver(indicatorRemover, filter);
+		}
+		unregisterReceiver(indicatorRemover);
 	}
 
 	private void sendAllGroups(Message message) throws XMPPException {
