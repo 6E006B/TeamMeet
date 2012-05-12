@@ -583,15 +583,28 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
-	private void notifyNewInvitation(String room, String inviter, String reason,
-			  String password, Message message) {
+	private void showAutoCancelNotificaton(CharSequence title, CharSequence text,
+			CharSequence tickerText, int icon, PendingIntent pendingIntent, int notificationID,
+			NotificationCompat.Builder builder) {
 		final String ns = Context.NOTIFICATION_SERVICE;
 		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
 
+		builder.setContentTitle(title);
+		builder.setContentText(text);
+		builder.setTicker(tickerText);
+		builder.setSmallIcon(icon);
+		builder.setAutoCancel(true);
+		builder.setDefaults(Notification.DEFAULT_ALL);
+		builder.setContentIntent(pendingIntent);
+		Notification notification = builder.getNotification();
+
+		notificationManager.notify(notificationID, notification);
+	}
+	private void notifyNewInvitation(String room, String inviter, String reason,
+			  String password, Message message) {
 		final int icon = R.drawable.group_invitation_icon;
 		final CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
 		                                        room, inviter, reason);
-
 		final CharSequence contentTitle = "Group Invitation received";
 		final Intent notificationIntent = new Intent(this, RosterActivity.class);
 		notificationIntent.putExtra(TYPE, TYPE_JOIN);
@@ -606,17 +619,11 @@ public class XMPPService extends Service implements IXMPPService {
 
 		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
 
-		mInvitationNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-		mInvitationNotificationBuilder.setContentTitle(contentTitle);
-		mInvitationNotificationBuilder.setContentText(tickerText);
-		mInvitationNotificationBuilder.setTicker(tickerText);
-		mInvitationNotificationBuilder.setSmallIcon(icon);
-		mInvitationNotificationBuilder.setAutoCancel(true);
-		mInvitationNotificationBuilder.setDefaults(Notification.DEFAULT_ALL);
-		mInvitationNotificationBuilder.setContentIntent(contentIntent);
-		Notification notification = mInvitationNotificationBuilder.getNotification();
-
-		notificationManager.notify(NOTIFICATION_GROUP_INVITATION_ID, notification);
+		if (mInvitationNotificationBuilder == null) {
+			mInvitationNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
+		}
+		showAutoCancelNotificaton(contentTitle, tickerText, tickerText, icon, contentIntent,
+		                          NOTIFICATION_GROUP_INVITATION_ID, mInvitationNotificationBuilder);
 	}
 
 	@Override
