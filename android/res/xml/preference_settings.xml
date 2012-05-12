@@ -30,6 +30,7 @@
             android:name="@string/preference_password_key"
             android:defaultValue=""
             android:key="@string/preference_password_key"
+            android:password="true"
             android:summary="@string/preference_password_summary"
             android:title="@string/preference_password_title" />
         <EditTextPreference
