@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
@@ -202,7 +203,39 @@ public class XMPPService extends Service implements IXMPPService {
 		final MessageTypeFilter chatMessageFilter = new MessageTypeFilter(Message.Type.chat);
 		mXMPP.addPacketListener(mChatMessageListener, chatMessageFilter);
 		mXMPP.addPacketSendingListener(mChatMessageListener, chatMessageFilter);
+		mXMPP.addConnectionListener(new ConnectionListener() {
+			@Override
+			public void reconnectionSuccessful() {}
+			@Override
+			public void reconnectionFailed(Exception arg0) {
+				broadcastDisconnected();
+			}
+			@Override
+			public void reconnectingIn(int arg0) {}
+			@Override
+			public void connectionClosedOnError(Exception arg0) {
+				broadcastDisconnected();
+			}
+			@Override
+			public void connectionClosed() {
+				broadcastDisconnected();
+			}
+		});
 		showXMPPServiceNotification();
+	}
+
+	private void broadcastDisconnected() {
+		Log.d(CLASS, "Cutting off old connection broadcast");
+		Intent intent = new Intent();
+		intent.addCategory(getString(R.string.broadcast_connection_state));
+		intent.setAction(getString(R.string.broadcast_connected));
+		removeStickyBroadcast(intent);
+
+		Log.d(CLASS, "Turning on new connection broadcast");
+		intent = new Intent();
+		intent.addCategory(getString(R.string.broadcast_connection_state));
+		intent.setAction(getString(R.string.broadcast_disconnected));
+		sendStickyBroadcast(intent);
 	}
 
 	@Override
