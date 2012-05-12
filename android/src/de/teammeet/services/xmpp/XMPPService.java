@@ -104,6 +104,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private NotificationCompat.Builder mServiceNotificationBuilder;
 	private NotificationCompat.Builder mInvitationNotificationBuilder;
 	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
+	private NotificationCompat.Builder mChatMessageNotificationBuilder;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -741,31 +742,24 @@ public class XMPPService extends Service implements IXMPPService {
 		                                              message.getMessage());
 		Log.d(CLASS, notificationText);
 
-		final String ns = Context.NOTIFICATION_SERVICE;
-		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
-
 		final int icon = R.drawable.group_invitation_icon;
 		final CharSequence tickerText = String.format("New message from %s", notificationText);
-		final long when = System.currentTimeMillis();
-
-		final Notification notification = new Notification(icon, tickerText, when);
 
 		final CharSequence contentTitle = "Chat message received";
 		final Intent notificationIntent = new Intent(this, ChatsActivity.class);
 		notificationIntent.putExtra(TYPE, Chat.TYPE_NORMAL_CHAT);
 		notificationIntent.putExtra(SENDER, message.getFrom());
-		notificationIntent.setAction(Long.toString(when));
 		final PendingIntent contentIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent,
 				                          PendingIntent.FLAG_UPDATE_CURRENT);
 
 		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
 
-		notification.setLatestEventInfo(this, contentTitle, notificationText, contentIntent);
-	    notification.defaults = Notification.DEFAULT_ALL;
-	    notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-		notificationManager.notify(NOTIFICATION_CHAT_MESSAGE_ID, notification);
+		if (mChatMessageNotificationBuilder == null) {
+			mChatMessageNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
+		}
+		showAutoCancelNotificaton(contentTitle, notificationText, tickerText, icon, contentIntent,
+		                          NOTIFICATION_CHAT_MESSAGE_ID, mChatMessageNotificationBuilder);
 	}
 
 	@Override
