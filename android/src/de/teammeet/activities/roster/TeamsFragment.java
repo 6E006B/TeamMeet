@@ -1,5 +1,7 @@
 package de.teammeet.activities.roster;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -78,9 +80,9 @@ public class TeamsFragment extends Fragment {
 		super.onResume();
 		Log.d(CLASS, "Resuming teams fragment");
 
-		mConnectReceiver = getConnectReceiverInstance();
-		mDisconnectReceiver = getDisconnectReceiverInstance();
-		mTeamsUpdateReceiver = getTeamUpdateReceiverInstance();
+		mConnectReceiver = getBroadcastReceiverInstance(ConnectReceiver.class, R.string.broadcast_connection_state, R.string.broadcast_connected);
+		mDisconnectReceiver = getBroadcastReceiverInstance(DisconnectReceiver.class, R.string.broadcast_connection_state, R.string.broadcast_disconnected);
+		mTeamsUpdateReceiver = getBroadcastReceiverInstance(TeamUpdateReceiver.class, R.string.broadcast_teams_updated);
 	}
 
 	@Override
@@ -149,40 +151,55 @@ public class TeamsFragment extends Fragment {
 		});
 	}
 
-	private ConnectReceiver getConnectReceiverInstance() {
-		ConnectReceiver instance = new ConnectReceiver();
+	private BroadcastReceiver getBroadcastReceiverInstance(Class<? extends BroadcastReceiver> type,
+														   int category, int action) {
+		BroadcastReceiver instance = createBroadcastReceiver(type);
 
-		IntentFilter filter = new IntentFilter();
-		filter.addCategory(getActivity().getString(R.string.broadcast_connection_state));
-		filter.addAction(getActivity().getString(R.string.broadcast_connected));
-
-		getActivity().registerReceiver(instance, filter);
-
-		return instance;
-	}
-
-	private DisconnectReceiver getDisconnectReceiverInstance() {
-		DisconnectReceiver instance = new DisconnectReceiver();
-
-		IntentFilter filter = new IntentFilter();
-		filter.addCategory(getActivity().getString(R.string.broadcast_connection_state));
-		filter.addAction(getActivity().getString(R.string.broadcast_disconnected));
+		IntentFilter filter = new IntentFilter(getActivity().getString(action));
+		filter.addCategory(getActivity().getString(category));
 
 		getActivity().registerReceiver(instance, filter);
 
 		return instance;
 	}
 
-	private TeamUpdateReceiver getTeamUpdateReceiverInstance() {
-		TeamUpdateReceiver instance = new TeamUpdateReceiver();
+	private BroadcastReceiver getBroadcastReceiverInstance(Class<? extends BroadcastReceiver> type,
+														   int action) {
+		BroadcastReceiver instance = createBroadcastReceiver(type);
 
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(getActivity().getString(R.string.broadcast_teams_updated));
+		IntentFilter filter = new IntentFilter(getActivity().getString(action));
 
 		getActivity().registerReceiver(instance, filter);
 
 		return instance;
 	}
+
+	private BroadcastReceiver createBroadcastReceiver(Class<? extends BroadcastReceiver> type) {
+		BroadcastReceiver instance = null;
+
+		try {
+			Constructor<? extends BroadcastReceiver> constructor = type.getConstructor(this.getClass());
+			instance = constructor.newInstance(this);
+		} catch (NoSuchMethodException e) {
+			Log.e(CLASS, String.format("Could not fetch constructor for broadcast receiver '%s': %s",
+										type.getName(), e.getMessage()));
+		} catch (IllegalArgumentException e) {
+			Log.e(CLASS, String.format("Wrong argument when creating broadcast receiver '%s': %s",
+										type.getName(), e.getMessage()));
+		} catch (InvocationTargetException e) {
+			Log.e(CLASS, String.format("Error in constructor of '%s': %s",
+										type.getName(), e.getMessage()));
+		} catch (java.lang.InstantiationException e) {
+			Log.e(CLASS, String.format("Could not instantiate broadcast receiver type '%s': %s",
+										type.getName(), e.getMessage()));
+		} catch (IllegalAccessException e) {
+			Log.e(CLASS, String.format("Instantiation of receiver of type '%s' denied: %s",
+										type.getName(), e.getMessage()));
+		}
+
+		return instance;
+	}
+
 
 	protected class FetchRoomsHandler extends BaseAsyncTaskCallback<Set<String>> {
 		private Set<String> mRooms;
