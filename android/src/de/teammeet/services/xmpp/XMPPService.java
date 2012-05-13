@@ -47,6 +47,7 @@ import de.teammeet.activities.chat.Chat;
 import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.activities.roster.RosterActivity;
 import de.teammeet.activities.teams.Mate;
+import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
@@ -208,34 +209,26 @@ public class XMPPService extends Service implements IXMPPService {
 			public void reconnectionSuccessful() {}
 			@Override
 			public void reconnectionFailed(Exception arg0) {
-				broadcastDisconnected();
+				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+															   R.string.broadcast_connected,
+															   R.string.broadcast_disconnected);
 			}
 			@Override
 			public void reconnectingIn(int arg0) {}
 			@Override
 			public void connectionClosedOnError(Exception arg0) {
-				broadcastDisconnected();
+				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+															   R.string.broadcast_connected,
+															   R.string.broadcast_disconnected);
 			}
 			@Override
 			public void connectionClosed() {
-				broadcastDisconnected();
+				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+															   R.string.broadcast_connected,
+															   R.string.broadcast_disconnected);
 			}
 		});
 		showXMPPServiceNotification();
-	}
-
-	private void broadcastDisconnected() {
-		Log.d(CLASS, "Cutting off old connection broadcast");
-		Intent intent = new Intent();
-		intent.addCategory(getString(R.string.broadcast_connection_state));
-		intent.setAction(getString(R.string.broadcast_connected));
-		removeStickyBroadcast(intent);
-
-		Log.d(CLASS, "Turning on new connection broadcast");
-		intent = new Intent();
-		intent.addCategory(getString(R.string.broadcast_connection_state));
-		intent.setAction(getString(R.string.broadcast_disconnected));
-		sendStickyBroadcast(intent);
 	}
 
 	@Override
