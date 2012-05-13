@@ -1,7 +1,5 @@
 package de.teammeet.activities.roster;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,7 +14,6 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -28,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
 import de.teammeet.R;
+import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.FetchRoomsTask;
@@ -80,9 +78,17 @@ public class TeamsFragment extends Fragment {
 		super.onResume();
 		Log.d(CLASS, "Resuming teams fragment");
 
-		mConnectReceiver = getBroadcastReceiverInstance(ConnectReceiver.class, R.string.broadcast_connection_state, R.string.broadcast_connected);
-		mDisconnectReceiver = getBroadcastReceiverInstance(DisconnectReceiver.class, R.string.broadcast_connection_state, R.string.broadcast_disconnected);
-		mTeamsUpdateReceiver = getBroadcastReceiverInstance(TeamUpdateReceiver.class, R.string.broadcast_teams_updated);
+		mConnectReceiver = BroadcastHelper.getBroadcastReceiverInstance(this,
+																		ConnectReceiver.class,
+																		R.string.broadcast_connection_state,
+																		R.string.broadcast_connected);
+		mDisconnectReceiver = BroadcastHelper.getBroadcastReceiverInstance(this,
+																		   DisconnectReceiver.class,
+																		   R.string.broadcast_connection_state,
+																		   R.string.broadcast_disconnected);
+		mTeamsUpdateReceiver = BroadcastHelper.getBroadcastReceiverInstance(this,
+																			TeamUpdateReceiver.class,
+																			R.string.broadcast_teams_updated);
 	}
 
 	@Override
@@ -149,55 +155,6 @@ public class TeamsFragment extends Fragment {
 				mAdapter.notifyDataSetChanged();
 			}
 		});
-	}
-
-	private BroadcastReceiver getBroadcastReceiverInstance(Class<? extends BroadcastReceiver> type,
-														   int category, int action) {
-		BroadcastReceiver instance = createBroadcastReceiver(type);
-
-		IntentFilter filter = new IntentFilter(getActivity().getString(action));
-		filter.addCategory(getActivity().getString(category));
-
-		getActivity().registerReceiver(instance, filter);
-
-		return instance;
-	}
-
-	private BroadcastReceiver getBroadcastReceiverInstance(Class<? extends BroadcastReceiver> type,
-														   int action) {
-		BroadcastReceiver instance = createBroadcastReceiver(type);
-
-		IntentFilter filter = new IntentFilter(getActivity().getString(action));
-
-		getActivity().registerReceiver(instance, filter);
-
-		return instance;
-	}
-
-	private BroadcastReceiver createBroadcastReceiver(Class<? extends BroadcastReceiver> type) {
-		BroadcastReceiver instance = null;
-
-		try {
-			Constructor<? extends BroadcastReceiver> constructor = type.getConstructor(this.getClass());
-			instance = constructor.newInstance(this);
-		} catch (NoSuchMethodException e) {
-			Log.e(CLASS, String.format("Could not fetch constructor for broadcast receiver '%s': %s",
-										type.getName(), e.getMessage()));
-		} catch (IllegalArgumentException e) {
-			Log.e(CLASS, String.format("Wrong argument when creating broadcast receiver '%s': %s",
-										type.getName(), e.getMessage()));
-		} catch (InvocationTargetException e) {
-			Log.e(CLASS, String.format("Error in constructor of '%s': %s",
-										type.getName(), e.getMessage()));
-		} catch (java.lang.InstantiationException e) {
-			Log.e(CLASS, String.format("Could not instantiate broadcast receiver type '%s': %s",
-										type.getName(), e.getMessage()));
-		} catch (IllegalAccessException e) {
-			Log.e(CLASS, String.format("Instantiation of receiver of type '%s' denied: %s",
-										type.getName(), e.getMessage()));
-		}
-
-		return instance;
 	}
 
 
