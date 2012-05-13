@@ -41,7 +41,8 @@ public class BroadcastHelper {
 		BroadcastReceiver instance = null;
 	
 		try {
-			Constructor<? extends BroadcastReceiver> constructor = type.getConstructor(parent.getClass());
+			Constructor<? extends BroadcastReceiver> constructor = type.getDeclaredConstructor(parent.getClass());
+			constructor.setAccessible(true);
 			instance = constructor.newInstance(parent);
 		} catch (NoSuchMethodException e) {
 			Log.e(CLASS, String.format("Could not fetch constructor for broadcast receiver '%s': %s",

@@ -174,7 +174,7 @@ public class TeamsFragment extends Fragment {
 		}
 	}
 
-	public class ConnectReceiver extends BroadcastReceiver {
+	private class ConnectReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -185,7 +185,7 @@ public class TeamsFragment extends Fragment {
 		}
 	}
 
-	public class DisconnectReceiver extends BroadcastReceiver {
+	private class DisconnectReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -194,7 +194,7 @@ public class TeamsFragment extends Fragment {
 		}
 	}
 
-	public class TeamUpdateReceiver extends BroadcastReceiver {
+	private class TeamUpdateReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
