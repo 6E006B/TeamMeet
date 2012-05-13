@@ -15,14 +15,13 @@ import de.teammeet.R;
 import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.services.xmpp.XMPPService;
 
-public class ChatsActivity extends SherlockFragmentActivity implements ViewPager.OnPageChangeListener {
+public class ChatsActivity extends SherlockFragmentActivity {
 
 	private static final String CLASS = ChatsActivity.class.getSimpleName();
 
 	private static final String CHAT_INFORMATION_LIST_KEY = "chat_information_list_key";
 	private static final String ACTIVE_CHAT_WINDOW_KEY = "active_chat_window_key";
 
-	private ActionBar mActionBar;
 	private ViewPager mViewPager;
 	private TabsAdapter mTabsAdapter;
 	private ArrayList<ChatInformation> mChatInformationList = new ArrayList<ChatInformation>();
@@ -36,10 +35,10 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 
 		// Inflate the layout
 		setContentView(R.layout.chats);
-		mActionBar = getSupportActionBar();
-		mActionBar.setDisplayHomeAsUpEnabled(true);
-		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		mActionBar.setDisplayShowTitleEnabled(false);
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		actionBar.setDisplayShowTitleEnabled(false);
 
 		if (savedInstanceState != null) {
 			mChatInformationList = savedInstanceState.getParcelableArrayList(CHAT_INFORMATION_LIST_KEY);
@@ -47,14 +46,14 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 			Log.d(CLASS, "No instance to restore from.");
 		}
 
-		intialiseViewPager();
+		intialiseViewPager(actionBar);
 
 		if (savedInstanceState != null) {
 			for (ChatInformation chatInfo : mChatInformationList) {
 				addTab(chatInfo);
 			}
 //			mViewPager.setCurrentItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
-			mActionBar.setSelectedNavigationItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
+			actionBar.setSelectedNavigationItem(savedInstanceState.getInt(ACTIVE_CHAT_WINDOW_KEY));
 		}
 
 		handleIntent(getIntent());
@@ -75,10 +74,9 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 	/**
 	 * Initialise ViewPager
 	 */
-	private void intialiseViewPager() {
+	private void intialiseViewPager(ActionBar bar) {
 		mViewPager = (ViewPager)super.findViewById(R.id.viewpager);
-		mViewPager.setOnPageChangeListener(this);
-		mTabsAdapter = new TabsAdapter(this, mActionBar, mViewPager);
+		mTabsAdapter = new TabsAdapter(this, bar, mViewPager);
 	}
 
 	@Override
@@ -142,7 +140,7 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 		Bundle args = new Bundle();
         args.putInt(XMPPService.TYPE, chatInfo.getType());
         args.putString(XMPPService.SENDER, chatInfo.getCounterpart());
-		mTabsAdapter.addTab(mActionBar.newTab().setText(chatInfo.getUsername()),
+		mTabsAdapter.addTab(getSupportActionBar().newTab().setText(chatInfo.getUsername()),
 		                    ChatFragment.class, args);
 	}
 
@@ -155,23 +153,5 @@ public class ChatsActivity extends SherlockFragmentActivity implements ViewPager
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-	}
-
-	@Override
-	public void onPageScrollStateChanged(int state) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void onPageScrolled(int arg0, float arg1, int arg2) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void onPageSelected(int position) {
-		// TODO Auto-generated method stub
-//		ChatInformation chatInfo = mChatInformationList.get(position);
-		mActionBar.setSelectedNavigationItem(position);
-//		setTitle(chatInfo.getCounterpart());
 	}
 }

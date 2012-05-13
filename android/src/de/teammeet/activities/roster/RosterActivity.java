@@ -26,6 +26,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.teammeet.R;
+import de.teammeet.activities.chat.TabsAdapter;
 import de.teammeet.activities.preferences.SettingsActivity;
 import de.teammeet.activities.teams.TeamMeetActivity;
 import de.teammeet.helper.BroadcastHelper;
@@ -46,9 +47,6 @@ public class RosterActivity extends SherlockFragmentActivity {
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
 	private Intent mCurrentIntent = null;
 	
-	private ViewPager mViewPager;
-	private RosterAdapter mPagerAdapter;
-	
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -62,25 +60,13 @@ public class RosterActivity extends SherlockFragmentActivity {
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		actionBar.setDisplayShowTitleEnabled(false);
 		
-		Tab tab = actionBar.newTab();
-		tab.setText(R.string.tab_contacts);
-		tab.setTabListener(new TabListener<ContactsFragment>(
-						this, CONTACTS_TAB_ID, ContactsFragment.class));
-		actionBar.addTab(tab);
+		// Intialise ViewPager
+		intialiseViewPager(actionBar);
 
-		tab = actionBar.newTab();
-		tab.setText(R.string.tab_teams);
-		tab.setTabListener(new TabListener<TeamsFragment>(
-					this, TEAMS_TAB_ID, TeamsFragment.class));
-		actionBar.addTab(tab);
-		
 		if (savedInstanceState != null) {
 			//set the tab as per the saved state
 			actionBar.setSelectedNavigationItem(savedInstanceState.getInt(SAVED_TAB_KEY));
 		}
-
-		// Intialise ViewPager
-		//intialiseViewPager();
 
 		mCurrentIntent = getIntent();
 	}
@@ -142,14 +128,17 @@ public class RosterActivity extends SherlockFragmentActivity {
 	/**
 	 * Initialise ViewPager
 	 */
-	private void intialiseViewPager() {
+	private void intialiseViewPager(ActionBar bar) {
+		ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+		TabsAdapter tabsAdapter = new TabsAdapter(this, bar, viewPager);
 
-		mPagerAdapter  = new RosterAdapter(getSupportFragmentManager());
+		Tab tab = bar.newTab();
+		tab.setText(R.string.tab_contacts);
+		tabsAdapter.addTab(tab, ContactsFragment.class, null);
 
-		mViewPager = (ViewPager) findViewById(R.id.viewpager);
-		mViewPager.setAdapter(mPagerAdapter);
-		//mViewPager.setOnPageChangeListener(this);
-
+		tab = bar.newTab();
+		tab.setText(R.string.tab_teams);
+		tabsAdapter.addTab(tab, TeamsFragment.class, null);
 	}
 
 	private void handleIntent(Intent intent) {
