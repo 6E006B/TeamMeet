@@ -204,6 +204,9 @@ public class RosterActivity extends SherlockFragmentActivity {
 							final String userID = settings.getString(userIDKey, "anonymous");
 							try {
 								mXMPPService.joinRoom(room, userID, password);
+
+								Intent newTeam = new Intent(getString(R.string.broadcast_teams_updated));
+								sendBroadcast(newTeam);
 							} catch (XMPPException e) {
 								String problem = String.format("Unable to join room '%s': %s",
 																room, e.getMessage());
@@ -414,6 +417,9 @@ public class RosterActivity extends SherlockFragmentActivity {
 		public void onTaskCompleted(String[] connection_data) {
 			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
 			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+
+			Intent newTeam = new Intent(getString(R.string.broadcast_teams_updated));
+			sendBroadcast(newTeam);
 		}
 
 		@Override

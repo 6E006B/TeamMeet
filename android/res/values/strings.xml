@@ -87,5 +87,6 @@
     <string name="broadcast_action_indicator">de.teammeet.intent.action.INDICATOR</string>
     <string name="broadcast_action_indicator_remove">de.teammeet.intent.action.INDICATOR_REMOVE</string>
     <string name="broadcast_category_location">de.teammeet.intent.category.LOCATION</string>
+    <string name="broadcast_teams_updated">de.teammeet.intent.action.TEAMS_UPDATED</string>
 
 </resources>

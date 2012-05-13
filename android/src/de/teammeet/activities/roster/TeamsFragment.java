@@ -14,7 +14,6 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -26,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
 import de.teammeet.R;
+import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.FetchRoomsTask;
@@ -38,6 +38,7 @@ public class TeamsFragment extends Fragment {
 	
 	private BroadcastReceiver mConnectReceiver;
 	private BroadcastReceiver mDisconnectReceiver;
+	private BroadcastReceiver mTeamsUpdateReceiver;
 	private ExpandableListView mTeamsList;
 	private SimpleExpandableListAdapter mAdapter;
 	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
@@ -77,8 +78,17 @@ public class TeamsFragment extends Fragment {
 		super.onResume();
 		Log.d(CLASS, "Resuming teams fragment");
 
-		mConnectReceiver = getConnectReceiverInstance();
-		mDisconnectReceiver = getDisconnectReceiverInstance();
+		mConnectReceiver = BroadcastHelper.getBroadcastReceiverInstance(this,
+																		ConnectReceiver.class,
+																		R.string.broadcast_connection_state,
+																		R.string.broadcast_connected);
+		mDisconnectReceiver = BroadcastHelper.getBroadcastReceiverInstance(this,
+																		   DisconnectReceiver.class,
+																		   R.string.broadcast_connection_state,
+																		   R.string.broadcast_disconnected);
+		mTeamsUpdateReceiver = BroadcastHelper.getBroadcastReceiverInstance(this,
+																			TeamUpdateReceiver.class,
+																			R.string.broadcast_teams_updated);
 	}
 
 	@Override
@@ -88,6 +98,7 @@ public class TeamsFragment extends Fragment {
 		Activity activity = getActivity();
 		activity.unregisterReceiver(mConnectReceiver);
 		activity.unregisterReceiver(mDisconnectReceiver);
+		activity.unregisterReceiver(mTeamsUpdateReceiver);
 
 		super.onPause();
 	}
@@ -146,29 +157,6 @@ public class TeamsFragment extends Fragment {
 		});
 	}
 
-	private ConnectReceiver getConnectReceiverInstance() {
-		ConnectReceiver instance = new ConnectReceiver();
-
-		IntentFilter filter = new IntentFilter();
-		filter.addCategory(getActivity().getString(R.string.broadcast_connection_state));
-		filter.addAction(getActivity().getString(R.string.broadcast_connected));
-
-		getActivity().registerReceiver(instance, filter);
-
-		return instance;
-	}
-
-	private DisconnectReceiver getDisconnectReceiverInstance() {
-		DisconnectReceiver instance = new DisconnectReceiver();
-
-		IntentFilter filter = new IntentFilter();
-		filter.addCategory(getActivity().getString(R.string.broadcast_connection_state));
-		filter.addAction(getActivity().getString(R.string.broadcast_disconnected));
-
-		getActivity().registerReceiver(instance, filter);
-
-		return instance;
-	}
 
 	protected class FetchRoomsHandler extends BaseAsyncTaskCallback<Set<String>> {
 		private Set<String> mRooms;
@@ -186,7 +174,7 @@ public class TeamsFragment extends Fragment {
 		}
 	}
 
-	public class ConnectReceiver extends BroadcastReceiver {
+	private class ConnectReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -197,12 +185,23 @@ public class TeamsFragment extends Fragment {
 		}
 	}
 
-	public class DisconnectReceiver extends BroadcastReceiver {
+	private class DisconnectReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Log.d(CLASS, String.format("*** Received DISCONNECT broadcast in '%s'", TeamsFragment.this));
 			handleDisconnect();
+		}
+	}
+
+	private class TeamUpdateReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, String.format("*** Received TEAMS_UPDATED broadcast in '%s'", TeamsFragment.this));
+
+			IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
+			new FetchRoomsTask(service, new FetchRoomsHandler()).execute();
 		}
 	}
 }
