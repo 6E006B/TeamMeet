@@ -5,12 +5,33 @@ import java.lang.reflect.InvocationTargetException;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import de.teammeet.R;
 
 public class BroadcastHelper {
 	private static final String CLASS = BroadcastHelper.class.getSimpleName();
+
+	public static void toggleConnectionStateBroadcast(Context context, int oldStateAction, int newStateAction) {
+		String broadcastCategory = context.getString(R.string.broadcast_connection_state);
+		String oldAction = context.getString(oldStateAction);
+		String newAction = context.getString(newStateAction);
+
+		Log.d(CLASS, "Cutting off old connection broadcast");
+		Intent intent = new Intent();
+		intent.addCategory(broadcastCategory);
+		intent.setAction(oldAction);
+		context.removeStickyBroadcast(intent);
+
+		Log.d(CLASS, "Turning on new connection broadcast");
+		intent = new Intent();
+		intent.addCategory(broadcastCategory);
+		intent.setAction(newAction);
+		context.sendStickyBroadcast(intent);
+	}
 	
 	public static BroadcastReceiver getBroadcastReceiverInstance(Fragment parent, Class<? extends BroadcastReceiver> type,
 			 											   		 int category, int action) {

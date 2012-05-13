@@ -28,6 +28,7 @@ import com.actionbarsherlock.view.MenuItem;
 import de.teammeet.R;
 import de.teammeet.activities.preferences.SettingsActivity;
 import de.teammeet.activities.teams.TeamMeetActivity;
+import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
@@ -353,20 +354,6 @@ public class RosterActivity extends SherlockFragmentActivity {
 		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
 	}
 
-	private void toggleConnectionStateBroadcast(int oldStateAction, int newStateAction) {
-		Log.d(CLASS, "Cutting off old connection broadcast");
-		Intent intent = new Intent();
-		intent.addCategory(getString(R.string.broadcast_connection_state));
-		intent.setAction(getString(oldStateAction));
-		removeStickyBroadcast(intent);
-
-		Log.d(CLASS, "Turning on new connection broadcast");
-		intent = new Intent();
-		intent.addCategory(getString(R.string.broadcast_connection_state));
-		intent.setAction(getString(newStateAction));
-		sendStickyBroadcast(intent);
-	}
-
 	private class XMPPServiceConnection implements ServiceConnection {
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder binder) {
@@ -389,8 +376,9 @@ public class RosterActivity extends SherlockFragmentActivity {
 			invalidateOptionsMenu();
 
 			// broadcast connected
-			toggleConnectionStateBroadcast(R.string.broadcast_disconnected,
-										   R.string.broadcast_connected);
+			BroadcastHelper.toggleConnectionStateBroadcast(RosterActivity.this,
+														   R.string.broadcast_disconnected,
+														   R.string.broadcast_connected);
 		}
 
 		@Override
@@ -407,8 +395,9 @@ public class RosterActivity extends SherlockFragmentActivity {
 			invalidateOptionsMenu();
 
 			// broadcast disconnected
-			toggleConnectionStateBroadcast(R.string.broadcast_connected,
-										   R.string.broadcast_disconnected);
+			BroadcastHelper.toggleConnectionStateBroadcast(RosterActivity.this,
+														   R.string.broadcast_connected,
+														   R.string.broadcast_disconnected);
 		}
 	}
 
