@@ -39,7 +39,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
@@ -309,7 +308,7 @@ public class XMPPService extends Service implements IXMPPService {
 			public void invitationDeclined(String invitee, String reason) {
 				String info = String.format("%s declined to join team %s: %s", invitee, teamName, reason);
 				Log.d(CLASS, info);
-				Toast.makeText(XMPPService.this, info, Toast.LENGTH_LONG).show();
+				//TODO Notify user of rejected invitation (in UI thread)
 			}
 		});
 		team.getRoom().addParticipantStatusListener(new TeamJoinListener(teamName));
@@ -396,6 +395,15 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 		
 		// TODO: there is an InvitationRejectionListener - maybe use it
+	}
+
+	@Override
+	public void declineInvitation(String teamName, String inviter, String reason) throws XMPPException {
+		if (mXMPP != null) {
+		MultiUserChat.decline(mXMPP, teamName, inviter, reason);
+		} else {
+			throw new XMPPException("Not connected");
+		}
 	}
 
 	@Override
