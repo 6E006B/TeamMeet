@@ -244,7 +244,7 @@ public class TeamMeetActivity extends SherlockMapActivity {
 	private void handleIntent(Intent intent) {
 		mTeam = intent.getStringExtra(XMPPService.GROUP);
 		if (mTeam != null) {
-			createOverlays();
+			createOverlays(mTeam);
 			addOverlays();
 		} else {
 			final String error = "Intent had no team!";
