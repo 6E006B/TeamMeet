@@ -30,6 +30,7 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
 import de.teammeet.activities.teams.Mate;
+import de.teammeet.services.xmpp.Team;
 
 public interface IXMPPService {
 
@@ -90,4 +91,6 @@ public interface IXMPPService {
 	String getNickname(String room) throws XMPPException;
 
 	void declineInvitation(String teamName, String inviter, String reason) throws XMPPException;
+
+	Team getTeam(String teamName) throws XMPPException;
 }

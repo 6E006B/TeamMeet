@@ -1,16 +1,22 @@
 package de.teammeet.services.xmpp;
 
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.muc.InvitationRejectionListener;
 
 import android.util.Log;
+import de.teammeet.interfaces.IXMPPService;
 
 public class TeamJoinDeclinedListener implements InvitationRejectionListener {
 
 	private static final String CLASS = TeamJoinDeclinedListener.class.getSimpleName();
 
-	private String mTeamName;  
+	private IXMPPService mXMPPService;
+	private String mTeamName;
 
-	public TeamJoinDeclinedListener(String teamName) {
+
+	public TeamJoinDeclinedListener(IXMPPService service, String teamName) {
+		mXMPPService = service;
 		mTeamName = teamName;
 	}
 	
@@ -19,6 +25,17 @@ public class TeamJoinDeclinedListener implements InvitationRejectionListener {
 		String info = String.format("%s declined to join team %s: %s", invitee, mTeamName, reason);
 		Log.d(CLASS , info);
 		//TODO Notify user of rejected invitation (in UI thread)
+		try {
+			Team team = mXMPPService.getTeam(invitee);
+			String nick = StringUtils.parseResource(invitee);
+			if (team.isInvitee(nick)) {
+				Log.d(CLASS, String.format("Removing invitee '%s' from list for team '%s'", nick, mTeamName));
+				team.removeInvitee(invitee);
+			}
+		} catch (XMPPException e) {
+			//TODO: Notify user via UI
+			Log.e(CLASS, String.format("Failed to get team '%s': %s", mTeamName, e.getMessage()));
+		}
 	}
 
 }

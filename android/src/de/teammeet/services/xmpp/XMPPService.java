@@ -21,6 +21,7 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.Base64;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -342,8 +343,8 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, String.format("adding team '%s'", teamName));
 		acquireTeamsLock();
 		team.getRoom().addMessageListener(new RoomMessageListener(this, teamName));
-		team.getRoom().addParticipantStatusListener(new TeamJoinListener(teamName));
-		team.getRoom().addInvitationRejectionListener(new TeamJoinDeclinedListener(teamName));
+		team.getRoom().addParticipantStatusListener(new TeamJoinListener(this, teamName));
+		team.getRoom().addInvitationRejectionListener(new TeamJoinDeclinedListener(this, teamName));
 		mTeams.put(teamName, team);
 		releaseTeamsLock();
 	}
@@ -392,6 +393,15 @@ public class XMPPService extends Service implements IXMPPService {
 	public Set<String> getTeams() {
 		return mTeams.keySet();
 	}
+
+	@Override
+	public Team getTeam(String teamName) throws XMPPException {
+		Team team = mTeams.get(teamName);
+		if (team == null) {
+			throw new XMPPException(String.format("No team '%s'", teamName));
+		}
+		return team;
+	}
 	
 	@Override
 	public Iterator<String> getMates(String teamName) throws XMPPException {
@@ -422,11 +432,10 @@ public class XMPPService extends Service implements IXMPPService {
 		Team team = mTeams.get(teamName);
 		if (team != null) {
 			team.getRoom().invite(contact, "reason");
+			team.addInvitee(StringUtils.parseName(contact));
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));
 		}
-		
-		// TODO: there is an InvitationRejectionListener - maybe use it
 	}
 
 	@Override
