@@ -297,10 +297,13 @@ public class XMPPService extends Service implements IXMPPService {
 		addTeam(room, team);
 	}
 
-	private void addTeam(String room, Team team) {
+	private void addTeam(final String teamName, Team team) {
+		Log.d(CLASS, String.format("adding team '%s'", teamName));
 		acquireTeamsLock();
-		team.getRoom().addMessageListener(new RoomMessageListener(this, room));
-		mTeams.put(room, team);
+		team.getRoom().addMessageListener(new RoomMessageListener(this, teamName));
+		team.getRoom().addParticipantStatusListener(new TeamJoinListener(teamName));
+		team.getRoom().addInvitationRejectionListener(new TeamJoinDeclinedListener(teamName));
+		mTeams.put(teamName, team);
 		releaseTeamsLock();
 	}
 
@@ -383,6 +386,15 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 		
 		// TODO: there is an InvitationRejectionListener - maybe use it
+	}
+
+	@Override
+	public void declineInvitation(String teamName, String inviter, String reason) throws XMPPException {
+		if (mXMPP != null) {
+		MultiUserChat.decline(mXMPP, teamName, inviter, reason);
+		} else {
+			throw new XMPPException("Not connected");
+		}
 	}
 
 	@Override
