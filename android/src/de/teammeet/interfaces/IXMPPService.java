@@ -88,4 +88,6 @@ public interface IXMPPService {
 	Iterator<String> getMates(String room) throws XMPPException;
 
 	String getNickname(String room) throws XMPPException;
+
+	void declineInvitation(String teamName, String inviter, String reason) throws XMPPException;
 }
