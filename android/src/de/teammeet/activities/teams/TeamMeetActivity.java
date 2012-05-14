@@ -77,7 +77,6 @@ public class TeamMeetActivity extends SherlockMapActivity {
 			handleIntent(mCurrentIntent);
 			mMapGestureOverlay.setXMPPService(mXMPPService);
 			// register to get status updates
-			mXMPPService.registerMatesUpdates(mMatesOverlay);
 			mXMPPService.startLocationTransmission(mMyLocationOverlay);
 		}
 
