@@ -26,36 +26,45 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 
 import de.teammeet.R;
 import de.teammeet.activities.chat.Chat;
-import de.teammeet.interfaces.IMatesUpdateRecipient;
+import de.teammeet.services.xmpp.TeamMeetPacketExtension;
+import de.teammeet.services.xmpp.XMPPService;
 
-public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMatesUpdateRecipient {
+public class MatesOverlay extends ItemizedOverlay<OverlayItem> {
 
 	private static final String	CLASS = MatesOverlay.class.getSimpleName();
 
 	private Context mContext = null;
 	private String mOwnID = null;
+	private String mTeam = null;
 	private Map<String, Mate> mMates = null;
 	private List<OverlayItem> mOverlayItems = null;
 	private MapView mMapView = null;
 	private final ReentrantLock	mLock = new ReentrantLock();
+	private MateUpdateReceiver mMateUpdateReceiver = null;
 
 
-	public MatesOverlay(Context context, Drawable marker, MapView mapView) {
+	public MatesOverlay(String team, Context context, Drawable marker, MapView mapView) {
 		super(boundCenterBottom(marker));
+		mTeam = team;
 		mContext = context;
 		mMapView = mapView;
 		final SharedPreferences settings =
@@ -69,26 +78,11 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 		mMates = new HashMap<String, Mate>();
 		mOverlayItems = new ArrayList<OverlayItem>();
 		populate();
-	}
-
-	@Override
-	public void handleMateUpdate(Mate mate) {
-		Log.d(CLASS, "MatesOverlay.handleMateUpdate() : " + mate.getID());
-		if (!Chat.getPath(mate.getID()).equals(mOwnID)) {
-			acquireLock();
-			try {
-				if (mMates.containsKey(mate.getID())) {
-					mMates.get(mate.getID()).setLocation(mate.getLocation(), mate.getAccuracy());
-				} else {
-					mMates.put(mate.getID(), mate);
-					mOverlayItems.add(new MateOverlayItem(mate));
-				}
-			} finally {
-				releaseLock();
-			}
-			populate();
-			mMapView.postInvalidate();
-		}
+		mMateUpdateReceiver = new MateUpdateReceiver();
+		IntentFilter filter =
+				new IntentFilter(mContext.getString(R.string.broadcast_action_teammate_update));
+		filter.addCategory(mContext.getString(R.string.broadcast_category_location));
+		mContext.registerReceiver(mMateUpdateReceiver, filter);
 	}
 
 	private void acquireLock() {
@@ -133,5 +127,49 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> implements IMates
 			super.draw(canvas, mapView, shadow, when);
 		}
 		return isRedrawNeeded;
+	}
+
+	private class MateUpdateReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String group = intent.getStringExtra(XMPPService.GROUP);
+			if (mTeam.equals(group)) {
+			Mate mate = parseMate(intent.getExtras());
+			if (mate != null) {
+				Log.d(CLASS, "MatesOverlay.MateUpdateReceiver.onReceive()");
+				if (!Chat.getPath(mate.getID()).equals(mOwnID)) {
+					acquireLock();
+					try {
+						if (mMates.containsKey(mate.getID())) {
+							mMates.get(mate.getID()).setLocation(mate.getLocation(), mate.getAccuracy());
+						} else {
+							mMates.put(mate.getID(), mate);
+							mOverlayItems.add(new MateOverlayItem(mate));
+						}
+					} finally {
+						releaseLock();
+					}
+					populate();
+					mMapView.postInvalidate();
+				}
+			} else {
+				Log.e(CLASS, "Mate intent didn't contain the required information.");
+			}
+			} else {
+				Log.d(CLASS, "Received mate update for different team.");
+			}
+		}
+
+		private Mate parseMate(Bundle bundle) {
+			Mate mate = null;
+			String from = bundle.getString(TeamMeetPacketExtension.MATE);
+			int lon = bundle.getInt(TeamMeetPacketExtension.LON, -1);
+			int lat = bundle.getInt(TeamMeetPacketExtension.LAT, -1);
+			int accuracy = bundle.getInt(TeamMeetPacketExtension.ACCURACY, -1);
+			if (from != null && lon != -1 && lat != -1 && accuracy != -1) {
+				mate = new Mate(from, new GeoPoint(lat, lon), accuracy);
+			}
+			return mate;
+		}
 	}
 }
