@@ -1,5 +1,6 @@
 package de.teammeet.services.xmpp;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,6 +20,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -108,11 +110,13 @@ public class XMPPService extends Service implements IXMPPService {
 	private TimerTask mTimerTask = null;
 	private ChatOpenHelper mChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
+	private SecureRandom mKeyGenerator = null;
 
 	private NotificationCompat.Builder mServiceNotificationBuilder;
 	private NotificationCompat.Builder mInvitationNotificationBuilder;
 	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
 	private NotificationCompat.Builder mChatMessageNotificationBuilder;
+
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -126,6 +130,7 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
 		mChatDatabase = new ChatOpenHelper(this);
+		mKeyGenerator = new SecureRandom();
 	}
 
 	@Override
@@ -289,9 +294,10 @@ public class XMPPService extends Service implements IXMPPService {
 
 		Form configForm = createMUCConfig(muc.getConfigurationForm());
 
-		String roomPassword = "secret";
+		String roomPassword = generateMUCPassword();
 		configForm.setAnswer(MUC_PASSWORDPROTECTED_FIELD, true);
 		configForm.setAnswer(MUC_PASSWORD_FIELD, roomPassword);
+		Log.d(CLASS, String.format("Password for room '%s' is '%s'", groupName, roomPassword));
 
 		muc.sendConfigurationForm(configForm);
 
@@ -311,6 +317,12 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 
 		return config;
+	}
+
+	private String generateMUCPassword() {
+		byte[] roomKey = new byte[18]; // 18 bytes = 144 bits = 24 base64-chars
+		mKeyGenerator.nextBytes(roomKey);
+		return Base64.encodeBytes(roomKey);
 	}
 
 	@Override
