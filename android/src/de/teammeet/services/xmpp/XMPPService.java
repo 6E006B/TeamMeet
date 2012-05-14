@@ -1,5 +1,6 @@
 package de.teammeet.services.xmpp;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,7 +20,9 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smackx.Form;
+import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Notification;
@@ -76,6 +79,9 @@ public class XMPPService extends Service implements IXMPPService {
 	private static final int NOTIFICATION_GROUP_CHAT_MESSAGE_ID = 2;
 	private static final int NOTIFICATION_CHAT_MESSAGE_ID = 3;
 
+	private static final String MUC_PASSWORDPROTECTED_FIELD = "muc#roomconfig_passwordprotectedroom";
+	private static final String MUC_PASSWORD_FIELD = "muc#roomconfig_roomsecret"; 
+
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
 	private String mServer = null;
@@ -104,11 +110,13 @@ public class XMPPService extends Service implements IXMPPService {
 	private TimerTask mTimerTask = null;
 	private ChatOpenHelper mChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
+	private SecureRandom mKeyGenerator = null;
 
 	private NotificationCompat.Builder mServiceNotificationBuilder;
 	private NotificationCompat.Builder mInvitationNotificationBuilder;
 	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
 	private NotificationCompat.Builder mChatMessageNotificationBuilder;
+
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -122,6 +130,7 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
 		mChatDatabase = new ChatOpenHelper(this);
+		mKeyGenerator = new SecureRandom();
 	}
 
 	@Override
@@ -282,9 +291,38 @@ public class XMPPService extends Service implements IXMPPService {
 		final String group = String.format("%s@%s", groupName, conferenceServer);
 		MultiUserChat muc = new MultiUserChat(mXMPP, group);
 		muc.create(mUserID);
-		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
+
+		Form configForm = createMUCConfig(muc.getConfigurationForm());
+
+		String roomPassword = generateMUCPassword();
+		configForm.setAnswer(MUC_PASSWORDPROTECTED_FIELD, true);
+		configForm.setAnswer(MUC_PASSWORD_FIELD, roomPassword);
+		Log.d(CLASS, String.format("Password for room '%s' is '%s'", groupName, roomPassword));
+
+		muc.sendConfigurationForm(configForm);
+
 		Team team = new Team(muc);
 		addTeam(group, team);
+	}
+
+	private Form createMUCConfig(Form template) {
+		Form config = template.createAnswerForm();
+
+		Iterator<FormField> templateFields = template.getFields();
+		while (templateFields.hasNext()) {
+			FormField field = (FormField) templateFields.next();
+			if (!field.getType().equals(FormField.TYPE_HIDDEN) && field.getVariable() != null) {
+				config.setDefaultAnswer(field.getVariable());
+			}
+		}
+
+		return config;
+	}
+
+	private String generateMUCPassword() {
+		byte[] roomKey = new byte[18]; // 18 bytes = 144 bits = 24 base64-chars
+		mKeyGenerator.nextBytes(roomKey);
+		return Base64.encodeBytes(roomKey);
 	}
 
 	@Override
