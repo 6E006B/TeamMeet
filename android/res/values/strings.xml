@@ -86,6 +86,7 @@
     <string name="broadcast_disconnected">de.teammeet.indent.action.DISCONNECTED</string>
     <string name="broadcast_action_indicator">de.teammeet.intent.action.INDICATOR</string>
     <string name="broadcast_action_indicator_remove">de.teammeet.intent.action.INDICATOR_REMOVE</string>
+    <string name="broadcast_action_teammate_update">de.teammeet.intent.action.TEAMMATE_UPDATE</string>
     <string name="broadcast_category_location">de.teammeet.intent.category.LOCATION</string>
     <string name="broadcast_teams_updated">de.teammeet.intent.action.TEAMS_UPDATED</string>
 
