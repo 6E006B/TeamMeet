@@ -31,10 +31,6 @@ import com.google.android.maps.MyLocationOverlay;
 
 public interface IXMPPService {
 
-	void registerMatesUpdates(IMatesUpdateRecipient object);
-
-	void unregisterMatesUpdates(IMatesUpdateRecipient object);
-
 	void registerInvitationHandler(IInvitationHandler object);
 
 	void unregisterInvitationHandler(IInvitationHandler object);

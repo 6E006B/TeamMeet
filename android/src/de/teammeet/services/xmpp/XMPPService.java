@@ -51,7 +51,6 @@ import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IInvitationHandler;
-import de.teammeet.interfaces.IMatesUpdateRecipient;
 import de.teammeet.interfaces.IXMPPService;
 
 public class XMPPService extends Service implements IXMPPService {
@@ -82,14 +81,11 @@ public class XMPPService extends Service implements IXMPPService {
 	private RoomInvitationListener mRoomInvitationListener = null;
 	private ChatMessageListener mChatMessageListener = null;
 
-	private final ReentrantLock mLockMates = new ReentrantLock();
 	private final ReentrantLock mLockGroups = new ReentrantLock();
 	private final ReentrantLock mLockInvitations = new ReentrantLock();
 	private final ReentrantLock mLockGroupMessages = new ReentrantLock();
 	private final ReentrantLock mLockChatMessages = new ReentrantLock();
 
-	private final List<IMatesUpdateRecipient> mMatesRecipients =
-			new ArrayList<IMatesUpdateRecipient>();
 	private final List<IInvitationHandler> mInvitationHandlers =
 			new ArrayList<IInvitationHandler>();
 	private final List<IGroupMessageHandler> mGroupMessageHandlers =
@@ -555,32 +551,6 @@ public class XMPPService extends Service implements IXMPPService {
 		sendBroadcast(intent);
 	}
 
-	@Override
-	public void registerMatesUpdates(final IMatesUpdateRecipient object) {
-		// Log.e(CLASS, "registerMatesUpdates(" + object.getClass()
-		// .getSimpleName() + ")");
-		acquireMatesLock();
-		try {
-			if (!mMatesRecipients.contains(object)) {
-				mMatesRecipients.add(object);
-			}
-		} finally {
-			releaseMatesLock();
-		}
-	}
-
-	@Override
-	public void unregisterMatesUpdates(final IMatesUpdateRecipient object) {
-		// Log.e(CLASS, "unregisterMatesUpdates(" + object.getClass()
-		// .getSimpleName() + ")");
-		acquireMatesLock();
-		try {
-			mMatesRecipients.remove(object);
-		} finally {
-			releaseMatesLock();
-		}
-	}
-
 	private void showXMPPServiceNotification() {
 		Log.d(CLASS, "XMPPService.showXMPPServiceNotification()");
 		String ns = Context.NOTIFICATION_SERVICE;
@@ -826,14 +796,6 @@ public class XMPPService extends Service implements IXMPPService {
 		} finally {
 			releaseChatMessageLock();
 		}
-	}
-
-	private void acquireMatesLock() {
-		mLockMates.lock();
-	}
-
-	private void releaseMatesLock() {
-		mLockMates.unlock();
 	}
 
 	private void acquireTeamsLock() {
