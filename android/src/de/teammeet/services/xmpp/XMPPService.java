@@ -79,7 +79,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
 	private String mServer = null;
-	private Map<String, MultiUserChat> mRooms = null;
+	private Map<String, Team> mTeams = null;
 	private RoomInvitationListener mRoomInvitationListener = null;
 	private ChatMessageListener mChatMessageListener = null;
 
@@ -172,7 +172,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void connect(String userID, String server, String password) throws XMPPException {
-		mRooms = new HashMap<String, MultiUserChat>();
+		mTeams = new HashMap<String, Team>();
 		mUserID = userID;
 		mServer = server;
 
@@ -254,7 +254,7 @@ public class XMPPService extends Service implements IXMPPService {
 			}
 		}
 		removeNotifications();
-		mRooms = null;
+		mTeams = null;
 		mRoomInvitationListener = null;
 		mXMPP = null;
 	}
@@ -283,7 +283,8 @@ public class XMPPService extends Service implements IXMPPService {
 		MultiUserChat muc = new MultiUserChat(mXMPP, group);
 		muc.create(mUserID);
 		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
-		addRoom(group, muc);
+		Team team = new Team(muc);
+		addTeam(group, team);
 	}
 
 	@Override
@@ -292,89 +293,93 @@ public class XMPPService extends Service implements IXMPPService {
 		                           room, userID, password));
 		MultiUserChat muc = new MultiUserChat(mXMPP, room);
 		muc.join(userID, password);
-		addRoom(room, muc);
+		Team team = new Team(muc);
+		addTeam(room, team);
 	}
 
-	private void addRoom(String room, MultiUserChat muc) {
-		acquireGroupsLock();
-		muc.addMessageListener(new RoomMessageListener(this, room));
-		mRooms.put(room, muc);
-		releaseGroupsLock();
+	private void addTeam(String room, Team team) {
+		acquireTeamsLock();
+		team.getRoom().addMessageListener(new RoomMessageListener(this, room));
+		mTeams.put(room, team);
+		releaseTeamsLock();
 	}
 
-	private void removeRoom(String roomName) {
-		acquireGroupsLock();
-		mRooms.remove(roomName);
+	private void removeTeam(String teamName) {
+		acquireTeamsLock();
+		mTeams.remove(teamName);
 		//TODO find out if the GroupMessageHandler has to be removed
 		// if there has to be an additional dict of handlers
-		releaseGroupsLock();
+		releaseTeamsLock();
 	}
 
 	@Override
-	public void leaveRoom(String roomName) {
-		acquireGroupsLock();
-		MultiUserChat muc = mRooms.get(roomName);
-		if (muc != null) {
-			muc.leave();
-			removeRoom(roomName);
+	public void leaveTeam(String teamName) throws XMPPException {
+		acquireTeamsLock();
+		Team team = mTeams.get(teamName);
+		if (team != null) {
+			team.getRoom().leave();
+			removeTeam(teamName);
+		} else {
+			throw new XMPPException(String.format("No team '%s'", teamName));
 		}
-		releaseGroupsLock();
+		releaseTeamsLock();
 	}
 
 	@Override
-	public void destroyRoom(String roomName) throws XMPPException {
-		acquireGroupsLock();
-		MultiUserChat muc = mRooms.get(roomName);
-		if (muc != null) {
+	public void destroyTeam(String teamName) throws XMPPException {
+		acquireTeamsLock();
+		Team team = mTeams.get(teamName);
+		if (team != null) {
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 			String userID =
 					settings.getString(getString(R.string.preference_user_id_key), "");
 			String server =
 					settings.getString(getString(R.string.preference_server_key), "");
 			String alternateAddress = String.format("%s@%s", userID, server);
-			muc.destroy("reason", alternateAddress);
-			removeRoom(roomName);
+			team.getRoom().destroy("reason", alternateAddress);
+			removeTeam(teamName);
+		} else {
+			throw new XMPPException(String.format("No team '%s'", teamName));
 		}
-		releaseGroupsLock();
+		releaseTeamsLock();
 	}
 
 	@Override
-	public Set<String> getRooms() {
-		return mRooms.keySet();
+	public Set<String> getTeams() {
+		return mTeams.keySet();
 	}
 	
 	@Override
-	public Iterator<String> getOccupants(String room) throws XMPPException {
-		MultiUserChat muc = mRooms.get(room);
+	public Iterator<String> getMates(String teamName) throws XMPPException {
 		Iterator<String> occupants;
-		if (muc != null) {
-			Log.d(CLASS, String.format("My nick in room is '%s'", muc.getNickname()));
-			occupants = muc.getOccupants();
+		Team team = mTeams.get(teamName);
+		if (team != null) {
+			occupants = team.getRoom().getOccupants();
 		} else {
-			throw new XMPPException(String.format("No such room '%s'", room));
+			throw new XMPPException(String.format("No team '%s'", teamName));
 		}
 		return occupants;
 	}
 	
 	@Override
-	public String getNickname(String room) throws XMPPException {
-		MultiUserChat muc = mRooms.get(room);
+	public String getNickname(String teamName) throws XMPPException {
 		String nick;
-		if (muc != null) {
-			nick = muc.getNickname();
+		Team team = mTeams.get(teamName);
+		if (team != null) {
+			nick = team.getRoom().getNickname();
 		} else {
-			throw new XMPPException(String.format("No such room '%s'", room));
+			throw new XMPPException(String.format("No team '%s'", team));
 		}
 		return nick;
 	}
 
 	@Override
-	public void invite(String contact, String roomName) throws XMPPException {
-		MultiUserChat muc = mRooms.get(roomName);
-		if (muc != null) {
-			muc.invite(contact, "reason");
+	public void invite(String contact, String teamName) throws XMPPException {
+		Team team = mTeams.get(teamName);
+		if (team != null) {
+			team.getRoom().invite(contact, "reason");
 		} else {
-			throw new XMPPException(String.format("Cannot invite to non-existent MUC '%s'", roomName));
+			throw new XMPPException(String.format("No team '%s'", teamName));
 		}
 		
 		// TODO: there is an InvitationRejectionListener - maybe use it
@@ -439,7 +444,7 @@ public class XMPPService extends Service implements IXMPPService {
 				                                                                     null);
 				message.addExtension(teamMeetPacket);
 				message.addBody("", "");
-				sendAllGroups(message);
+				sendAllTeams(message);
 			} else {
 				throw new XMPPException("Not authenticated.");
 			}
@@ -460,7 +465,7 @@ public class XMPPService extends Service implements IXMPPService {
 						new TeamMeetPacketExtension(null, indicatorPacket);
 				message.addExtension(teamMeetPacket);
 				message.addBody("", "");
-				sendAllGroups(message);
+				sendAllTeams(message);
 			} else {
 				throw new XMPPException("Not authenticated.");
 			}
@@ -512,9 +517,10 @@ public class XMPPService extends Service implements IXMPPService {
 		unregisterReceiver(indicatorRemover);
 	}
 
-	private void sendAllGroups(Message message) throws XMPPException {
+	private void sendAllTeams(Message message) throws XMPPException {
 		message.setType(Message.Type.groupchat);
-		for (MultiUserChat muc : mRooms.values()) {
+		for (Team team : mTeams.values()) {
+			MultiUserChat muc = team.getRoom();
 			message.setTo(muc.getRoom());
 			muc.sendMessage(message);
 		}
@@ -529,12 +535,12 @@ public class XMPPService extends Service implements IXMPPService {
 		mXMPP.sendPacket(packet);
 	}
 
-	public void sendToGroup(String group, String message) throws XMPPException {
-		final MultiUserChat muc = mRooms.get(group);
-		if (muc != null) {
-			muc.sendMessage(message);
+	public void sendToTeam(String teamName, String message) throws XMPPException {
+		final Team team = mTeams.get(teamName);
+		if (team != null) {
+			team.getRoom().sendMessage(message);
 		} else {
-			throw new XMPPException(String.format("Unknown group '%s'", group));
+			throw new XMPPException(String.format("No team '%s'", teamName));
 		}
 	}
 
@@ -833,11 +839,11 @@ public class XMPPService extends Service implements IXMPPService {
 		mLockMates.unlock();
 	}
 
-	private void acquireGroupsLock() {
+	private void acquireTeamsLock() {
 		mLockGroups.lock();
 	}
 
-	private void releaseGroupsLock() {
+	private void releaseTeamsLock() {
 		mLockGroups.unlock();
 	}
 

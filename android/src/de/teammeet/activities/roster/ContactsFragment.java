@@ -162,13 +162,13 @@ public class ContactsFragment extends Fragment {
 		//MenuInflater inflater = getMenuInflater();
 		//inflater.inflate(R.menu.roster_context, menu);
 		Log.d(CLASS, "creating context menu");
-		Set<String> rooms = ((RosterActivity) getActivity()).getXMPPService().getRooms();
-		if (!rooms.isEmpty()) {
+		Set<String> teams = ((RosterActivity) getActivity()).getXMPPService().getTeams();
+		if (!teams.isEmpty()) {
 			SubMenu inviteSubMenu = menu.addSubMenu(Menu.NONE, CONTEXT_MENU_INVITE_PARENT_ID,
 													Menu.NONE, R.string.context_invite);
-			for (String room : rooms) {
-				Log.d(CLASS, "room: " + room);
-				inviteSubMenu.add(Menu.NONE, CONTEXT_MENU_INVITE_ROOM_ID, Menu.NONE, room);
+			for (String teamName : teams) {
+				Log.d(CLASS, "team: " + teamName);
+				inviteSubMenu.add(Menu.NONE, CONTEXT_MENU_INVITE_ROOM_ID, Menu.NONE, teamName);
 			}
 		}
 	}

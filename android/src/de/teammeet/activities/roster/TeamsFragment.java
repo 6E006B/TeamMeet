@@ -28,7 +28,7 @@ import de.teammeet.R;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
-import de.teammeet.tasks.FetchRoomsTask;
+import de.teammeet.tasks.FetchTeamsTask;
 
 public class TeamsFragment extends Fragment {
 
@@ -103,42 +103,42 @@ public class TeamsFragment extends Fragment {
 		super.onPause();
 	}
 
-	private void fillExpandableList(Set<String> rooms) {
+	private void fillExpandableList(Set<String> teams) {
 		mExpandableGroups.clear();
 		mExpandableChildren.clear();
 		
 		IXMPPService xmppService = ((RosterActivity) getActivity()).getXMPPService();
 
-		for (String room : rooms) {
-			Map<String, String> roomStruct = new HashMap<String, String>();
-			List<Map<String, String>> membersStruct = new ArrayList<Map<String,String>>();
+		for (String teamName : teams) {
+			Map<String, String> teamStruct = new HashMap<String, String>();
+			List<Map<String, String>> matesStruct = new ArrayList<Map<String,String>>();
 			String me = "";
 			
-			roomStruct.put(NAME, room);
-			mExpandableGroups.add(roomStruct);
+			teamStruct.put(NAME, teamName);
+			mExpandableGroups.add(teamStruct);
 			
 			try {
-				me = xmppService.getNickname(room);
+				me = xmppService.getNickname(teamName);
 			} catch (XMPPException e) {
-				String problem = String.format("Failed to fetch own nickname from room '%s': %s",
-												room, e.getMessage());
+				String problem = String.format("Failed to fetch own nickname in team '%s': %s",
+												teamName, e.getMessage());
 				Log.e(CLASS, problem, e);
 				Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 			}
 
 			try {
-				Iterator<String> occupants = xmppService.getOccupants(room);
-				while (occupants.hasNext()) {
-					String nick = StringUtils.parseResource(occupants.next());
+				Iterator<String> mates = xmppService.getMates(teamName);
+				while (mates.hasNext()) {
+					String nick = StringUtils.parseResource(mates.next());
 					if (!nick.equals(me)) {
-						HashMap<String, String> occupantStruct = new HashMap<String, String>();
-						occupantStruct.put(NAME, nick);
-						membersStruct.add(occupantStruct);
+						HashMap<String, String> mateStruct = new HashMap<String, String>();
+						mateStruct.put(NAME, nick);
+						matesStruct.add(mateStruct);
 					}
 				}
-				mExpandableChildren.add(membersStruct);
+				mExpandableChildren.add(matesStruct);
 			} catch (XMPPException e) {
-				String problem = String.format("Failed to fetch occupants for room '%s': %s", room, e.getMessage());
+				String problem = String.format("Failed to fetch mates in team '%s': %s", teamName, e.getMessage());
 				Log.e(CLASS, problem, e);
 				Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 			}
@@ -158,16 +158,16 @@ public class TeamsFragment extends Fragment {
 	}
 
 
-	protected class FetchRoomsHandler extends BaseAsyncTaskCallback<Set<String>> {
-		private Set<String> mRooms;
+	protected class FetchTeamsHandler extends BaseAsyncTaskCallback<Set<String>> {
+		private Set<String> mTeams;
 
 		@Override
-		public void onTaskCompleted(Set<String> rooms) {
-			mRooms = rooms;
+		public void onTaskCompleted(Set<String> teams) {
+			mTeams = teams;
 			mTeamsList.post(new Runnable() {
 				@Override
 				public void run() {
-					fillExpandableList(mRooms);
+					fillExpandableList(mTeams);
 					mAdapter.notifyDataSetChanged();
 				}
 			});
@@ -181,7 +181,7 @@ public class TeamsFragment extends Fragment {
 			Log.d(CLASS, String.format("*** Received CONNECT broadcast in '%s'", TeamsFragment.this));
 			
 			IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
-			new FetchRoomsTask(service, new FetchRoomsHandler()).execute();
+			new FetchTeamsTask(service, new FetchTeamsHandler()).execute();
 		}
 	}
 
@@ -201,7 +201,7 @@ public class TeamsFragment extends Fragment {
 			Log.d(CLASS, String.format("*** Received TEAMS_UPDATED broadcast in '%s'", TeamsFragment.this));
 
 			IXMPPService service = ((RosterActivity) getActivity()).getXMPPService();
-			new FetchRoomsTask(service, new FetchRoomsHandler()).execute();
+			new FetchTeamsTask(service, new FetchTeamsHandler()).execute();
 		}
 	}
 }

@@ -63,13 +63,13 @@ public interface IXMPPService {
 
 	void joinRoom(String room, String userID, String password) throws XMPPException;
 
-	void leaveRoom(String roomName);
+	void leaveTeam(String roomName) throws XMPPException;
 
 	void invite(String contact, String roomName) throws XMPPException;
 
 	void sendChatMessage(String mSender, String sendText);
 
-	void sendToGroup(String mGroup, String message) throws XMPPException;
+	void sendToTeam(String mGroup, String message) throws XMPPException;
 
 	void startLocationTransmission(MyLocationOverlay locationOverlay);
 
@@ -81,11 +81,11 @@ public interface IXMPPService {
 
 	void updateMate(Mate mate);
 
-	void destroyRoom(String roomName) throws XMPPException;
+	void destroyTeam(String roomName) throws XMPPException;
 
-	Set<String> getRooms();
+	Set<String> getTeams();
 
-	Iterator<String> getOccupants(String room) throws XMPPException;
+	Iterator<String> getMates(String room) throws XMPPException;
 
 	String getNickname(String room) throws XMPPException;
 }
