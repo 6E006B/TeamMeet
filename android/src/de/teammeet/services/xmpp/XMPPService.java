@@ -80,7 +80,8 @@ public class XMPPService extends Service implements IXMPPService {
 	private static final int NOTIFICATION_CHAT_MESSAGE_ID = 3;
 
 	private static final String MUC_PASSWORDPROTECTED_FIELD = "muc#roomconfig_passwordprotectedroom";
-	private static final String MUC_PASSWORD_FIELD = "muc#roomconfig_roomsecret"; 
+	private static final String MUC_PASSWORD_FIELD = "muc#roomconfig_roomsecret";
+	private static final String MUC_MEMBERSONLY_FIELD = "muc#roomconfig_membersonly";
 
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
@@ -298,6 +299,8 @@ public class XMPPService extends Service implements IXMPPService {
 		configForm.setAnswer(MUC_PASSWORDPROTECTED_FIELD, true);
 		configForm.setAnswer(MUC_PASSWORD_FIELD, roomPassword);
 		Log.d(CLASS, String.format("Password for room '%s' is '%s'", groupName, roomPassword));
+
+		configForm.setAnswer(MUC_MEMBERSONLY_FIELD, true);
 
 		muc.sendConfigurationForm(configForm);
 
