@@ -8,6 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.jivesoftware.smack.XMPPException;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -34,6 +35,7 @@ public class MapGestureDetectorOverlay extends Overlay implements OnGestureListe
 	private GestureDetector gestureDetector;
 	private OnGestureListener onGestureListener;
 	private MapView mMapView = null;
+	private Context mContext = null;
 	private XMPPService mXMPPService = null;
 	private GeoPoint mIndicatorLocation = null;
 
@@ -46,11 +48,12 @@ public class MapGestureDetectorOverlay extends Overlay implements OnGestureListe
 	private Paint				mPaintIndicator			= null;
 	private Paint				mPaintIndicatorText		= null;
 	
-	public MapGestureDetectorOverlay(MapView mapView, Resources resources) {
-		gestureDetector = new GestureDetector(this);
+	public MapGestureDetectorOverlay(MapView mapView, Context context) {
+		gestureDetector = new GestureDetector(mContext, this);
 		mMapView = mapView;
+		mContext = context;
 		
-		mResources = resources;
+		mResources = mContext.getResources();
 		mIndicatorSize = mResources.getInteger(R.integer.indicator_size);
 		mIndicatorWidth = mResources.getInteger(R.integer.indicator_width);
 
@@ -68,9 +71,9 @@ public class MapGestureDetectorOverlay extends Overlay implements OnGestureListe
 				1, mResources.getColor(R.color.paint_indicator_text_border));
 	}
 
-	public MapGestureDetectorOverlay(MapView mapView, Resources resources,
+	public MapGestureDetectorOverlay(MapView mapView, Context context,
 			OnGestureListener onGestureListener) {
-		this(mapView, resources);
+		this(mapView, context);
 		setOnGestureListener(onGestureListener);
 	}
 
