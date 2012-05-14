@@ -39,14 +39,16 @@ public class TeamJoinListener implements ParticipantStatusListener {
 	}
 
 	@Override
-	public void joined(String mate) {
-		Log.d(CLASS, String.format("%s just joined team '%s'", mate, mTeamName));
+	public void joined(String fullAddress) {
+		Log.d(CLASS, String.format("%s just joined team '%s'", fullAddress, mTeamName));
 		try {
 			Team team = mXMPPService.getTeam(mTeamName);
-			String nick = StringUtils.parseResource(mate);
-			if (team.isInvitee(nick)) {
-				Log.d(CLASS, String.format("Initiating session key exchange for team '%s' with '%s'", mTeamName, nick));
-				team.removeInvitee(nick);
+			String fullJID = mXMPPService.getFullJID(mTeamName, fullAddress);
+			Log.d(CLASS, String.format("full JID is '%s'", fullJID));
+			String mate = StringUtils.parseBareAddress(fullJID);
+			if (team.isInvitee(mate)) {
+				Log.d(CLASS, String.format("Initiating session key exchange for team '%s' with '%s'", mTeamName, mate));
+				team.removeInvitee(mate);
 			}
 		} catch (XMPPException e) {
 			//TODO: Notify user via UI

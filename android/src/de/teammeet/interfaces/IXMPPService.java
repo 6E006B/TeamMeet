@@ -93,4 +93,6 @@ public interface IXMPPService {
 	void declineInvitation(String teamName, String inviter, String reason) throws XMPPException;
 
 	Team getTeam(String teamName) throws XMPPException;
+
+	String getFullJID(String teamName, String fullNick) throws XMPPException;
 }
