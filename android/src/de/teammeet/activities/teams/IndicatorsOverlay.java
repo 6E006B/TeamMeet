@@ -42,11 +42,13 @@ import com.google.android.maps.OverlayItem;
 
 import de.teammeet.R;
 import de.teammeet.services.xmpp.TeamMeetPacketExtension;
+import de.teammeet.services.xmpp.XMPPService;
 
 public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 
 	private static final String	CLASS = IndicatorsOverlay.class.getSimpleName();
 
+	private String mTeam = null;
 	private Context mContext = null;
 	private Map<GeoPoint, String> mIndicators = null;
 	private List<OverlayItem> mOverlayItems = null;
@@ -56,8 +58,9 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 	private final ReentrantLock	mLock = new ReentrantLock();
 
 
-	public IndicatorsOverlay(Context context, Drawable marker, MapView mapView) {
+	public IndicatorsOverlay(String team, Context context, Drawable marker, MapView mapView) {
 		super(boundCenterBottom(marker));
+		mTeam = team;
 		mContext = context;
 		mMapView = mapView;
 		mIndicators = new HashMap<GeoPoint, String>();
@@ -189,11 +192,15 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Log.d(CLASS, "*** Received INDICATOR broadcast");
-			int lon = intent.getIntExtra(TeamMeetPacketExtension.LON, -1);
-			int lat = intent.getIntExtra(TeamMeetPacketExtension.LAT, -1);
-			String info = intent.getStringExtra(TeamMeetPacketExtension.INFO);
-			if (lon != -1 && lat != -1 && info != null) {
-				handleIndicatorUpdate(lon, lat, info);
+			if (mTeam.equals(intent.getStringExtra(XMPPService.GROUP))) {
+				int lon = intent.getIntExtra(TeamMeetPacketExtension.LON, -1);
+				int lat = intent.getIntExtra(TeamMeetPacketExtension.LAT, -1);
+				String info = intent.getStringExtra(TeamMeetPacketExtension.INFO);
+				if (lon != -1 && lat != -1 && info != null) {
+					handleIndicatorUpdate(lon, lat, info);
+				}
+			} else {
+				Log.d(CLASS, "indicator for different team received.");
 			}
 		}
 	}
@@ -201,11 +208,15 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 	private class IndicatorRemoveBroadcastReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d(CLASS, "*** Received INDICATOR_REMOVE broadcast");
-			int lon = intent.getIntExtra(TeamMeetPacketExtension.LON, -1);
-			int lat = intent.getIntExtra(TeamMeetPacketExtension.LAT, -1);
-			if (lon != -1 && lat != -1) {
-				removeIndicator(lon, lat);
+			if (mTeam.equals(intent.getStringExtra(XMPPService.GROUP))) {
+				Log.d(CLASS, "*** Received INDICATOR_REMOVE broadcast");
+				int lon = intent.getIntExtra(TeamMeetPacketExtension.LON, -1);
+				int lat = intent.getIntExtra(TeamMeetPacketExtension.LAT, -1);
+				if (lon != -1 && lat != -1) {
+					removeIndicator(lon, lat);
+				}
+			} else {
+				Log.d(CLASS, "remove indicator for different team received.");
 			}
 		}
 	}
