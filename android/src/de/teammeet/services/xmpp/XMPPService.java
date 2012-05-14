@@ -20,6 +20,7 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.Form;
+import org.jivesoftware.smackx.muc.InvitationRejectionListener;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Notification;
@@ -38,6 +39,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
@@ -297,10 +299,21 @@ public class XMPPService extends Service implements IXMPPService {
 		addTeam(room, team);
 	}
 
-	private void addTeam(String room, Team team) {
+	private void addTeam(final String teamName, Team team) {
+		Log.d(CLASS, String.format("adding team '%s'", teamName));
 		acquireTeamsLock();
-		team.getRoom().addMessageListener(new RoomMessageListener(this, room));
-		mTeams.put(room, team);
+		team.getRoom().addMessageListener(new RoomMessageListener(this, teamName));
+		team.getRoom().addInvitationRejectionListener(new InvitationRejectionListener() {
+
+			@Override
+			public void invitationDeclined(String invitee, String reason) {
+				String info = String.format("%s declined to join team %s: %s", invitee, teamName, reason);
+				Log.d(CLASS, info);
+				Toast.makeText(XMPPService.this, info, Toast.LENGTH_LONG).show();
+			}
+		});
+		team.getRoom().addParticipantStatusListener(new TeamJoinListener(teamName));
+		mTeams.put(teamName, team);
 		releaseTeamsLock();
 	}
 
