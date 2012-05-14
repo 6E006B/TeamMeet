@@ -39,7 +39,7 @@ public class RoomMessageListener implements PacketListener {
 			      String.format("received location update from '%s' - lon: %d lat: %d acc: %d",
 			                    from, lon, lat, accuracy));
 			Mate mate = new Mate(from, location, accuracy);
-			mXMPPService.updateMate(mate);
+			mXMPPService.updateMate(from, lon, lat, accuracy, mGroup);
 		} else {
 			Log.d(CLASS, "packet did not contain geoloc extension.");
 		}

@@ -29,8 +29,6 @@ import org.jivesoftware.smack.XMPPException;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
-import de.teammeet.activities.teams.Mate;
-
 public interface IXMPPService {
 
 	void registerMatesUpdates(IMatesUpdateRecipient object);
@@ -79,7 +77,7 @@ public interface IXMPPService {
 
 	void sendIndicator(GeoPoint location, String info) throws XMPPException;
 
-	void updateMate(Mate mate);
+	void updateMate(String from, int lon, int lat, int accuracy, String mTeam);
 
 	void destroyTeam(String roomName) throws XMPPException;
 
@@ -88,4 +86,5 @@ public interface IXMPPService {
 	Iterator<String> getMates(String room) throws XMPPException;
 
 	String getNickname(String room) throws XMPPException;
+
 }

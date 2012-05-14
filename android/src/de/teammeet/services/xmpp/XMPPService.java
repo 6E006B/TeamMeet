@@ -46,7 +46,6 @@ import de.teammeet.R;
 import de.teammeet.activities.chat.Chat;
 import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.activities.roster.RosterActivity;
-import de.teammeet.activities.teams.Mate;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.helper.ChatOpenHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
@@ -545,17 +544,15 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void updateMate(final Mate mate) {
-		acquireMatesLock();
-		try {
-			if (mate != null) {
-				for (final IMatesUpdateRecipient object : mMatesRecipients) {
-					object.handleMateUpdate(mate);
-				}
-			}
-		} finally {
-			releaseMatesLock();
-		}
+	public void updateMate(String from, int lon, int lat, int accuracy, String mTeam) {
+		Intent intent = new Intent(getString(R.string.broadcast_action_teammate_update));
+		intent.addCategory(getString(R.string.broadcast_category_location));
+		intent.putExtra(XMPPService.GROUP, mTeam);
+		intent.putExtra(TeamMeetPacketExtension.MATE, from);
+		intent.putExtra(TeamMeetPacketExtension.LON, lon);
+		intent.putExtra(TeamMeetPacketExtension.LAT, lat);
+		intent.putExtra(TeamMeetPacketExtension.ACCURACY, accuracy);
+		sendBroadcast(intent);
 	}
 
 	@Override
