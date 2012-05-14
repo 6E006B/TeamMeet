@@ -20,6 +20,7 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.Form;
+import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Notification;
@@ -75,6 +76,9 @@ public class XMPPService extends Service implements IXMPPService {
 	private static final int NOTIFICATION_GROUP_INVITATION_ID = 1;
 	private static final int NOTIFICATION_GROUP_CHAT_MESSAGE_ID = 2;
 	private static final int NOTIFICATION_CHAT_MESSAGE_ID = 3;
+
+	private static final String MUC_PASSWORDPROTECTED_FIELD = "muc#roomconfig_passwordprotectedroom";
+	private static final String MUC_PASSWORD_FIELD = "muc#roomconfig_roomsecret"; 
 
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
@@ -282,9 +286,31 @@ public class XMPPService extends Service implements IXMPPService {
 		final String group = String.format("%s@%s", groupName, conferenceServer);
 		MultiUserChat muc = new MultiUserChat(mXMPP, group);
 		muc.create(mUserID);
-		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
+
+		Form configForm = createMUCConfig(muc.getConfigurationForm());
+
+		String roomPassword = "secret";
+		configForm.setAnswer(MUC_PASSWORDPROTECTED_FIELD, true);
+		configForm.setAnswer(MUC_PASSWORD_FIELD, roomPassword);
+
+		muc.sendConfigurationForm(configForm);
+
 		Team team = new Team(muc);
 		addTeam(group, team);
+	}
+
+	private Form createMUCConfig(Form template) {
+		Form config = template.createAnswerForm();
+
+		Iterator<FormField> templateFields = template.getFields();
+		while (templateFields.hasNext()) {
+			FormField field = (FormField) templateFields.next();
+			if (!field.getType().equals(FormField.TYPE_HIDDEN) && field.getVariable() != null) {
+				config.setDefaultAnswer(field.getVariable());
+			}
+		}
+
+		return config;
 	}
 
 	@Override
