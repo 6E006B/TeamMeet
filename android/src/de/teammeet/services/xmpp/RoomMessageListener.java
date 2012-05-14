@@ -49,7 +49,7 @@ public class RoomMessageListener implements PacketListener {
 			             "' - lon: " + indicatorPacket.getLongitude() +
 			             " lat: " + indicatorPacket.getLatitude() +
 			             " info: " + indicatorPacket.getInfo());
-			mXMPPService.broadcastIndicator(indicatorPacket);
+			mXMPPService.broadcastIndicator(indicatorPacket, mGroup);
 		} else {
 			Log.d(CLASS, "packet did not contain indicator extension.");
 		}

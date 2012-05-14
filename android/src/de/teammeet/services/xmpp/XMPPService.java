@@ -469,7 +469,7 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
-	public void broadcastIndicator(IndicatorPacket indicatorPacket) {
+	public void broadcastIndicator(IndicatorPacket indicatorPacket, String team) {
 		final int lon = indicatorPacket.getLongitude();
 		final int lat = indicatorPacket.getLatitude();
 		final String info = indicatorPacket.getInfo();
@@ -478,6 +478,7 @@ public class XMPPService extends Service implements IXMPPService {
 		Intent intent = new Intent(getString(R.string.broadcast_action_indicator));
 		intent.addCategory(getString(R.string.broadcast_category_location));
 		intent.setData(Uri.parse(String.format("location:%d/%d", lon, lat)));
+		intent.putExtra(XMPPService.GROUP, team);
 		intent.putExtra(TeamMeetPacketExtension.LON, lon);
 		intent.putExtra(TeamMeetPacketExtension.LAT, lat);
 		intent.putExtra(TeamMeetPacketExtension.INFO, info);
