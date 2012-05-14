@@ -165,8 +165,8 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		super.onDestroy();
 	}
 
-	private void createOverlays() {
-		mMatesOverlay = new MatesOverlay(this, getResources().getDrawable(R.drawable.matepos),
+	private void createOverlays(String team) {
+		mMatesOverlay = new MatesOverlay(team, this, getResources().getDrawable(R.drawable.matepos),
 		                                 mMapView);
 		mMapGestureOverlay = new MapGestureDetectorOverlay(mMapView, getResources());
 		mIndicatorsOverlay = new IndicatorsOverlay(getApplicationContext(),
@@ -188,9 +188,9 @@ public class TeamMeetActivity extends SherlockMapActivity {
 	}
 
 	private void unregisterMatesUpdates() {
-		if (mMatesOverlay != null && mXMPPService != null) {
-			mXMPPService.unregisterMatesUpdates(mMatesOverlay);
-		}
+//		if (mMatesOverlay != null && mXMPPService != null) {
+//			mXMPPService.unregisterMatesUpdates(mMatesOverlay);
+//		}
 	}
 
 	@Override
