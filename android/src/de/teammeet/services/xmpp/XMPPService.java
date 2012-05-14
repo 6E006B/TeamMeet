@@ -20,7 +20,6 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.Form;
-import org.jivesoftware.smackx.muc.InvitationRejectionListener;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Notification;
@@ -302,16 +301,8 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, String.format("adding team '%s'", teamName));
 		acquireTeamsLock();
 		team.getRoom().addMessageListener(new RoomMessageListener(this, teamName));
-		team.getRoom().addInvitationRejectionListener(new InvitationRejectionListener() {
-
-			@Override
-			public void invitationDeclined(String invitee, String reason) {
-				String info = String.format("%s declined to join team %s: %s", invitee, teamName, reason);
-				Log.d(CLASS, info);
-				//TODO Notify user of rejected invitation (in UI thread)
-			}
-		});
 		team.getRoom().addParticipantStatusListener(new TeamJoinListener(teamName));
+		team.getRoom().addInvitationRejectionListener(new TeamJoinDeclinedListener(teamName));
 		mTeams.put(teamName, team);
 		releaseTeamsLock();
 	}
