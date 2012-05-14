@@ -58,14 +58,14 @@ public class TeamMeetActivity extends SherlockMapActivity {
 	private IndicatorsOverlay			mIndicatorsOverlay			= null;
 	private MapGestureDetectorOverlay mMapGestureOverlay = null;
 
-
+	private String mTeam = null;
 	private boolean						mFollowingLocation			= false;
 	private boolean						mSatelliteView				= false;
 	private boolean						mFullscreen					= false;
 
 	private XMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
-
+	private Intent mCurrentIntent = null;
 
 	private class XMPPServiceConnection implements ServiceConnection {
 
@@ -74,6 +74,7 @@ public class TeamMeetActivity extends SherlockMapActivity {
 			Log.d(CLASS, "TeamMeetActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 
+			handleIntent(mCurrentIntent);
 			mMapGestureOverlay.setXMPPService(mXMPPService);
 			// register to get status updates
 			mXMPPService.registerMatesUpdates(mMatesOverlay);
@@ -97,12 +98,14 @@ public class TeamMeetActivity extends SherlockMapActivity {
 
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
-		
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		final String fullscreenKey = getString(R.string.preference_fullscreen_key);
 		mFullscreen = settings.getBoolean(fullscreenKey, false);
 		final String followLocationKey = getString(R.string.preference_auto_center_key);
 		mFollowingLocation = settings.getBoolean(followLocationKey, false);
+
+		mCurrentIntent = getIntent();
 	}
 
 	@Override
@@ -132,10 +135,6 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		mMapView.setSatellite(mSatelliteView);
 		mListOfOverlays = mMapView.getOverlays();
 
-		createOverlays();
-
-		addOverlays();
-
 		// now connect to the service
 		final boolean bindSuccess = bindService(xmppIntent, mXMPPServiceConnection, 0);
 		if (bindSuccess) {
@@ -145,6 +144,12 @@ public class TeamMeetActivity extends SherlockMapActivity {
 			Toast.makeText(getApplicationContext(), "Error: Couldn't connect to XMPP service.",
 			               Toast.LENGTH_LONG).show();
 		}
+	}
+
+	@Override
+	public void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		mCurrentIntent = intent;
 	}
 
 	@Override
@@ -234,6 +239,24 @@ public class TeamMeetActivity extends SherlockMapActivity {
 				return super.onOptionsItemSelected(item);
 		}
 		
+	}
+
+	private void handleIntent(Intent intent) {
+		mTeam = intent.getStringExtra(XMPPService.GROUP);
+		if (mTeam != null) {
+			createOverlays();
+			addOverlays();
+		} else {
+			final String error = "Intent had no team!";
+			Log.e(CLASS, error);
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG).show();
+					finish();
+				}
+			});
+		}
 	}
 
 	private void toggleFollowingLocation() {
