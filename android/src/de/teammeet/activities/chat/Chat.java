@@ -100,7 +100,7 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 				break;
 
 			case TYPE_GROUP_CHAT:
-				xmppService.sendToGroup(mCounterpart, message);
+				xmppService.sendToTeam(mCounterpart, message);
 				break;
 			}
 		} else {
