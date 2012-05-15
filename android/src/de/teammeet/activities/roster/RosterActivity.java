@@ -28,7 +28,6 @@ import com.actionbarsherlock.view.MenuItem;
 import de.teammeet.R;
 import de.teammeet.activities.chat.TabsAdapter;
 import de.teammeet.activities.preferences.SettingsActivity;
-import de.teammeet.activities.teams.TeamMeetActivity;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
@@ -270,11 +269,6 @@ public class RosterActivity extends SherlockFragmentActivity {
 				clickedConnect(item);
 				return true;
 
-			case R.id.roster_menu_show_map:
-				Log.d(CLASS, "User clicked 'map' in menu");
-				clickedMap();
-				return true;
-
 			case R.id.roster_menu_form_team:
 				Log.d(CLASS, "User clicked 'form team' in menu");
 				clickedFormTeam();
@@ -310,11 +304,6 @@ public class RosterActivity extends SherlockFragmentActivity {
 		final Intent intent = new Intent(this, XMPPService.class);
 		stopService(intent);
 		finish();
-	}
-
-	private void clickedMap() {
-		final Intent intent = new Intent(this, TeamMeetActivity.class);
-		startActivity(intent);
 	}
 
 	private void clickedConnect(MenuItem connectMenu) {
