@@ -15,22 +15,31 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.LinearLayout;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.SherlockFragment;
+
 import de.teammeet.R;
+import de.teammeet.activities.teams.TeamMeetActivity;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.interfaces.IXMPPService;
+import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.FetchTeamsTask;
 
-public class TeamsFragment extends Fragment {
+public class TeamsFragment extends SherlockFragment {
 
 	private static final String CLASS = TeamsFragment.class.getSimpleName();
 	
@@ -70,6 +79,7 @@ public class TeamsFragment extends Fragment {
 		mTeamsList.setAdapter(mAdapter);
 		mTeamsList.setEmptyView(rootView.findViewById(R.id.teams_empty));
 		Log.d(CLASS, String.format("teams list is '%s'", mTeamsList));
+		registerForContextMenu(mTeamsList);
 		return rootView;
 	}
 
@@ -101,6 +111,27 @@ public class TeamsFragment extends Fragment {
 		activity.unregisterReceiver(mTeamsUpdateReceiver);
 
 		super.onPause();
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		Log.d(CLASS, "TeamsFragment.onCreateContextMenu()");
+		MenuInflater inflater = getActivity().getMenuInflater();
+		inflater.inflate(R.menu.team_context, menu);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		Log.d(CLASS, "TeamsFragment.onContextItemSelected()");
+		switch(item.getItemId()) {
+		case R.id.teams_list_context_open_map:
+			clickedOpenMap(item);
+			return true;
+		default:
+			Log.d(CLASS, String.format("unhandeled item clicked: 0x%x", item.getItemId()));
+			return super.onContextItemSelected(item);
+		}
 	}
 
 	private void fillExpandableList(Set<String> teams) {
@@ -157,6 +188,19 @@ public class TeamsFragment extends Fragment {
 		});
 	}
 
+	private void clickedOpenMap(MenuItem item) {
+		ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo)item.getMenuInfo();
+		String team = getExpandableListChild(menuInfo.packedPosition);
+		Intent intent = new Intent(getActivity().getApplicationContext(), TeamMeetActivity.class);
+		intent.putExtra(XMPPService.GROUP, team);
+		startActivity(intent);
+	}
+
+	private String getExpandableListChild(long packedPosition) {
+		final int group_position = ExpandableListView.getPackedPositionGroup(packedPosition);
+		final Map<String, String> group = (Map<String, String>) mAdapter.getGroup(group_position);
+		return group.get(NAME);
+	}
 
 	protected class FetchTeamsHandler extends BaseAsyncTaskCallback<Set<String>> {
 		private Set<String> mTeams;
