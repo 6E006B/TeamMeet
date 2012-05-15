@@ -1,16 +1,22 @@
 package de.teammeet.services.xmpp;
 
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.muc.ParticipantStatusListener;
 
 import android.util.Log;
+import de.teammeet.interfaces.IXMPPService;
 
 public class TeamJoinListener implements ParticipantStatusListener {
 
 	private static final String CLASS = TeamJoinListener.class.getSimpleName();
 	
-	private String mTeamName;  
+	private IXMPPService mXMPPService; 
+	private String mTeamName;
 
-	public TeamJoinListener(String teamName) {
+
+	public TeamJoinListener(IXMPPService service, String teamName) {
+		mXMPPService = service;
 		mTeamName = teamName;
 	}
 	
@@ -33,8 +39,21 @@ public class TeamJoinListener implements ParticipantStatusListener {
 	}
 
 	@Override
-	public void joined(String mate) {
-		Log.d(CLASS, String.format("%s just joined team '%s'", mate, mTeamName));
+	public void joined(String fullAddress) {
+		Log.d(CLASS, String.format("%s just joined team '%s'", fullAddress, mTeamName));
+		try {
+			Team team = mXMPPService.getTeam(mTeamName);
+			String fullJID = mXMPPService.getFullJID(mTeamName, fullAddress);
+			Log.d(CLASS, String.format("full JID is '%s'", fullJID));
+			String mate = StringUtils.parseBareAddress(fullJID);
+			if (team.isInvitee(mate)) {
+				Log.d(CLASS, String.format("Initiating session key exchange for team '%s' with '%s'", mTeamName, mate));
+				team.removeInvitee(mate);
+			}
+		} catch (XMPPException e) {
+			//TODO: Notify user via UI
+			Log.e(CLASS, String.format("Failed to get team '%s': %s", mTeamName, e.getMessage()));
+		}
 	}
 
 	@Override
