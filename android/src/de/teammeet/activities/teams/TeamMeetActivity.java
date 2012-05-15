@@ -74,10 +74,11 @@ public class TeamMeetActivity extends SherlockMapActivity {
 			Log.d(CLASS, "TeamMeetActivity.XMPPServiceConnection.onServiceConnected('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 
-			handleIntent(mCurrentIntent);
-			mMapGestureOverlay.setXMPPService(mXMPPService);
-			// register to get status updates
-			mXMPPService.startLocationTransmission(mMyLocationOverlay);
+			if (handleIntent(mCurrentIntent)) {
+				mMapGestureOverlay.setXMPPService(mXMPPService);
+				// register to get status updates
+				mXMPPService.startLocationTransmission(mMyLocationOverlay);
+			}
 		}
 
 		@Override
@@ -153,8 +154,9 @@ public class TeamMeetActivity extends SherlockMapActivity {
 
 	@Override
 	protected void onPause() {
-//		mMyLocationOverlay.disableMyLocation();
-		mMyLocationOverlay.disableCompass();
+		if (mMyLocationOverlay != null) {
+			mMyLocationOverlay.disableCompass();
+		}
 		unregisterMatesUpdates();
 		if (mXMPPServiceConnection != null) {
 			unbindService(mXMPPServiceConnection);
@@ -240,12 +242,14 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		
 	}
 
-	private void handleIntent(Intent intent) {
+	private boolean handleIntent(Intent intent) {
+		boolean success = true;
 		mTeam = intent.getStringExtra(XMPPService.GROUP);
 		if (mTeam != null) {
 			createOverlays(mTeam);
 			addOverlays();
 		} else {
+			success = false;
 			final String error = "Intent had no team!";
 			Log.e(CLASS, error);
 			runOnUiThread(new Runnable() {
@@ -256,6 +260,7 @@ public class TeamMeetActivity extends SherlockMapActivity {
 				}
 			});
 		}
+		return success;
 	}
 
 	private void toggleFollowingLocation() {
