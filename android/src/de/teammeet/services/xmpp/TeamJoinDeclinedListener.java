@@ -25,7 +25,7 @@ public class TeamJoinDeclinedListener implements InvitationRejectionListener {
 		Log.d(CLASS , info);
 		//TODO Notify user of rejected invitation (in UI thread)
 		try {
-			Team team = mXMPPService.getTeam(invitee);
+			Team team = mXMPPService.getTeam(mTeamName);
 			if (team.isInvitee(invitee)) {
 				Log.d(CLASS, String.format("Removing invitee '%s' from list for team '%s'", invitee, mTeamName));
 				team.removeInvitee(invitee);
