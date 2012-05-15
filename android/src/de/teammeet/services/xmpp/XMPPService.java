@@ -24,6 +24,7 @@ import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.muc.Occupant;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -82,6 +83,8 @@ public class XMPPService extends Service implements IXMPPService {
 	private static final String MUC_PASSWORDPROTECTED_FIELD = "muc#roomconfig_passwordprotectedroom";
 	private static final String MUC_PASSWORD_FIELD = "muc#roomconfig_roomsecret";
 	private static final String MUC_MEMBERSONLY_FIELD = "muc#roomconfig_membersonly";
+	private static final String MUC_JIDRESOLVERS_FIELD = "muc#roomconfig_whois";
+	private static final String MUC_ALLAFFILIATIONS_VALUE = "anyone";
 
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
@@ -302,6 +305,10 @@ public class XMPPService extends Service implements IXMPPService {
 
 		configForm.setAnswer(MUC_MEMBERSONLY_FIELD, true);
 
+		List<String> JIDResolverRoles = new ArrayList<String>();
+		JIDResolverRoles.add(MUC_ALLAFFILIATIONS_VALUE);
+		configForm.setAnswer(MUC_JIDRESOLVERS_FIELD, JIDResolverRoles);
+
 		muc.sendConfigurationForm(configForm);
 
 		Team team = new Team(muc);
@@ -342,8 +349,8 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, String.format("adding team '%s'", teamName));
 		acquireTeamsLock();
 		team.getRoom().addMessageListener(new RoomMessageListener(this, teamName));
-		team.getRoom().addParticipantStatusListener(new TeamJoinListener(teamName));
-		team.getRoom().addInvitationRejectionListener(new TeamJoinDeclinedListener(teamName));
+		team.getRoom().addParticipantStatusListener(new TeamJoinListener(this, teamName));
+		team.getRoom().addInvitationRejectionListener(new TeamJoinDeclinedListener(this, teamName));
 		mTeams.put(teamName, team);
 		releaseTeamsLock();
 	}
@@ -392,6 +399,15 @@ public class XMPPService extends Service implements IXMPPService {
 	public Set<String> getTeams() {
 		return mTeams.keySet();
 	}
+
+	@Override
+	public Team getTeam(String teamName) throws XMPPException {
+		Team team = mTeams.get(teamName);
+		if (team == null) {
+			throw new XMPPException(String.format("No team '%s'", teamName));
+		}
+		return team;
+	}
 	
 	@Override
 	public Iterator<String> getMates(String teamName) throws XMPPException {
@@ -404,7 +420,30 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 		return occupants;
 	}
-	
+
+	@Override
+	public String getFullJID(String teamName, String fullNick) throws XMPPException {
+		String fullJID = null;
+
+		Team team = mTeams.get(teamName);
+		if (team != null) {
+			Occupant occupant = team.getRoom().getOccupant(fullNick);
+			if (occupant != null) {
+				fullJID = occupant.getJid();
+				if (fullJID == null) {
+					throw new XMPPException(String.format("Full JID for '%s' not available in '%s'",
+														   fullNick, teamName));
+				}
+			} else {
+				throw new XMPPException(String.format("No user '%s' in '%s'", fullNick, teamName));
+			}
+		} else {
+			throw new XMPPException(String.format("No team '%s'", teamName));
+		}
+
+		return fullJID;
+	}
+
 	@Override
 	public String getNickname(String teamName) throws XMPPException {
 		String nick;
@@ -422,11 +461,10 @@ public class XMPPService extends Service implements IXMPPService {
 		Team team = mTeams.get(teamName);
 		if (team != null) {
 			team.getRoom().invite(contact, "reason");
+			team.addInvitee(contact);
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));
 		}
-		
-		// TODO: there is an InvitationRejectionListener - maybe use it
 	}
 
 	@Override
