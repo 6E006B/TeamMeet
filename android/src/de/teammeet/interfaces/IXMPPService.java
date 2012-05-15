@@ -29,6 +29,8 @@ import org.jivesoftware.smack.XMPPException;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
+import de.teammeet.services.xmpp.Team;
+
 public interface IXMPPService {
 
 	void registerInvitationHandler(IInvitationHandler object);
@@ -83,4 +85,9 @@ public interface IXMPPService {
 
 	String getNickname(String room) throws XMPPException;
 
+	void declineInvitation(String teamName, String inviter, String reason) throws XMPPException;
+
+	Team getTeam(String teamName) throws XMPPException;
+
+	String getFullJID(String teamName, String fullNick) throws XMPPException;
 }

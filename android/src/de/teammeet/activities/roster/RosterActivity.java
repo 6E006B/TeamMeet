@@ -162,25 +162,25 @@ public class RosterActivity extends SherlockFragmentActivity {
 	}
 
 	private void handleJoinIntent(Intent intent) {
-		final String room = intent.getStringExtra(XMPPService.ROOM);
+		final String team = intent.getStringExtra(XMPPService.ROOM);
 		final String inviter = intent.getStringExtra(XMPPService.INVITER);
 		final String reason = intent.getStringExtra(XMPPService.REASON);
 		final String password = intent.getStringExtra(XMPPService.PASSWORD);
 		final String from = intent.getStringExtra(XMPPService.FROM);
 
-		Log.d(CLASS, String.format("room: '%s' inviter: '%s' reason: '%s' password: '%s' from: '%s'",
-									room, inviter, reason, password, from));
+		Log.d(CLASS, String.format("team: '%s' inviter: '%s' reason: '%s' password: '%s' from: '%s'",
+									team, inviter, reason, password, from));
 
 		// cleanup the extras so that this is only executed once, not every time the activity is
 		// brought to foreground again
 		cleanupJoinIntent(intent);
 
-		if (room != null && inviter != null && reason != null && from != null) {
+		if (team != null && inviter != null && reason != null && from != null) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Group Invitation");
 			builder.setMessage(String.format("%s wants you to join '%s':\n%s",
 											 StringUtils.parseName(inviter),
-											 StringUtils.parseName(room),
+											 StringUtils.parseName(team),
 											 reason)
 											);
 			builder.setCancelable(false);
@@ -192,13 +192,13 @@ public class RosterActivity extends SherlockFragmentActivity {
 							final String userIDKey = getString(R.string.preference_user_id_key);
 							final String userID = settings.getString(userIDKey, "anonymous");
 							try {
-								mXMPPService.joinRoom(room, userID, password);
+								mXMPPService.joinRoom(team, userID, password);
 
 								Intent newTeam = new Intent(getString(R.string.broadcast_teams_updated));
 								sendBroadcast(newTeam);
 							} catch (XMPPException e) {
 								String problem = String.format("Unable to join room '%s': %s",
-																room, e.getMessage());
+																team, e.getMessage());
 								Log.e(CLASS, problem, e);
 								Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 							}
@@ -206,6 +206,14 @@ public class RosterActivity extends SherlockFragmentActivity {
 				   });
 			builder.setNegativeButton("Decline", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
+						String reason = "Won't join team";
+						try {
+							mXMPPService.declineInvitation(team, inviter,reason);
+						} catch (XMPPException e) {
+							String problem = String.format("Error when declining invitation to team '%s': %s", team, e.getMessage());
+							Log.e(CLASS, problem);
+							Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG);
+						}
 						dialog.dismiss();
 					}
 				});

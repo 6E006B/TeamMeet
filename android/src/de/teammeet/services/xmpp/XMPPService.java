@@ -1,5 +1,6 @@
 package de.teammeet.services.xmpp;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,8 +20,11 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smackx.Form;
+import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.muc.Occupant;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -74,6 +78,12 @@ public class XMPPService extends Service implements IXMPPService {
 	private static final int NOTIFICATION_GROUP_CHAT_MESSAGE_ID = 2;
 	private static final int NOTIFICATION_CHAT_MESSAGE_ID = 3;
 
+	private static final String MUC_PASSWORDPROTECTED_FIELD = "muc#roomconfig_passwordprotectedroom";
+	private static final String MUC_PASSWORD_FIELD = "muc#roomconfig_roomsecret";
+	private static final String MUC_MEMBERSONLY_FIELD = "muc#roomconfig_membersonly";
+	private static final String MUC_JIDRESOLVERS_FIELD = "muc#roomconfig_whois";
+	private static final String MUC_ALLAFFILIATIONS_VALUE = "anyone";
+
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
 	private String mServer = null;
@@ -99,11 +109,13 @@ public class XMPPService extends Service implements IXMPPService {
 	private TimerTask mTimerTask = null;
 	private ChatOpenHelper mChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
+	private SecureRandom mKeyGenerator = null;
 
 	private NotificationCompat.Builder mServiceNotificationBuilder;
 	private NotificationCompat.Builder mInvitationNotificationBuilder;
 	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
 	private NotificationCompat.Builder mChatMessageNotificationBuilder;
+
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -117,6 +129,7 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
 		mChatDatabase = new ChatOpenHelper(this);
+		mKeyGenerator = new SecureRandom();
 	}
 
 	@Override
@@ -277,9 +290,44 @@ public class XMPPService extends Service implements IXMPPService {
 		final String group = String.format("%s@%s", groupName, conferenceServer);
 		MultiUserChat muc = new MultiUserChat(mXMPP, group);
 		muc.create(mUserID);
-		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
+
+		Form configForm = createMUCConfig(muc.getConfigurationForm());
+
+		String roomPassword = generateMUCPassword();
+		configForm.setAnswer(MUC_PASSWORDPROTECTED_FIELD, true);
+		configForm.setAnswer(MUC_PASSWORD_FIELD, roomPassword);
+		Log.d(CLASS, String.format("Password for room '%s' is '%s'", groupName, roomPassword));
+
+		configForm.setAnswer(MUC_MEMBERSONLY_FIELD, true);
+
+		List<String> JIDResolverRoles = new ArrayList<String>();
+		JIDResolverRoles.add(MUC_ALLAFFILIATIONS_VALUE);
+		configForm.setAnswer(MUC_JIDRESOLVERS_FIELD, JIDResolverRoles);
+
+		muc.sendConfigurationForm(configForm);
+
 		Team team = new Team(muc);
 		addTeam(group, team);
+	}
+
+	private Form createMUCConfig(Form template) {
+		Form config = template.createAnswerForm();
+
+		Iterator<FormField> templateFields = template.getFields();
+		while (templateFields.hasNext()) {
+			FormField field = (FormField) templateFields.next();
+			if (!field.getType().equals(FormField.TYPE_HIDDEN) && field.getVariable() != null) {
+				config.setDefaultAnswer(field.getVariable());
+			}
+		}
+
+		return config;
+	}
+
+	private String generateMUCPassword() {
+		byte[] roomKey = new byte[18]; // 18 bytes = 144 bits = 24 base64-chars
+		mKeyGenerator.nextBytes(roomKey);
+		return Base64.encodeBytes(roomKey);
 	}
 
 	@Override
@@ -292,10 +340,13 @@ public class XMPPService extends Service implements IXMPPService {
 		addTeam(room, team);
 	}
 
-	private void addTeam(String room, Team team) {
+	private void addTeam(final String teamName, Team team) {
+		Log.d(CLASS, String.format("adding team '%s'", teamName));
 		acquireTeamsLock();
-		team.getRoom().addMessageListener(new RoomMessageListener(this, room));
-		mTeams.put(room, team);
+		team.getRoom().addMessageListener(new RoomMessageListener(this, teamName));
+		team.getRoom().addParticipantStatusListener(new TeamJoinListener(this, teamName));
+		team.getRoom().addInvitationRejectionListener(new TeamJoinDeclinedListener(this, teamName));
+		mTeams.put(teamName, team);
 		releaseTeamsLock();
 	}
 
@@ -343,6 +394,15 @@ public class XMPPService extends Service implements IXMPPService {
 	public Set<String> getTeams() {
 		return mTeams.keySet();
 	}
+
+	@Override
+	public Team getTeam(String teamName) throws XMPPException {
+		Team team = mTeams.get(teamName);
+		if (team == null) {
+			throw new XMPPException(String.format("No team '%s'", teamName));
+		}
+		return team;
+	}
 	
 	@Override
 	public Iterator<String> getMates(String teamName) throws XMPPException {
@@ -355,7 +415,30 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 		return occupants;
 	}
-	
+
+	@Override
+	public String getFullJID(String teamName, String fullNick) throws XMPPException {
+		String fullJID = null;
+
+		Team team = mTeams.get(teamName);
+		if (team != null) {
+			Occupant occupant = team.getRoom().getOccupant(fullNick);
+			if (occupant != null) {
+				fullJID = occupant.getJid();
+				if (fullJID == null) {
+					throw new XMPPException(String.format("Full JID for '%s' not available in '%s'",
+														   fullNick, teamName));
+				}
+			} else {
+				throw new XMPPException(String.format("No user '%s' in '%s'", fullNick, teamName));
+			}
+		} else {
+			throw new XMPPException(String.format("No team '%s'", teamName));
+		}
+
+		return fullJID;
+	}
+
 	@Override
 	public String getNickname(String teamName) throws XMPPException {
 		String nick;
@@ -373,11 +456,19 @@ public class XMPPService extends Service implements IXMPPService {
 		Team team = mTeams.get(teamName);
 		if (team != null) {
 			team.getRoom().invite(contact, "reason");
+			team.addInvitee(contact);
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));
 		}
-		
-		// TODO: there is an InvitationRejectionListener - maybe use it
+	}
+
+	@Override
+	public void declineInvitation(String teamName, String inviter, String reason) throws XMPPException {
+		if (mXMPP != null) {
+		MultiUserChat.decline(mXMPP, teamName, inviter, reason);
+		} else {
+			throw new XMPPException("Not connected");
+		}
 	}
 
 	@Override
