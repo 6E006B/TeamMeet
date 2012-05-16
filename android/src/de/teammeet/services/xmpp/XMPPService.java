@@ -1,5 +1,10 @@
 package de.teammeet.services.xmpp;
 
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +15,8 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.crypto.spec.DHParameterSpec;
 
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -84,6 +91,10 @@ public class XMPPService extends Service implements IXMPPService {
 	private static final String MUC_JIDRESOLVERS_FIELD = "muc#roomconfig_whois";
 	private static final String MUC_ALLAFFILIATIONS_VALUE = "anyone";
 
+	private static final BigInteger mDHPrime = new BigInteger("145135528544641048828781082741133792265510283642227563843882120490266943454709965696885526964860090920378220705587684343691655547422645061028417617789225411492181871509076266136947361308537150838075923208869454733438857938120530479235883529669535849982509957532677257289115470567900093536536896831965040387969");
+	private static final BigInteger mDHGenerator = new BigInteger("88291786162459212881905949060861099478890630921833730602301026928256212377008840401387215755929281334909231489875975120117299561515866296992376827924649080932422589386576501108138166912979093438394542997153702864014749319348771381994641762187325694782184297315316416077796892478055266319844543738559065819115");
+	private static final int mDHExponentSize = 1023;
+
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
 	private String mServer = null;
@@ -109,7 +120,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private TimerTask mTimerTask = null;
 	private ChatOpenHelper mChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
-	private SecureRandom mKeyGenerator = null;
+	private SecureRandom mRandomNumberGenerator = null;
 
 	private NotificationCompat.Builder mServiceNotificationBuilder;
 	private NotificationCompat.Builder mInvitationNotificationBuilder;
@@ -129,7 +140,7 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
 		mChatDatabase = new ChatOpenHelper(this);
-		mKeyGenerator = new SecureRandom();
+		mRandomNumberGenerator = new SecureRandom();
 	}
 
 	@Override
@@ -325,7 +336,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	private String generateMUCPassword() {
 		byte[] roomKey = new byte[18]; // 18 bytes = 144 bits = 24 base64-chars
-		mKeyGenerator.nextBytes(roomKey);
+		mRandomNumberGenerator.nextBytes(roomKey);
 		return Base64.encodeBytes(roomKey);
 	}
 
@@ -474,6 +485,29 @@ public class XMPPService extends Service implements IXMPPService {
 		} else {
 			throw new XMPPException("Not connected");
 		}
+	}
+
+	@Override
+	public void initiateSessionKeyExchange(String mate, String teamName) {
+		try {
+			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
+			keyPairGenerator.initialize(new DHParameterSpec(mDHPrime, mDHGenerator, mDHExponentSize));
+
+			KeyPair keyPair = keyPairGenerator.generateKeyPair();
+			byte publicKey[] = keyPair.getPublic().getEncoded();
+
+			sendDHPublicKey(mate, teamName, publicKey);
+		} catch (NoSuchAlgorithmException e) {
+			//TODO: Inform user via UI
+			Log.e(CLASS, String.format("Could not acquire key pair generator to exchange session key with '%s' in '%s': %s", mate, teamName, e.getMessage()));
+		} catch (InvalidAlgorithmParameterException e) {
+			//TODO: Inform user via UI
+			Log.e(CLASS, String.format("Could not initialize key pair generator to exchange session key with '%s' in '%s': %s", mate, teamName, e.getMessage()));
+		}
+	}
+
+	private void sendDHPublicKey(String mate, String teamName, byte publicKey[]) {
+		Log.d(CLASS, String.format("Sending public key to '%s' in '%s' [not implemented]", mate, teamName));
 	}
 
 	@Override

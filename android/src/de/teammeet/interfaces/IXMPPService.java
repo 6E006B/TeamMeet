@@ -91,4 +91,6 @@ public interface IXMPPService {
 	Team getTeam(String teamName) throws XMPPException;
 
 	String getFullJID(String teamName, String fullNick) throws XMPPException;
+
+	void initiateSessionKeyExchange(String mate, String teamName);
 }

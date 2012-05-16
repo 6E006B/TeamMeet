@@ -49,6 +49,7 @@ public class TeamJoinListener implements ParticipantStatusListener {
 			if (team.isInvitee(mate)) {
 				Log.d(CLASS, String.format("Initiating session key exchange for team '%s' with '%s'", mTeamName, mate));
 				team.removeInvitee(mate);
+				mXMPPService.initiateSessionKeyExchange(mate, mTeamName);
 			}
 		} catch (XMPPException e) {
 			//TODO: Notify user via UI
