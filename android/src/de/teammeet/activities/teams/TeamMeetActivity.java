@@ -172,7 +172,8 @@ public class TeamMeetActivity extends SherlockMapActivity {
 	}
 
 	private void createOverlays(String team) {
-		mMatesOverlay = new MatesOverlay(team, this, getResources().getDrawable(R.drawable.matepos),
+		mMatesOverlay = new MatesOverlay(team, this,
+		                                 getResources().getDrawable(R.drawable.colored_ball),
 		                                 mMapView);
 		mMapGestureOverlay = new MapGestureDetectorOverlay(mMapView, getApplicationContext());
 		mIndicatorsOverlay = new IndicatorsOverlay(team, getApplicationContext(),
