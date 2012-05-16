@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
+import org.jivesoftware.smack.util.Base64;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -135,9 +136,49 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 		return indicatorPacket;
 	}
 
-	private CryptoPacket parseCryptoPacketExtension(XmlPullParser parser) {
-		//TODO: Implement parsing of crypto packet
-		return null;
+	private CryptoPacket parseCryptoPacketExtension(XmlPullParser parser)
+			throws InvalidProtocolException, XmlPullParserException, IOException {
+		CryptoPacket cryptoPacket = null;
+		String keyType = null;
+		byte[] key = null;
+
+		// iterate over all XML tags
+		boolean done = false;
+		while (!done) {
+			int eventType = parser.next();
+			if (eventType == XmlPullParser.START_TAG) {
+				if (parser.getName().equals(TeamMeetPacketExtension.CRYPTO_KEY)) {
+					int numAttributes = parser.getAttributeCount();
+					if ( numAttributes == 1) {
+						keyType = parser.getAttributeValue(null, TeamMeetPacketExtension.KEYTYPE_ATTR);
+						if (keyType != TeamMeetPacketExtension.KEYTYPE_PUBLIC &&
+							keyType != TeamMeetPacketExtension.KEYTYPE_SECRET) {
+							throw new InvalidProtocolException(String.format("Invalid key type '%s'", keyType));
+						}
+					} else {
+						throw new InvalidProtocolException(String.format("Invalid number of attributes in 'key' tag: %d",
+																		  numAttributes));
+					}
+					key = Base64.decode(parser.nextText());
+				} else {
+					throw new InvalidProtocolException(String.format("Found invalid opening tag '%s'", parser.getName())); 
+				}
+			} else if (eventType == XmlPullParser.END_TAG) {
+				// TODO: What happens if we never meet a </keyExchange> tag and the parser runs out of tags?
+				if (parser.getName().equals(TeamMeetPacketExtension.CRYPTO)) {
+					done = true;
+				}
+			}
+
+		}
+
+		// check we've got everything we need
+		if (keyType != null && key != null) {
+			cryptoPacket = new CryptoPacket(keyType, key);
+		} else {
+			throw new InvalidProtocolException("Missing value in Indicator message");
+		}
+		return cryptoPacket;
 	}
 
 	public static class InvalidProtocolException extends XMPPException {
