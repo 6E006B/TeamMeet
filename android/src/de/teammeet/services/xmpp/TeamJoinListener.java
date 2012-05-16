@@ -2,6 +2,7 @@ package de.teammeet.services.xmpp;
 
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.muc.Occupant;
 import org.jivesoftware.smackx.muc.ParticipantStatusListener;
 
 import android.util.Log;
@@ -12,12 +13,12 @@ public class TeamJoinListener implements ParticipantStatusListener {
 	private static final String CLASS = TeamJoinListener.class.getSimpleName();
 	
 	private IXMPPService mXMPPService; 
-	private String mTeamName;
+	private Team mTeam;
 
 
-	public TeamJoinListener(IXMPPService service, String teamName) {
+	public TeamJoinListener(IXMPPService service, Team team) {
 		mXMPPService = service;
-		mTeamName = teamName;
+		mTeam = team;
 	}
 	
 	@Override
@@ -40,21 +41,40 @@ public class TeamJoinListener implements ParticipantStatusListener {
 
 	@Override
 	public void joined(String fullAddress) {
-		Log.d(CLASS, String.format("%s just joined team '%s'", fullAddress, mTeamName));
+		Log.d(CLASS, String.format("%s just joined team '%s'", fullAddress, mTeam));
+
 		try {
-			Team team = mXMPPService.getTeam(mTeamName);
-			String fullJID = mXMPPService.getFullJID(mTeamName, fullAddress);
+			String fullJID = getFullJID(mTeam, fullAddress);
 			Log.d(CLASS, String.format("full JID is '%s'", fullJID));
 			String mate = StringUtils.parseBareAddress(fullJID);
-			if (team.isInvitee(mate)) {
-				Log.d(CLASS, String.format("Initiating session key exchange for team '%s' with '%s'", mTeamName, mate));
-				team.removeInvitee(mate);
-				mXMPPService.initiateSessionKeyExchange(mate, mTeamName);
+
+			if (mTeam.isInvitee(mate)) {
+				Log.d(CLASS, String.format("Initiating session key exchange for team '%s' with '%s'", mTeam, mate));
+				mTeam.removeInvitee(mate);
+				mXMPPService.initiateSessionKeyExchange(mate, mTeam);
 			}
 		} catch (XMPPException e) {
 			//TODO: Notify user via UI
-			Log.e(CLASS, String.format("Failed to get team '%s': %s", mTeamName, e.getMessage()));
+			Log.e(CLASS, String.format("Failed to get team '%s': %s", mTeam, e.getMessage()));
+			return;
 		}
+	}
+
+	private String getFullJID(Team team, String fullNick) throws XMPPException {
+		String fullJID = null;
+
+		Occupant occupant = team.getRoom().getOccupant(fullNick);
+		if (occupant != null) {
+			fullJID = occupant.getJid();
+			if (fullJID == null) {
+				throw new XMPPException(String.format("Full JID for '%s' not available in '%s'",
+													   fullNick, team));
+			}
+		} else {
+			throw new XMPPException(String.format("No user '%s' in '%s'", fullNick, team));
+		}
+
+		return fullJID;
 	}
 
 	@Override

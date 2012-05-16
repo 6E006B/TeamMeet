@@ -90,7 +90,7 @@ public interface IXMPPService {
 
 	Team getTeam(String teamName) throws XMPPException;
 
-	String getFullJID(String teamName, String fullNick) throws XMPPException;
+	void initiateSessionKeyExchange(String mate, Team team);
 
-	void initiateSessionKeyExchange(String mate, String teamName);
+	void completeKeyExchange(String invitee, org.jivesoftware.smack.Chat chat, byte[] publicKey);
 }

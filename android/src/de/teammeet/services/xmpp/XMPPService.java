@@ -31,7 +31,6 @@ import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.muc.MultiUserChat;
-import org.jivesoftware.smackx.muc.Occupant;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -354,7 +353,7 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, String.format("adding team '%s'", teamName));
 		acquireTeamsLock();
 		team.getRoom().addMessageListener(new RoomMessageListener(this, teamName));
-		team.getRoom().addParticipantStatusListener(new TeamJoinListener(this, teamName));
+		team.getRoom().addParticipantStatusListener(new TeamJoinListener(this, team));
 		team.getRoom().addInvitationRejectionListener(new TeamJoinDeclinedListener(this, teamName));
 		mTeams.put(teamName, team);
 		releaseTeamsLock();
@@ -433,29 +432,6 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public String getFullJID(String teamName, String fullNick) throws XMPPException {
-		String fullJID = null;
-
-		Team team = mTeams.get(teamName);
-		if (team != null) {
-			Occupant occupant = team.getRoom().getOccupant(fullNick);
-			if (occupant != null) {
-				fullJID = occupant.getJid();
-				if (fullJID == null) {
-					throw new XMPPException(String.format("Full JID for '%s' not available in '%s'",
-														   fullNick, teamName));
-				}
-			} else {
-				throw new XMPPException(String.format("No user '%s' in '%s'", fullNick, teamName));
-			}
-		} else {
-			throw new XMPPException(String.format("No team '%s'", teamName));
-		}
-
-		return fullJID;
-	}
-
-	@Override
 	public String getNickname(String teamName) throws XMPPException {
 		String nick;
 		Team team = mTeams.get(teamName);
@@ -488,31 +464,39 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void initiateSessionKeyExchange(String mate, String teamName) {
+	public void initiateSessionKeyExchange(String mate, Team team) {
 		try {
 			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
 			keyPairGenerator.initialize(new DHParameterSpec(mDHPrime, mDHGenerator, mDHExponentSize));
 
+			//TODO store with mate in team
 			KeyPair keyPair = keyPairGenerator.generateKeyPair();
 			byte[] publicKey = keyPair.getPublic().getEncoded();
 
-			sendKey(mate, teamName, TeamMeetPacketExtension.KEYTYPE_PUBLIC, publicKey);
+			sendKey(mate, team, TeamMeetPacketExtension.KEYTYPE_PUBLIC, publicKey);
 		} catch (NoSuchAlgorithmException e) {
 			//TODO: Inform user via UI
-			Log.e(CLASS, String.format("Could not acquire key pair generator to exchange session key with '%s' in '%s': %s", mate, teamName, e.getMessage()));
+			Log.e(CLASS, String.format("Could not acquire key pair generator to exchange session key with '%s' in '%s': %s", mate, team, e.getMessage()));
 		} catch (InvalidAlgorithmParameterException e) {
 			//TODO: Inform user via UI
-			Log.e(CLASS, String.format("Could not initialize key pair generator to exchange session key with '%s' in '%s': %s", mate, teamName, e.getMessage()));
+			Log.e(CLASS, String.format("Could not initialize key pair generator to exchange session key with '%s' in '%s': %s", mate, team, e.getMessage()));
 		} catch (XMPPException e) {
 			//TODO: Inform user via UI
-			Log.e(CLASS, String.format("Could not send public key to '%s' in '%s': %s", mate, teamName, e.getMessage()));
+			Log.e(CLASS, String.format("Could not send public key to '%s' in '%s': %s", mate, team, e.getMessage()));
 		}
 	}
 
-	private void sendKey(String mate, String teamName, String type, byte[] publicKey) throws XMPPException {
+	@Override
+	public void completeKeyExchange(String invitee, org.jivesoftware.smack.Chat chat, byte[] publicKey) {
+		Log.d(CLASS, String.format("Completing key exchange with '%s'", invitee));
+		//TODO: Generate shared DH secret from public key
+		//TODO: send teams session key encrypted with shared secret via chat
+	}
+
+	private void sendKey(String mate, Team team, String type, byte[] publicKey) throws XMPPException {
 		if (mXMPP != null) {
 			if (mXMPP.isAuthenticated()) {
-				Log.d(CLASS, String.format("Sending key to '%s' in '%s'", mate, teamName));
+				Log.d(CLASS, String.format("Sending key to '%s' in '%s'", mate, team));
 
 				Message message = new Message();
 				CryptoPacket cryptoPacket = new CryptoPacket(type, publicKey);
@@ -521,8 +505,9 @@ public class XMPPService extends Service implements IXMPPService {
 																				  cryptoPacket);
 				message.addExtension(teamMeetExt);
 				message.addBody("", "");
-				//TODO: Send private message in team to mate
-				Log.d(CLASS, String.format("Would send crypto packet '%s'", cryptoPacket.toXML()));
+
+				org.jivesoftware.smack.Chat privateChat = team.getRoom().createPrivateChat(mate, new KeyExchangeListener(this, team));
+				privateChat.sendMessage(message);
 			} else {
 				throw new XMPPException("Not authenticated.");
 			}
@@ -987,4 +972,5 @@ public class XMPPService extends Service implements IXMPPService {
 	private void acquireChatMessageLock() {
 		mLockChatMessages.lock();
 	}
+
 }
