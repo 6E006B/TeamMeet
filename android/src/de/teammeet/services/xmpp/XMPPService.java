@@ -2,10 +2,16 @@ package de.teammeet.services.xmpp;
 
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,6 +22,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.crypto.KeyAgreement;
 import javax.crypto.spec.DHParameterSpec;
 
 import org.jivesoftware.smack.Connection;
@@ -62,6 +69,7 @@ import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IInvitationHandler;
 import de.teammeet.interfaces.IXMPPService;
+import de.teammeet.services.xmpp.Team.TeamException;
 
 public class XMPPService extends Service implements IXMPPService {
 
@@ -487,10 +495,62 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void completeKeyExchange(String invitee, org.jivesoftware.smack.Chat chat, byte[] publicKey) {
-		Log.d(CLASS, String.format("Completing key exchange with '%s'", invitee));
-		//TODO: Generate shared DH secret from public key
-		//TODO: send teams session key encrypted with shared secret via chat
+	public void completeSessionKeyExchange(String inviteeName, Team team, org.jivesoftware.smack.Chat chat, byte[] publicKeyBytes) {
+		Log.d(CLASS, String.format("Completing key exchange with '%s'", inviteeName));
+
+		Invitee invitee;
+		try {
+			invitee = team.getInvitee(inviteeName);
+
+			PrivateKey ownPrivateKey = invitee.getKeyPair().getPrivate();
+			PublicKey foreignPublicKey = restoreKey(publicKeyBytes);
+			KeyAgreement keyAgreement = setupKeyAgreement(ownPrivateKey, foreignPublicKey);
+
+			byte[] sharedSecret = keyAgreement.generateSecret();
+			Log.d(CLASS, String.format("Inviter generated shared secret: %s", Base64.encodeBytes(sharedSecret)));
+
+			//TODO: send teams session key encrypted with shared secret via chat
+		} catch (TeamException e) {
+			//TODO: Notify user via UI
+			Log.e(CLASS, String.format("Could not resolve invitee '%s' to get private key: %s",
+										inviteeName, e.getMessage()));
+		} catch (InvalidKeyException e) {
+			//TODO: Notify user via UI
+			Log.e(CLASS, String.format("Key used to agree upon key is invalid: %s",
+										e.getMessage()));
+		}
+	}
+
+	private PublicKey restoreKey(byte[] keyBytes) {
+		X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
+		PublicKey publicKey = null;
+		try {
+			KeyFactory keyFactory = KeyFactory.getInstance("DH");
+			publicKey = keyFactory.generatePublic(x509KeySpec);
+		} catch (NoSuchAlgorithmException e) {
+			//TODO: Notify user via UI
+			Log.e(CLASS, String.format("Could not get Diffie-Hellman key factory: %s",
+										e.getMessage()));
+		} catch (InvalidKeySpecException e) {
+			//TODO: Notify user via UI
+			Log.e(CLASS, String.format("Key spec used to decrypt received public key is invalid: %s",
+										e.getMessage()));
+		}
+		return publicKey;
+	}
+
+	private KeyAgreement setupKeyAgreement(PrivateKey privKey, PublicKey pubKey) throws InvalidKeyException {
+		KeyAgreement keyAgreement = null;
+		try {
+			keyAgreement = KeyAgreement.getInstance("DH");
+			keyAgreement.init(privKey);
+			keyAgreement.doPhase(pubKey, true);
+		} catch (NoSuchAlgorithmException e) {
+			//TODO: Notify user via UI
+			Log.e(CLASS, String.format("Could not fetch Diffie-Hellman key agreement: %s",
+										e.getMessage()));
+		}
+		return keyAgreement;
 	}
 
 	private void sendKey(String mate, Team team, String type, byte[] publicKey) throws XMPPException {
@@ -509,10 +569,10 @@ public class XMPPService extends Service implements IXMPPService {
 				org.jivesoftware.smack.Chat privateChat = team.getRoom().createPrivateChat(mate, new KeyExchangeListener(this, team));
 				privateChat.sendMessage(message);
 			} else {
-				throw new XMPPException("Not authenticated.");
+				throw new XMPPException("Not authenticated");
 			}
 		} else {
-			throw new XMPPException("Not connected.");
+			throw new XMPPException("Not connected");
 		}
 	}
 

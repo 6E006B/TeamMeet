@@ -28,7 +28,7 @@ public class KeyExchangeListener implements MessageListener {
 			TeamMeetPacketExtension extension = (TeamMeetPacketExtension) message.getExtension(TeamMeetPacketExtension.NAMESPACE);
 			if (extension.hasCryptoPacket()) {
 				byte[] publicKey = extension.getCryptoPacket().getKey();
-				mXMPPService.completeKeyExchange(sender, chat, publicKey);
+				mXMPPService.completeSessionKeyExchange(sender, mTeam, chat, publicKey);
 			} else {
 				//TODO: Inform user via UI
 				Log.e(CLASS, String.format("'%s' send reply to public key without crypto packet!", sender));

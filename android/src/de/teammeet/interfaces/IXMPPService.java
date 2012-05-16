@@ -23,6 +23,7 @@ package de.teammeet.interfaces;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPException;
 
@@ -92,5 +93,5 @@ public interface IXMPPService {
 
 	void initiateSessionKeyExchange(String mate, Team team);
 
-	void completeKeyExchange(String invitee, org.jivesoftware.smack.Chat chat, byte[] publicKey);
+	void completeSessionKeyExchange(String invitee, Team team, Chat chat, byte[] publicKeyBytes);
 }
