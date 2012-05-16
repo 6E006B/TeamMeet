@@ -17,13 +17,20 @@ public class TeamMeetPacketExtension implements PacketExtension {
 	public static final String ACCURACY = "err";
 	public static final String INFO = "info";
 	public static final String REMOVE = "remove";
+	public static final String CRYPTO = "keyExchange";
+	public static final String CRYPTO_KEY = "key";
+	public static final String KEYTYPE_ATTR = "type";
+	public static final String KEYTYPE_PUBLIC = "publicKey";
+	public static final String KEYTYPE_SECRET = "sharedSecret";
 
 	private MatePacket mMatePacket;
 	private IndicatorPacket mIndicatorPacket;
+	private CryptoPacket mCryptoPacket;
 
-	public TeamMeetPacketExtension(MatePacket matePacket, IndicatorPacket indicatorPacket) {
+	public TeamMeetPacketExtension(MatePacket matePacket, IndicatorPacket indicatorPacket, CryptoPacket cryptoPacket) {
 		mMatePacket = matePacket;
 		mIndicatorPacket = indicatorPacket;
+		mCryptoPacket = cryptoPacket;
 	}
 
 	@Override
@@ -41,14 +48,18 @@ public class TeamMeetPacketExtension implements PacketExtension {
 	public String toXML() {
 		String mateXML = "";
 		String indicatorXML = "";
+		String cryptoXML = "";
 		if (mMatePacket != null) {
 			mateXML = mMatePacket.toXML();
 		}
 		if (mIndicatorPacket != null) {
 			indicatorXML = mIndicatorPacket.toXML();
 		}
-		return String.format("<x xmlns=\"%s\"><%s>%s%s</%s></x>",
-				             getNamespace(), TEAMMEET, mateXML, indicatorXML, TEAMMEET);
+		if (mCryptoPacket != null) {
+			cryptoXML = mCryptoPacket.toXML();
+		}
+		return String.format("<x xmlns=\"%s\"><%s>%s%s%s</%s></x>",
+				             getNamespace(), TEAMMEET, mateXML, indicatorXML, cryptoXML, TEAMMEET);
 	}
 	
 	public boolean hasMatePacket() {
@@ -59,12 +70,20 @@ public class TeamMeetPacketExtension implements PacketExtension {
 		return mIndicatorPacket != null;
 	}
 
+	public boolean hasCryptoPacket() {
+		return mCryptoPacket != null;
+	}
+
 	public MatePacket getMatePacket() {
 		return mMatePacket;
 	}
 
 	public IndicatorPacket getIndicatorPacket() {
 		return mIndicatorPacket;
+	}
+
+	public CryptoPacket getCryptoPacket() {
+		return mCryptoPacket;
 	}
 
 }

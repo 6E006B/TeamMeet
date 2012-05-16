@@ -20,6 +20,7 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 		TeamMeetPacketExtension teamMeetPacket = null;
 		MatePacket matePacket = null;
 		IndicatorPacket indicatorPacket = null;
+		CryptoPacket cryptoPacket = null;
 
 		// iterate over all XML tags
 		boolean done = false;
@@ -32,19 +33,21 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 					matePacket = parseMatePacketExtension(parser);
 				} else if (parser.getName().equals(TeamMeetPacketExtension.INDICATOR)) {
 					indicatorPacket = parseIndicatorPacketExtension(parser);
+				} else if (parser.getName().equals(TeamMeetPacketExtension.CRYPTO)) {
+					cryptoPacket = parseCryptoPacketExtension(parser);
 				} else {
 					throw new InvalidProtocolException(String.format("Found invalid opening tag '%s'", parser.getName())); 
 				}
 			} else if (eventType == XmlPullParser.END_TAG) {
-				// TODO: What happens if we never meet a </teammet> tag and the parser runs out of tags?
+				// TODO: What happens if we never meet a </teammeet> tag and the parser runs out of tags?
 				if (parser.getName().equals(TeamMeetPacketExtension.TEAMMEET)) {
 					done = true;
 				}
 			}
 		}
 
-		if (matePacket != null || indicatorPacket != null) {
-			teamMeetPacket = new TeamMeetPacketExtension(matePacket, indicatorPacket);
+		if (matePacket != null || indicatorPacket != null || cryptoPacket != null) {
+			teamMeetPacket = new TeamMeetPacketExtension(matePacket, indicatorPacket, cryptoPacket);
 		} else {
 			throw new InvalidProtocolException("Missing value in TeamMeet XML message");
 		}
@@ -130,6 +133,11 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 			throw new InvalidProtocolException("Missing value in Indicator message");
 		}
 		return indicatorPacket;
+	}
+
+	private CryptoPacket parseCryptoPacketExtension(XmlPullParser parser) {
+		//TODO: Implement parsing of crypto packet
+		return null;
 	}
 
 	public static class InvalidProtocolException extends XMPPException {

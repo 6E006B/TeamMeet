@@ -494,20 +494,41 @@ public class XMPPService extends Service implements IXMPPService {
 			keyPairGenerator.initialize(new DHParameterSpec(mDHPrime, mDHGenerator, mDHExponentSize));
 
 			KeyPair keyPair = keyPairGenerator.generateKeyPair();
-			byte publicKey[] = keyPair.getPublic().getEncoded();
+			byte[] publicKey = keyPair.getPublic().getEncoded();
 
-			sendDHPublicKey(mate, teamName, publicKey);
+			sendKey(mate, teamName, TeamMeetPacketExtension.KEYTYPE_PUBLIC, publicKey);
 		} catch (NoSuchAlgorithmException e) {
 			//TODO: Inform user via UI
 			Log.e(CLASS, String.format("Could not acquire key pair generator to exchange session key with '%s' in '%s': %s", mate, teamName, e.getMessage()));
 		} catch (InvalidAlgorithmParameterException e) {
 			//TODO: Inform user via UI
 			Log.e(CLASS, String.format("Could not initialize key pair generator to exchange session key with '%s' in '%s': %s", mate, teamName, e.getMessage()));
+		} catch (XMPPException e) {
+			//TODO: Inform user via UI
+			Log.e(CLASS, String.format("Could not send public key to '%s' in '%s': %s", mate, teamName, e.getMessage()));
 		}
 	}
 
-	private void sendDHPublicKey(String mate, String teamName, byte publicKey[]) {
-		Log.d(CLASS, String.format("Sending public key to '%s' in '%s' [not implemented]", mate, teamName));
+	private void sendKey(String mate, String teamName, String type, byte[] publicKey) throws XMPPException {
+		if (mXMPP != null) {
+			if (mXMPP.isAuthenticated()) {
+				Log.d(CLASS, String.format("Sending key to '%s' in '%s'", mate, teamName));
+
+				Message message = new Message();
+				CryptoPacket cryptoPacket = new CryptoPacket(type, publicKey);
+				TeamMeetPacketExtension teamMeetExt = new TeamMeetPacketExtension(null,
+																				  null,
+																				  cryptoPacket);
+				message.addExtension(teamMeetExt);
+				message.addBody("", "");
+				//TODO: Send private message in team to mate
+				Log.d(CLASS, String.format("Would send crypto packet '%s'", cryptoPacket.toXML()));
+			} else {
+				throw new XMPPException("Not authenticated.");
+			}
+		} else {
+			throw new XMPPException("Not connected.");
+		}
 	}
 
 	@Override
@@ -566,6 +587,7 @@ public class XMPPService extends Service implements IXMPPService {
 				                                       location.getLatitudeE6(),
 				                                       accuracy);
 				TeamMeetPacketExtension teamMeetPacket = new TeamMeetPacketExtension(matePacket,
+				                                                                     null,
 				                                                                     null);
 				message.addExtension(teamMeetPacket);
 				message.addBody("", "");
@@ -592,7 +614,7 @@ public class XMPPService extends Service implements IXMPPService {
 				 						                             location.getLongitudeE6(),
 										                             info, remove);
 				TeamMeetPacketExtension teamMeetPacket =
-						new TeamMeetPacketExtension(null, indicatorPacket);
+						new TeamMeetPacketExtension(null, indicatorPacket, null);
 				message.addExtension(teamMeetPacket);
 				message.addBody("", "");
 				sendAllTeams(message);
