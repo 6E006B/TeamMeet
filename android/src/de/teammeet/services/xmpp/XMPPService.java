@@ -323,7 +323,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 		muc.sendConfigurationForm(configForm);
 
-		Team team = new Team(muc);
+		Team team = new Team(group, muc);
 		addTeam(group, team);
 	}
 
@@ -353,7 +353,7 @@ public class XMPPService extends Service implements IXMPPService {
 		                           room, userID, password));
 		MultiUserChat muc = new MultiUserChat(mXMPP, room);
 		muc.join(userID, password);
-		Team team = new Team(muc);
+		Team team = new Team(room, muc);
 		addTeam(room, team);
 	}
 

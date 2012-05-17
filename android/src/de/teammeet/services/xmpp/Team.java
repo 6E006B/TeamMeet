@@ -10,10 +10,12 @@ import android.util.Log;
 public class Team {
 	private static final String CLASS = Team.class.getSimpleName();
 	
-	private MultiUserChat mRoom;
+	private final String mName;
+	private final MultiUserChat mRoom;
 	private Map<String, Invitee> mInvitees;
 	
-	public Team(MultiUserChat room) {
+	public Team(String name, MultiUserChat room) {
+		mName = name;
 		mRoom = room;
 		mInvitees = new HashMap<String, Invitee>();
 	}
@@ -44,6 +46,11 @@ public class Team {
 	public void removeInvitee(String name) {
 		Log.d(CLASS, String.format("Removing invitee: '%s'", name));
 		mInvitees.remove(name);
+	}
+
+	@Override
+	public String toString() {
+		return mName;
 	}
 
 	public static class TeamException extends Exception {
