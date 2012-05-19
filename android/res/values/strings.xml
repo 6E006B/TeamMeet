@@ -65,6 +65,8 @@
     <string name="context_invite_condensed">Invite</string>
     <string name="context_open_map">Open team in map</string>
     <string name="context_open_map_condensed">Open map</string>
+    <string name="context_open_chat">Open team chat</string>
+    <string name="context_open_chat_condensed">Open chat</string>
     <string name="no_teams">No teams to display</string>
     <string name="button_show_map">Show Map</string>
     <string name="button_show_roster">Show Roster</string>
