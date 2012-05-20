@@ -14,6 +14,9 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -24,6 +27,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import de.teammeet.R;
+import de.teammeet.activities.teams.TeamMeetActivity;
 import de.teammeet.services.xmpp.ChatMessage;
 import de.teammeet.services.xmpp.XMPPService;
 
@@ -200,6 +204,28 @@ public class ChatFragment extends Fragment {
 		super.onDestroy();
 	}
 
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		Log.d(CLASS, "ChatFragment.onCreateOptionsMenu()");
+		super.onCreateOptionsMenu(menu, inflater);
+		if (mType == Chat.TYPE_GROUP_CHAT) {
+			inflater.inflate(R.menu.group_chat, menu);
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		Log.d(CLASS, String.format("ChatFragment.onOptionsItemSelected(%d)", item.getItemId()));
+		switch (item.getItemId()) {
+		case R.id.open_map:
+			clickedOpenMap();
+			return true;
+		default:
+			Log.w(CLASS, "Unknown options item id: '" + item.getItemId() + "'");
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
 	public void handleMessage(final CharSequence message) {
 		Log.d(CLASS, String.format("ChatFragment.handleMessage('%s')", message));
 		mChatListView.post(new Runnable() {
@@ -211,5 +237,11 @@ public class ChatFragment extends Fragment {
 				mChatListView.setSelection(mListAdapter.getCount());
 			}
 		});
+	}
+
+	private void clickedOpenMap() {
+		Intent intent = new Intent(getActivity().getApplicationContext(), TeamMeetActivity.class);
+		intent.putExtra(XMPPService.GROUP, mCounterpart);
+		startActivity(intent);
 	}
 }
