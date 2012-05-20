@@ -133,10 +133,12 @@ public class RosterActivity extends SherlockFragmentActivity {
 
 		Tab tab = bar.newTab();
 		tab.setText(R.string.tab_contacts);
+		tab.setIcon(R.drawable.social_person);
 		tabsAdapter.addTab(tab, ContactsFragment.class, null);
 
 		tab = bar.newTab();
 		tab.setText(R.string.tab_teams);
+		tab.setIcon(R.drawable.social_group);
 		tabsAdapter.addTab(tab, TeamsFragment.class, null);
 	}
 
