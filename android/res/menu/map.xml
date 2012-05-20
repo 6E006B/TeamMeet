@@ -21,19 +21,22 @@
 
     <item
         android:id="@+id/auto_center"
-        android:showAsAction="withText|ifRoom"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_auto_center"/>
     <item
         android:id="@+id/goto_mylocation"
-        android:showAsAction="withText|ifRoom"
+        android:icon="@drawable/device_access_location_found"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_goto_mylocation"/>
     <item
         android:id="@+id/satellite_view"
-        android:showAsAction="withText|ifRoom"
+        android:icon="@drawable/location_map"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_satellite_view"/>
     <item
         android:id="@+id/fullscreen"
-        android:showAsAction="withText|ifRoom"
+        android:icon="@drawable/av_full_screen"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_fullscreen"/>
 
 </menu>

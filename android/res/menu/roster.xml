@@ -9,12 +9,14 @@
         android:titleCondensed="@string/roster_menu_connect_condensed"/>
     <item
         android:id="@+id/roster_menu_form_team"
+        android:icon="@drawable/social_add_group"
         android:showAsAction="ifRoom"
         android:title="@string/roster_menu_form_team"
         android:titleCondensed="@string/roster_menu_form_team_condensed"
         android:visible="false"/>
     <item
         android:id="@+id/roster_menu_settings"
+        android:icon="@drawable/action_settings"
         android:title="@string/roster_menu_settings"
         android:titleCondensed="@string/roster_menu_settings_condensed"/>
     <item
