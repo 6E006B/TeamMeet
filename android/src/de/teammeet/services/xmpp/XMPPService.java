@@ -41,6 +41,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -100,6 +102,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private RoomInvitationListener mRoomInvitationListener = null;
 	private ChatMessageListener mChatMessageListener = null;
 	private KeyExchangeListener mKeyExchangeRequestListener = null;
+	private ConnectionReceiver mConnectionReceiver = null;
 
 	private final ReentrantLock mLockGroups = new ReentrantLock();
 	private final ReentrantLock mLockInvitations = new ReentrantLock();
@@ -276,6 +279,9 @@ public class XMPPService extends Service implements IXMPPService {
 															   R.string.broadcast_disconnected);
 			}
 		});
+		mConnectionReceiver = new ConnectionReceiver();
+		registerReceiver(mConnectionReceiver,
+		                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 		showXMPPServiceNotification(true);
 	}
 
@@ -293,6 +299,10 @@ public class XMPPService extends Service implements IXMPPService {
 	public void disconnect() {
 		Log.d(CLASS, "XMPPService.disconnect()");
 		stopLocationTransmission();
+		if (mConnectionReceiver != null) {
+			unregisterReceiver(mConnectionReceiver);
+			mConnectionReceiver = null;
+		}
 		if (mXMPP != null) {
 			if (mXMPP.isConnected()) {
 				mXMPP.disconnect();
@@ -933,4 +943,27 @@ public class XMPPService extends Service implements IXMPPService {
 	private void acquireChatMessageLock() {
 		mLockChatMessages.lock();
 	}
+
+	private class ConnectionReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+            String reason = intent.getStringExtra(ConnectivityManager.EXTRA_REASON);
+            boolean isFailover = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
+			ConnectivityManager connectivityManager =
+					(ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo currentNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            NetworkInfo otherNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
+
+            // do application-specific task(s) based on the current network state, such
+            // as enabling queuing of HTTP requests when currentNetworkInfo is connected etc.
+            Log.d(CLASS, "Connectivity changed: " + reason);
+            if (isFailover) {
+            	Log.d(CLASS, "IS_FAILOVER");
+            } else {
+            	Log.d(CLASS, "no failover");
+            }
+            Log.d(CLASS, "status: " + currentNetworkInfo);
+        }
+    };
 }
