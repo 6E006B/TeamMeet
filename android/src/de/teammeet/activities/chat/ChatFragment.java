@@ -9,14 +9,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -26,12 +22,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
 import de.teammeet.R;
 import de.teammeet.activities.teams.TeamMeetActivity;
 import de.teammeet.services.xmpp.ChatMessage;
 import de.teammeet.services.xmpp.XMPPService;
 
-public class ChatFragment extends Fragment {
+public class ChatFragment extends SherlockFragment {
 
 	private static final String CLASS = ChatFragment.class.getSimpleName();
 
@@ -80,6 +82,12 @@ public class ChatFragment extends Fragment {
 	}
 
 	public ChatFragment() {}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setHasOptionsMenu(true);
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -206,7 +214,6 @@ public class ChatFragment extends Fragment {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		Log.d(CLASS, "ChatFragment.onCreateOptionsMenu()");
 		super.onCreateOptionsMenu(menu, inflater);
 		if (mType == Chat.TYPE_GROUP_CHAT) {
 			inflater.inflate(R.menu.group_chat, menu);
@@ -215,7 +222,6 @@ public class ChatFragment extends Fragment {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Log.d(CLASS, String.format("ChatFragment.onOptionsItemSelected(%d)", item.getItemId()));
 		switch (item.getItemId()) {
 		case R.id.open_map:
 			clickedOpenMap();
