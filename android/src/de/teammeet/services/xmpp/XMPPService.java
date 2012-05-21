@@ -1,17 +1,6 @@
 package de.teammeet.services.xmpp;
 
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,9 +11,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.crypto.KeyAgreement;
-import javax.crypto.spec.DHParameterSpec;
-
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
@@ -32,7 +18,10 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.AndFilter;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
+import org.jivesoftware.smack.filter.PacketExtensionFilter;
+import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smackx.Form;
@@ -69,7 +58,6 @@ import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IInvitationHandler;
 import de.teammeet.interfaces.IXMPPService;
-import de.teammeet.services.xmpp.Team.TeamException;
 
 public class XMPPService extends Service implements IXMPPService {
 
@@ -98,16 +86,13 @@ public class XMPPService extends Service implements IXMPPService {
 	private static final String MUC_JIDRESOLVERS_FIELD = "muc#roomconfig_whois";
 	private static final String MUC_ALLAFFILIATIONS_VALUE = "anyone";
 
-	private static final BigInteger mDHPrime = new BigInteger("145135528544641048828781082741133792265510283642227563843882120490266943454709965696885526964860090920378220705587684343691655547422645061028417617789225411492181871509076266136947361308537150838075923208869454733438857938120530479235883529669535849982509957532677257289115470567900093536536896831965040387969");
-	private static final BigInteger mDHGenerator = new BigInteger("88291786162459212881905949060861099478890630921833730602301026928256212377008840401387215755929281334909231489875975120117299561515866296992376827924649080932422589386576501108138166912979093438394542997153702864014749319348771381994641762187325694782184297315316416077796892478055266319844543738559065819115");
-	private static final int mDHExponentSize = 1023;
-
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
 	private String mServer = null;
 	private Map<String, Team> mTeams = null;
 	private RoomInvitationListener mRoomInvitationListener = null;
 	private ChatMessageListener mChatMessageListener = null;
+	private KeyExchangeListener mKeyExchangeRequestListener = null;
 
 	private final ReentrantLock mLockGroups = new ReentrantLock();
 	private final ReentrantLock mLockInvitations = new ReentrantLock();
@@ -226,6 +211,10 @@ public class XMPPService extends Service implements IXMPPService {
 		mRoomInvitationListener  = new RoomInvitationListener(this);
 		MultiUserChat.addInvitationListener(mXMPP, mRoomInvitationListener);
 
+		mKeyExchangeRequestListener = new KeyExchangeListener(this);
+		final PacketFilter keyExchangeRequestfilter = new AndFilter(new MessageTypeFilter(Message.Type.chat),
+													  new PacketExtensionFilter(TeamMeetPacketExtension.NAMESPACE));
+		mXMPP.addPacketListener(mKeyExchangeRequestListener, keyExchangeRequestfilter);
 		mChatMessageListener = new ChatMessageListener(this);
 		final MessageTypeFilter chatMessageFilter = new MessageTypeFilter(Message.Type.chat);
 		mXMPP.addPacketListener(mChatMessageListener, chatMessageFilter);
@@ -348,12 +337,11 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void joinRoom(String room, String userID, String password) throws XMPPException {
-		Log.d(CLASS, String.format("joinRoom('%s', '%s', '%s')",
-		                           room, userID, password));
+	public void joinTeam(String room, String userID, String password, String inviter) throws XMPPException {
 		MultiUserChat muc = new MultiUserChat(mXMPP, room);
-		muc.join(userID, password);
 		Team team = new Team(room, muc);
+		team.setInviter(inviter);
+		muc.join(userID, password);
 		addTeam(room, team);
 	}
 
@@ -472,102 +460,21 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void initiateSessionKeyExchange(String mate, Team team) {
-		try {
-			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
-			keyPairGenerator.initialize(new DHParameterSpec(mDHPrime, mDHGenerator, mDHExponentSize));
-
-			//TODO store with mate in team
-			KeyPair keyPair = keyPairGenerator.generateKeyPair();
-			byte[] publicKey = keyPair.getPublic().getEncoded();
-
-			sendKey(mate, team, TeamMeetPacketExtension.KEYTYPE_PUBLIC, publicKey);
-		} catch (NoSuchAlgorithmException e) {
-			//TODO: Inform user via UI
-			Log.e(CLASS, String.format("Could not acquire key pair generator to exchange session key with '%s' in '%s': %s", mate, team, e.getMessage()));
-		} catch (InvalidAlgorithmParameterException e) {
-			//TODO: Inform user via UI
-			Log.e(CLASS, String.format("Could not initialize key pair generator to exchange session key with '%s' in '%s': %s", mate, team, e.getMessage()));
-		} catch (XMPPException e) {
-			//TODO: Inform user via UI
-			Log.e(CLASS, String.format("Could not send public key to '%s' in '%s': %s", mate, team, e.getMessage()));
-		}
-	}
-
-	@Override
-	public void completeSessionKeyExchange(String inviteeName, Team team, org.jivesoftware.smack.Chat chat, byte[] publicKeyBytes) {
-		Log.d(CLASS, String.format("Completing key exchange with '%s'", inviteeName));
-
-		Invitee invitee;
-		try {
-			invitee = team.getInvitee(inviteeName);
-
-			PrivateKey ownPrivateKey = invitee.getKeyPair().getPrivate();
-			PublicKey foreignPublicKey = restoreKey(publicKeyBytes);
-			KeyAgreement keyAgreement = setupKeyAgreement(ownPrivateKey, foreignPublicKey);
-
-			byte[] sharedSecret = keyAgreement.generateSecret();
-			Log.d(CLASS, String.format("Inviter generated shared secret: %s", Base64.encodeBytes(sharedSecret)));
-
-			//TODO: send teams session key encrypted with shared secret via chat
-		} catch (TeamException e) {
-			//TODO: Notify user via UI
-			Log.e(CLASS, String.format("Could not resolve invitee '%s' to get private key: %s",
-										inviteeName, e.getMessage()));
-		} catch (InvalidKeyException e) {
-			//TODO: Notify user via UI
-			Log.e(CLASS, String.format("Key used to agree upon key is invalid: %s",
-										e.getMessage()));
-		}
-	}
-
-	private PublicKey restoreKey(byte[] keyBytes) {
-		X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
-		PublicKey publicKey = null;
-		try {
-			KeyFactory keyFactory = KeyFactory.getInstance("DH");
-			publicKey = keyFactory.generatePublic(x509KeySpec);
-		} catch (NoSuchAlgorithmException e) {
-			//TODO: Notify user via UI
-			Log.e(CLASS, String.format("Could not get Diffie-Hellman key factory: %s",
-										e.getMessage()));
-		} catch (InvalidKeySpecException e) {
-			//TODO: Notify user via UI
-			Log.e(CLASS, String.format("Key spec used to decrypt received public key is invalid: %s",
-										e.getMessage()));
-		}
-		return publicKey;
-	}
-
-	private KeyAgreement setupKeyAgreement(PrivateKey privKey, PublicKey pubKey) throws InvalidKeyException {
-		KeyAgreement keyAgreement = null;
-		try {
-			keyAgreement = KeyAgreement.getInstance("DH");
-			keyAgreement.init(privKey);
-			keyAgreement.doPhase(pubKey, true);
-		} catch (NoSuchAlgorithmException e) {
-			//TODO: Notify user via UI
-			Log.e(CLASS, String.format("Could not fetch Diffie-Hellman key agreement: %s",
-										e.getMessage()));
-		}
-		return keyAgreement;
-	}
-
-	private void sendKey(String mate, Team team, String type, byte[] publicKey) throws XMPPException {
+	public void sendKey(String mate, String type, byte[] publicKey, String team) throws XMPPException {
 		if (mXMPP != null) {
 			if (mXMPP.isAuthenticated()) {
 				Log.d(CLASS, String.format("Sending key to '%s' in '%s'", mate, team));
 
 				Message message = new Message();
-				CryptoPacket cryptoPacket = new CryptoPacket(type, publicKey);
+				message.setType(Message.Type.chat);
+				message.setTo(mate);
+				CryptoPacket cryptoPacket = new CryptoPacket(type, publicKey, team);
 				TeamMeetPacketExtension teamMeetExt = new TeamMeetPacketExtension(null,
 																				  null,
 																				  cryptoPacket);
 				message.addExtension(teamMeetExt);
-				message.addBody("", "");
 
-				org.jivesoftware.smack.Chat privateChat = team.getRoom().createPrivateChat(mate, new KeyExchangeListener(this, team));
-				privateChat.sendMessage(message);
+				mXMPP.sendPacket(message);
 			} else {
 				throw new XMPPException("Not authenticated");
 			}
@@ -729,6 +636,7 @@ public class XMPPService extends Service implements IXMPPService {
 		packet.setBody(message);
 		packet.setType(Message.Type.chat);
 		packet.setTo(to);
+		//TODO: Do we have/want to set from? May b0rk if we make a mistake, should be set by the server?
 		packet.setFrom(String.format("%s@%s", mUserID, mServer));
 		mXMPP.sendPacket(packet);
 	}

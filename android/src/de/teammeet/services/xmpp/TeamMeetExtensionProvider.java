@@ -141,6 +141,7 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 		CryptoPacket cryptoPacket = null;
 		String keyType = null;
 		byte[] key = null;
+		String teamName = null;
 
 		// iterate over all XML tags
 		boolean done = false;
@@ -151,8 +152,8 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 					int numAttributes = parser.getAttributeCount();
 					if ( numAttributes == 1) {
 						keyType = parser.getAttributeValue(null, TeamMeetPacketExtension.KEYTYPE_ATTR);
-						if (keyType != TeamMeetPacketExtension.KEYTYPE_PUBLIC &&
-							keyType != TeamMeetPacketExtension.KEYTYPE_SECRET) {
+						if (!keyType.equals(TeamMeetPacketExtension.KEYTYPE_PUBLIC) &&
+							!keyType.equals(TeamMeetPacketExtension.KEYTYPE_SECRET)) {
 							throw new InvalidProtocolException(String.format("Invalid key type '%s'", keyType));
 						}
 					} else {
@@ -160,6 +161,8 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 																		  numAttributes));
 					}
 					key = Base64.decode(parser.nextText());
+				} else if (parser.getName().equals(TeamMeetPacketExtension.TEAM)) {
+					teamName = parser.nextText();
 				} else {
 					throw new InvalidProtocolException(String.format("Found invalid opening tag '%s'", parser.getName())); 
 				}
@@ -173,10 +176,10 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 		}
 
 		// check we've got everything we need
-		if (keyType != null && key != null) {
-			cryptoPacket = new CryptoPacket(keyType, key);
+		if (keyType != null && key != null && teamName != null) {
+			cryptoPacket = new CryptoPacket(keyType, key, teamName);
 		} else {
-			throw new InvalidProtocolException("Missing value in Indicator message");
+			throw new InvalidProtocolException("Missing value in crypto message");
 		}
 		return cryptoPacket;
 	}

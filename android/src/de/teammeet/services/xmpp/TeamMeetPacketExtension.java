@@ -22,6 +22,7 @@ public class TeamMeetPacketExtension implements PacketExtension {
 	public static final String KEYTYPE_ATTR = "type";
 	public static final String KEYTYPE_PUBLIC = "publicKey";
 	public static final String KEYTYPE_SECRET = "sharedSecret";
+	public static final String TEAM = "team";
 
 	private MatePacket mMatePacket;
 	private IndicatorPacket mIndicatorPacket;

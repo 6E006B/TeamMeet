@@ -6,10 +6,12 @@ public class CryptoPacket {
 
 	private String mType;
 	private byte[] mKey;
+	private String mTeam;
 
-	public CryptoPacket(final String TYPE, byte[] key) {
+	public CryptoPacket(final String TYPE, byte[] key, String team) {
 		mType = TYPE;
 		mKey = key;
+		mTeam = team;
 	}
 	
 	public boolean isPublicKey() {
@@ -23,10 +25,17 @@ public class CryptoPacket {
 	public byte[] getKey() {
 		return mKey;
 	}
+
+	public String getTeam() {
+		return mTeam;
+	}
 	
 	public String toXML() {
 		return String.format("<%s>" +
 				             "<%s %s=\"%s\" >" +
+				             "%s" +
+				             "</%s>" +
+				             "<%s>" +
 				             "%s" +
 				             "</%s>" +
 						     "</%s>",
@@ -34,6 +43,9 @@ public class CryptoPacket {
 				             TeamMeetPacketExtension.CRYPTO_KEY, TeamMeetPacketExtension.KEYTYPE_ATTR, mType,
 				             Base64.encodeBytes(mKey),
 				             TeamMeetPacketExtension.CRYPTO_KEY,
+				             TeamMeetPacketExtension.TEAM,
+				             mTeam,
+				             TeamMeetPacketExtension.TEAM,
 				             TeamMeetPacketExtension.CRYPTO);
 	}
 }

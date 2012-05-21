@@ -163,7 +163,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 
 	private void handleJoinIntent(Intent intent) {
 		final String team = intent.getStringExtra(XMPPService.ROOM);
-		final String inviter = intent.getStringExtra(XMPPService.INVITER);
+		final String inviter = StringUtils.parseBareAddress(intent.getStringExtra(XMPPService.INVITER));
 		final String reason = intent.getStringExtra(XMPPService.REASON);
 		final String password = intent.getStringExtra(XMPPService.PASSWORD);
 		final String from = intent.getStringExtra(XMPPService.FROM);
@@ -192,7 +192,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 							final String userIDKey = getString(R.string.preference_user_id_key);
 							final String userID = settings.getString(userIDKey, "anonymous");
 							try {
-								mXMPPService.joinRoom(team, userID, password);
+								mXMPPService.joinTeam(team, userID, password, inviter);
 
 								Intent newTeam = new Intent(getString(R.string.broadcast_teams_updated));
 								sendBroadcast(newTeam);
@@ -332,12 +332,13 @@ public class RosterActivity extends SherlockFragmentActivity {
 	}
 
 	public void enteredTeamName(String teamName) {
-		Log.d(CLASS, String.format("Will create team '%s'", teamName));
+		String sanitizedTeamName = teamName.toLowerCase();
+		Log.d(CLASS, String.format("Will create team '%s'", sanitizedTeamName));
 		final SharedPreferences settings =
 				PreferenceManager.getDefaultSharedPreferences(this);
 		final String conferenceSrvKey = getString(R.string.preference_conference_server_key);
 		final String conferenceSrv = settings.getString(conferenceSrvKey, "");
-		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(teamName, conferenceSrv);
+		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(sanitizedTeamName, conferenceSrv);
 	}
 
 	private class XMPPServiceConnection implements ServiceConnection {

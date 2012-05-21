@@ -12,21 +12,45 @@ public class Team {
 	
 	private final String mName;
 	private final MultiUserChat mRoom;
-	private Map<String, Invitee> mInvitees;
+	private KeyExchangePartner mInviter;
+	private Map<String, KeyExchangePartner> mInvitees;
+
 	
 	public Team(String name, MultiUserChat room) {
 		mName = name;
 		mRoom = room;
-		mInvitees = new HashMap<String, Invitee>();
+		mInviter = null;
+		mInvitees = new HashMap<String, KeyExchangePartner>();
 	}
 	
 	public MultiUserChat getRoom() {
 		return mRoom;
 	}
 
+	public void setInviter(String name) {
+		Log.d(CLASS, String.format("Setting inviter for team '%s' to '%s'", mName, name));
+		mInviter = new KeyExchangePartner(name);
+	}
+
+	public boolean isInviter(String name) {
+		boolean isInviter = false;
+		if (mInviter != null) {
+			isInviter = name.equals(mInviter.getName());
+		}
+		Log.d(CLASS, String.format("'%s' is inviter: '%s'", name, isInviter));
+		return isInviter;
+	}
+
+	public KeyExchangePartner getInviter() throws TeamException {
+		if (mInviter == null) {
+			throw new TeamException("No inviter set");
+		}
+		return mInviter;
+	}
+
 	public void addInvitee(String name) {
 		Log.d(CLASS, String.format("Adding invitee '%s'", name));
-		mInvitees.put(name, new Invitee(name));
+		mInvitees.put(name, new KeyExchangePartner(name));
 	}
 
 	public boolean isInvitee(String name) {
@@ -35,8 +59,8 @@ public class Team {
 		return invited;
 	}
 
-	public Invitee getInvitee(String name) throws TeamException {
-		Invitee invitee = mInvitees.get(name);
+	public KeyExchangePartner getInvitee(String name) throws TeamException {
+		KeyExchangePartner invitee = mInvitees.get(name);
 		if (invitee == null) {
 			throw new TeamException(String.format("No invitee '%s'", name));
 		}
