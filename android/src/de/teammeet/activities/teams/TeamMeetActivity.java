@@ -43,6 +43,8 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
 import de.teammeet.R;
+import de.teammeet.activities.chat.Chat;
+import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.services.xmpp.XMPPService;
 
@@ -220,7 +222,11 @@ public class TeamMeetActivity extends SherlockMapActivity {
 			case android.R.id.home:
 				ActionBarHelper.navigateUpInHierarchy(this);
 				return true;
-		
+
+			case R.id.open_chat:
+				clickedOpenChat();
+				return true;
+
 			case R.id.goto_mylocation:
 				focusCurrentLocation();
 				return true;
@@ -262,6 +268,13 @@ public class TeamMeetActivity extends SherlockMapActivity {
 			});
 		}
 		return success;
+	}
+
+	private void clickedOpenChat() {
+		Intent intent = new Intent(getApplicationContext(), ChatsActivity.class);
+		intent.putExtra(XMPPService.TYPE, Chat.TYPE_GROUP_CHAT);
+		intent.putExtra(XMPPService.SENDER, mTeam);
+		startActivity(intent);
 	}
 
 	private void toggleFollowingLocation() {

@@ -32,6 +32,8 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragment;
 
 import de.teammeet.R;
+import de.teammeet.activities.chat.Chat;
+import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.activities.teams.TeamMeetActivity;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.interfaces.IXMPPService;
@@ -128,6 +130,9 @@ public class TeamsFragment extends SherlockFragment {
 		case R.id.teams_list_context_open_map:
 			clickedOpenMap(item);
 			return true;
+		case R.id.teams_list_context_open_chat:
+			clickedOpenChat(item);
+			return true;
 		default:
 			Log.d(CLASS, String.format("unhandeled item clicked: 0x%x", item.getItemId()));
 			return super.onContextItemSelected(item);
@@ -193,6 +198,15 @@ public class TeamsFragment extends SherlockFragment {
 		String team = getExpandableListChild(menuInfo.packedPosition);
 		Intent intent = new Intent(getActivity().getApplicationContext(), TeamMeetActivity.class);
 		intent.putExtra(XMPPService.GROUP, team);
+		startActivity(intent);
+	}
+
+	private void clickedOpenChat(MenuItem item) {
+		ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo)item.getMenuInfo();
+		String team = getExpandableListChild(menuInfo.packedPosition);
+		Intent intent = new Intent(getActivity().getApplicationContext(), ChatsActivity.class);
+		intent.putExtra(XMPPService.TYPE, Chat.TYPE_GROUP_CHAT);
+		intent.putExtra(XMPPService.SENDER, team);
 		startActivity(intent);
 	}
 
