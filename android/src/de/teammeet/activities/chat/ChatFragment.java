@@ -14,9 +14,11 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -40,6 +42,7 @@ public class ChatFragment extends SherlockFragment {
 	private ListView mChatListView = null;
 	private ArrayAdapter<CharSequence> mListAdapter = null;
 	private EditText mChatEditText = null;
+	private ImageButton mSendButton = null;
 	private int mType = 0;
 	private String mCounterpart = null;
 	private Chat mChat = null;
@@ -47,6 +50,7 @@ public class ChatFragment extends SherlockFragment {
 
 	private XMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
+
 
 	private class XMPPServiceConnection implements ServiceConnection {
 
@@ -56,7 +60,9 @@ public class ChatFragment extends SherlockFragment {
 						 className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
 
-			mChatEditText.setEnabled(true);
+			boolean enabled = mXMPPService.isAuthenticated();
+			mChatEditText.setEnabled(enabled);
+			mSendButton.setEnabled(enabled);
 
 			mXMPPService.registerChatMessageHandler(mChat);
 			mXMPPService.registerGroupMessageHandler(mChat);
@@ -113,34 +119,24 @@ public class ChatFragment extends SherlockFragment {
 		mListAdapter = new ArrayAdapter<CharSequence>(getActivity(), R.layout.chat_item);
 		mChatListView.setAdapter(mListAdapter);
 		mChatEditText = (EditText) rootView.findViewById(R.id.chatInput);
-		if (mXMPPService == null) {
-			mChatEditText.setEnabled(false);
-		}
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				String sendText = v.getText().toString();
-				try {
-					mChat.sendMessage(sendText, mXMPPService);
-					v.setText("");
-				} catch (XMPPException e) {
-					final String errorMessage = "Unable to send message:\n" + e.getMessage();
-					Log.e(CLASS, errorMessage);
-					e.printStackTrace();
-					mChatEditText.post(new Runnable() {
-						@Override
-						public void run() {
-							final Toast toast =
-									Toast.makeText(getActivity().getApplicationContext(),
-									               errorMessage, Toast.LENGTH_LONG);
-							toast.setGravity(Gravity.BOTTOM, 0, 0);
-							toast.show();
-						}
-					});
-				}
+				sendMessage(v);
 				return true;
 			}
 		});
+		mSendButton = (ImageButton) rootView.findViewById(R.id.sendButton);
+		mSendButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				sendMessage(mChatEditText);
+			}
+		});
+		if (mXMPPService == null || !mXMPPService.isAuthenticated()) {
+			mChatEditText.setEnabled(false);
+			mSendButton.setEnabled(false);
+		}
 		List<ChatMessage> messages = mChat.fetchMessages();
 		for (ChatMessage message : messages) {
 			mListAdapter.add(mChat.createMessageSequence(message));
@@ -243,6 +239,28 @@ public class ChatFragment extends SherlockFragment {
 				mChatListView.setSelection(mListAdapter.getCount());
 			}
 		});
+	}
+
+	private void sendMessage(TextView v) {
+		String sendText = v.getText().toString();
+		try {
+			mChat.sendMessage(sendText, mXMPPService);
+			v.setText("");
+		} catch (XMPPException e) {
+			final String errorMessage = "Unable to send message:\n" + e.getMessage();
+			Log.e(CLASS, errorMessage);
+			e.printStackTrace();
+			mChatEditText.post(new Runnable() {
+				@Override
+				public void run() {
+					final Toast toast =
+							Toast.makeText(getActivity().getApplicationContext(),
+							               errorMessage, Toast.LENGTH_LONG);
+					toast.setGravity(Gravity.BOTTOM, 0, 0);
+					toast.show();
+				}
+			});
+		}
 	}
 
 	private void clickedOpenMap() {
