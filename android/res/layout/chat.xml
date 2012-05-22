@@ -15,17 +15,33 @@
         android:smoothScrollbar="true" >
     </ListView>
 
-    <EditText
-        android:id="@+id/chatInput"
-        android:layout_width="fill_parent"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:ems="10"
         android:gravity="bottom"
-        android:inputType="textMultiLine"
-        android:maxLines="@integer/max_chat_lines" >
+        android:orientation="horizontal" >
 
-        <requestFocus />
-    </EditText>
+        <EditText
+            android:id="@+id/chatInput"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="textMultiLine"
+            android:maxLines="@integer/max_chat_lines" >
+
+            <requestFocus />
+        </EditText>
+
+        <ImageButton
+            android:id="@+id/sendButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:contentDescription="@string/description_send_button"
+            android:padding="7dip"
+            android:src="@drawable/social_send_now" />
+    </LinearLayout>
 
 </LinearLayout>
