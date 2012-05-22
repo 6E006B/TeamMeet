@@ -93,5 +93,6 @@
     <string name="broadcast_action_teammate_update">de.teammeet.intent.action.TEAMMATE_UPDATE</string>
     <string name="broadcast_category_location">de.teammeet.intent.category.LOCATION</string>
     <string name="broadcast_teams_updated">de.teammeet.intent.action.TEAMS_UPDATED</string>
+    <string name="description_send_button">send button</string>
 
 </resources>
