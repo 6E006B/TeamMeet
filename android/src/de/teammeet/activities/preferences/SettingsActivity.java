@@ -37,6 +37,7 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 		super.onCreate(savedInstanceState);
 
 		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		
 		// Make sure default values are applied.  In a real app, you would
