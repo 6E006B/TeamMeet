@@ -541,12 +541,17 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public void sendIndicator(GeoPoint location, String info) throws XMPPException {
+		sendIndicator(location, info, false);
+	}
+
+	@Override
+	public void sendIndicator(GeoPoint location, String info, boolean remove) throws XMPPException {
 		if (mXMPP != null) {
 			if (mXMPP.isAuthenticated()) {
 				Message message = new Message();
 				IndicatorPacket indicatorPacket = new IndicatorPacket(location.getLatitudeE6(),
 				 						                             location.getLongitudeE6(),
-										                             info);
+										                             info, remove);
 				TeamMeetPacketExtension teamMeetPacket =
 						new TeamMeetPacketExtension(null, indicatorPacket);
 				message.addExtension(teamMeetPacket);

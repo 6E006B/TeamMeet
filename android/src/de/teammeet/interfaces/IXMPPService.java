@@ -74,6 +74,7 @@ public interface IXMPPService {
 	void sendLocation(GeoPoint location, int accuracy) throws XMPPException;
 
 	void sendIndicator(GeoPoint location, String info) throws XMPPException;
+	void sendIndicator(GeoPoint location, String info, boolean remove) throws XMPPException;
 
 	void updateMate(String from, int lon, int lat, int accuracy, String mTeam);
 
