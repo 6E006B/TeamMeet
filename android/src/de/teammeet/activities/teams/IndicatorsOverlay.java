@@ -138,10 +138,14 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 		try {
 			if (mIndicators.containsKey(location)) {
 				mIndicators.remove(location);
+				OverlayItem itemToRemove = null;
 				for (OverlayItem overlayItem : mOverlayItems) {
 					if (location.equals(overlayItem.getPoint())) {
-						mOverlayItems.remove(overlayItem);
+						itemToRemove = overlayItem;
 					}
+				}
+				if (itemToRemove != null) {
+					mOverlayItems.remove(itemToRemove);
 				}
 				changed = true;
 			}
@@ -149,6 +153,7 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 			releaseLock();
 		}
 		if (changed) {
+			setLastFocusedIndex(-1);
 			populate();
 			mMapView.postInvalidate();
 		}
@@ -164,9 +169,14 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 
 	@Override
 	protected OverlayItem createItem(int index) {
-//		Log.d(CLASS, "MatesOverlay.createItem("+index+") on position: " +
-//				mOverlayItems.get(index).getPoint().toString());
-		return mOverlayItems.get(index);
+		OverlayItem item = null;
+		acquireLock();
+		try {
+			item = mOverlayItems.get(index);
+		} finally {
+			releaseLock();
+		}
+		return item;
 	}
 
 	@Override
@@ -237,7 +247,14 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 
 	@Override
 	public boolean draw(Canvas canvas, MapView mapView, boolean shadow, long when) {
-		boolean isRedrawNeeded = mOverlayItems.size() > 0;
+		int size = 0;
+		acquireLock();
+		try {
+			size = mOverlayItems.size();
+		} finally {
+			releaseLock();
+		}
+		boolean isRedrawNeeded = size > 0;
 		if (isRedrawNeeded) {
 			super.draw(canvas, mapView, shadow, when);
 		}
