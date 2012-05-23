@@ -650,7 +650,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 		CharSequence title = getText(R.string.notification_service_title);
         CharSequence text = getText(R.string.notification_service_text);
-		int icon = R.drawable.group_invitation_icon;
+		int icon = R.drawable.ic_stat_notify_teammeet;
 		CharSequence tickerText = String.format("%s %s", title, text);
 
 		Intent notificationIntent = new Intent(this, RosterActivity.class);
@@ -710,7 +710,7 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 	private void notifyNewInvitation(String room, String inviter, String reason,
 			  String password, Message message) {
-		final int icon = R.drawable.group_invitation_icon;
+		final int icon = R.drawable.ic_stat_notify_teammeet;
 		final CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
 		                                        room, inviter, reason);
 		final CharSequence contentTitle = "Group Invitation received";
@@ -782,7 +782,7 @@ public class XMPPService extends Service implements IXMPPService {
 		                                              message.getTo(),
 		                                              message.getMessage());
 		Log.d(CLASS, notificationText);
-		final int icon = R.drawable.group_invitation_icon;
+		final int icon = R.drawable.ic_stat_notify_teammeet;
 		final CharSequence tickerText = String.format("New team message in %s", notificationText);
 		final CharSequence contentTitle = "Group chat message received";
 		final Intent notificationIntent = new Intent(this, ChatsActivity.class);
@@ -848,7 +848,7 @@ public class XMPPService extends Service implements IXMPPService {
 		                                              message.getMessage());
 		Log.d(CLASS, notificationText);
 
-		final int icon = R.drawable.group_invitation_icon;
+		final int icon = R.drawable.ic_stat_notify_teammeet;
 		final CharSequence tickerText = String.format("New message from %s", notificationText);
 
 		final CharSequence contentTitle = "Chat message received";
