@@ -23,7 +23,7 @@ public class FetchRosterTask extends BaseAsyncTask<Void, Void, Roster> {
 		try {
 			roster = mService.getRoster();
 		} catch (XMPPException e) {
-			Log.e(CLASS, "Could not fetch Roster: " + e.toString());
+			Log.e(CLASS, String.format("Could not fetch roster: %s", e.getMessage()));
 			mError = e;
 			cancel(false);
 		}
