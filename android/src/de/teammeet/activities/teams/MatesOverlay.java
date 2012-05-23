@@ -78,6 +78,11 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> {
 		mMates = new HashMap<String, Mate>();
 		mOverlayItems = new ArrayList<OverlayItem>();
 		populate();
+
+		registerBroadcastReceiver();
+	}
+
+	private void registerBroadcastReceiver() {
 		mMateUpdateReceiver = new MateUpdateReceiver();
 		IntentFilter filter =
 				new IntentFilter(mContext.getString(R.string.broadcast_action_teammate_update));
