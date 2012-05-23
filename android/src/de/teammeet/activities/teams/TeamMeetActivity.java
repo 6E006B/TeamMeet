@@ -99,6 +99,7 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		setContentView(R.layout.mapview);
 
 		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
