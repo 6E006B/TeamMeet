@@ -31,8 +31,9 @@ import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
-import de.teammeet.tasks.FormTeamTask;
 import de.teammeet.tasks.DisconnectTask;
+import de.teammeet.tasks.FormTeamTask;
+import de.teammeet.tasks.JoinTeamTask;
 
 public class RosterActivity extends SherlockFragmentActivity {
 	private static String CLASS = RosterActivity.class.getSimpleName();
@@ -287,17 +288,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 	}
 
 	public void clickedJoinTeam(String team, String userID, String password, String inviter) {
-		try{
-			mXMPPService.joinTeam(team, userID, password, inviter);
-
-			Intent newTeam = new Intent(getString(R.string.broadcast_teams_updated));
-			sendBroadcast(newTeam);
-		} catch (XMPPException e) {
-			String problem = String.format("Unable to join room '%s': %s",
-											team, e.getMessage());
-			Log.e(CLASS, problem, e);
-			Toast.makeText(this, problem, Toast.LENGTH_LONG).show();
-		}
+		new JoinTeamTask(mXMPPService, new JoinTeamHandler()).execute(team, userID, password, inviter);
 	}
 
 	public void clickedRejectTeam(String team, String inviter) {
@@ -370,6 +361,23 @@ public class RosterActivity extends SherlockFragmentActivity {
 		@Override
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to form team: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class JoinTeamHandler extends BaseAsyncTaskCallback<String> {
+		@Override
+		public void onTaskCompleted(String teamName) {
+			String user_feedback = String.format("Joined team '%s'", teamName);
+			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+
+			Intent newTeam = new Intent(getString(R.string.broadcast_teams_updated));
+			sendBroadcast(newTeam);
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to join team: %s", e.getMessage());
 			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
