@@ -80,7 +80,7 @@ public interface IXMPPService {
 
 	void destroyTeam(String roomName) throws XMPPException;
 
-	Set<String> getTeams();
+	Set<String> getTeams() throws XMPPException;
 
 	Iterator<String> getMates(String room) throws XMPPException;
 

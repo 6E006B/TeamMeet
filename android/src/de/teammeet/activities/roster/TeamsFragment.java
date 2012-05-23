@@ -230,6 +230,12 @@ public class TeamsFragment extends SherlockFragment {
 				}
 			});
 		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			final String problem = String.format("Could not fetch teams: %s", e.getMessage());
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
+		}
 	}
 
 	private class ConnectReceiver extends BroadcastReceiver {
