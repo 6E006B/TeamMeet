@@ -158,6 +158,12 @@ public class TeamMeetActivity extends SherlockMapActivity {
 
 	@Override
 	protected void onPause() {
+		if (mIndicatorsOverlay != null) {
+			mIndicatorsOverlay.unregisterBroadcastReceivers();
+		}
+		if (mMatesOverlay != null) {
+			mMatesOverlay.unregisterBroadcastReceiver();
+		}
 		if (mMyLocationOverlay != null) {
 			mMyLocationOverlay.disableCompass();
 		}
