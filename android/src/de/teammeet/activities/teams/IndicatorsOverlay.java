@@ -38,7 +38,6 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
@@ -186,7 +185,6 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 	protected boolean onTap(int index) {
 		final GeoPoint location = mOverlayItems.get(index).getPoint();
 		final String info = mIndicators.get(location);
-		Toast.makeText(mContext, info, Toast.LENGTH_SHORT).show();
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 		builder.setTitle("Indicator");
