@@ -31,7 +31,7 @@ import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
-import de.teammeet.tasks.CreateGroupTask;
+import de.teammeet.tasks.FormTeamTask;
 import de.teammeet.tasks.DisconnectTask;
 
 public class RosterActivity extends SherlockFragmentActivity {
@@ -283,7 +283,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 				PreferenceManager.getDefaultSharedPreferences(this);
 		final String conferenceSrvKey = getString(R.string.preference_conference_server_key);
 		final String conferenceSrv = settings.getString(conferenceSrvKey, "");
-		new CreateGroupTask(mXMPPService, new FormTeamHandler()).execute(sanitizedTeamName, conferenceSrv);
+		new FormTeamTask(mXMPPService, new FormTeamHandler()).execute(sanitizedTeamName, conferenceSrv);
 	}
 
 	public void clickedJoinTeam(String team, String userID, String password, String inviter) {
@@ -357,10 +357,10 @@ public class RosterActivity extends SherlockFragmentActivity {
 		}
 	}
 
-	private class FormTeamHandler extends BaseAsyncTaskCallback<String[]> {
+	private class FormTeamHandler extends BaseAsyncTaskCallback<String> {
 		@Override
-		public void onTaskCompleted(String[] connection_data) {
-			String user_feedback = String.format("Founded team '%s'", connection_data[0]);
+		public void onTaskCompleted(String teamName) {
+			String user_feedback = String.format("Founded team '%s'", teamName);
 			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
 
 			Intent newTeam = new Intent(getString(R.string.broadcast_teams_updated));
