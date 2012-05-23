@@ -273,7 +273,6 @@ public class XMPPService extends Service implements IXMPPService {
 		if (mXMPP != null) {
 			roster = mXMPP.getRoster();
 		} else {
-			// TODO: define better Exception
 			throw new XMPPException("Connect before getting contacts!");
 		}
 		return roster;
@@ -391,8 +390,14 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public Set<String> getTeams() {
-		return mTeams.keySet();
+	public Set<String> getTeams() throws XMPPException {
+		Set teams = null;
+		if (mTeams != null) {
+			teams = mTeams.keySet();
+		} else {
+			throw new XMPPException("Connect before getting teams!");
+		}
+		return teams;
 	}
 
 	@Override

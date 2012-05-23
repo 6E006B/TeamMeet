@@ -11,6 +11,7 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.app.Activity;
@@ -162,6 +163,8 @@ public class ContactsFragment extends Fragment {
 		//MenuInflater inflater = getMenuInflater();
 		//inflater.inflate(R.menu.roster_context, menu);
 		Log.d(CLASS, "creating context menu");
+
+		try {
 		Set<String> teams = ((RosterActivity) getActivity()).getXMPPService().getTeams();
 		if (!teams.isEmpty()) {
 			SubMenu inviteSubMenu = menu.addSubMenu(Menu.NONE, CONTEXT_MENU_INVITE_PARENT_ID,
@@ -170,6 +173,11 @@ public class ContactsFragment extends Fragment {
 				Log.d(CLASS, "team: " + teamName);
 				inviteSubMenu.add(Menu.NONE, CONTEXT_MENU_INVITE_ROOM_ID, Menu.NONE, teamName);
 			}
+		}
+		} catch (XMPPException e) {
+			String problem = String.format("Could not fetch teams: %s", e.getMessage());
+			Log.e(CLASS, problem);
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
 	}
 	
