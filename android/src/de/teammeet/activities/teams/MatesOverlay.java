@@ -90,6 +90,10 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> {
 		mContext.registerReceiver(mMateUpdateReceiver, filter);
 	}
 
+	public void unregisterBroadcastReceiver() {
+		mContext.unregisterReceiver(mMateUpdateReceiver);
+	}
+
 	private void acquireLock() {
 		mLock.lock();
 	}
