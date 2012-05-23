@@ -739,7 +739,6 @@ public class XMPPService extends Service implements IXMPPService {
 		notificationIntent.putExtra(INVITER, inviter);
 		notificationIntent.putExtra(REASON, reason);
 		notificationIntent.putExtra(PASSWORD, password);
-		notificationIntent.putExtra(FROM, message.getFrom());
 		final PendingIntent contentIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent,
 				                          PendingIntent.FLAG_UPDATE_CURRENT);

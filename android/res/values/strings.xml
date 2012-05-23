@@ -58,7 +58,7 @@
     <string name="roster_menu_exit_condensed">Exit</string>
     <string name="no_contacts">No contacts to display</string>
     <string name="form_team_dialog_title">Form a new Team</string>
-    <!-- <string name="invite_mate_dialog_title">Select a Team</string> -->
+    <string name="join_team_dialog_title">Join a Team</string>
     <string name="tab_contacts">Contacts</string>
     <string name="tab_teams">Teams</string>
     <string name="context_invite">Invite to team</string>
@@ -75,6 +75,8 @@
     <string name="button_disconnect">Disconnect</string>
     <string name="button_create">Create Team</string>
     <string name="button_invite">Invite Mate</string>
+    <string name="button_join">Join Team</string>
+    <string name="button_decline">Decline</string>
     <string name="text_xmpp_section">XMPP</string>
     <string name="text_xmpp_account">XMPP Account Details</string>
     <string name="text_user_id">User ID:</string>
@@ -94,5 +96,6 @@
     <string name="broadcast_category_location">de.teammeet.intent.category.LOCATION</string>
     <string name="broadcast_teams_updated">de.teammeet.intent.action.TEAMS_UPDATED</string>
     <string name="description_send_button">send button</string>
+    <string name="reason_team_rejection">We\'re not soldiers!</string>
 
 </resources>
