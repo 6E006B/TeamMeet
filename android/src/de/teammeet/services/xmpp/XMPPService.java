@@ -130,7 +130,6 @@ public class XMPPService extends Service implements IXMPPService {
 		ConfigureProviderManager.configureProviderManager();
 		mChatDatabase = new ChatOpenHelper(this);
 		mKeyGenerator = new SecureRandom();
-		mTeams = new HashMap<String, Team>();
 	}
 
 	@Override
