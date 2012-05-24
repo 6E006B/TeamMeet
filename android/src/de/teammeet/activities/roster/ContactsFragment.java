@@ -57,8 +57,6 @@ public class ContactsFragment extends Fragment {
 	private static final String NAME = "name";
 	private static final String AVAILABILITY = "avail";
 	private static final String UNFILED_GROUP = "Unfiled contacts";
-	private static final int DIALOG_FORM_TEAM_ID = 0x7e000000;
-	//private static final int DIALOG_INVITE_MATE_ID = 0x7e000001;
 	private static final int CONTEXT_MENU_INVITE_PARENT_ID = 0x7e000002;
 	private static final int CONTEXT_MENU_INVITE_ROOM_ID = 0x7e000003;
 
