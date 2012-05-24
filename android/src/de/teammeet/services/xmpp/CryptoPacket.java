@@ -13,15 +13,15 @@ public class CryptoPacket {
 		mKey = key;
 		mTeam = team;
 	}
-	
+
 	public boolean isPublicKey() {
-		return mType == TeamMeetPacketExtension.KEYTYPE_PUBLIC;
+		return mType.equals(TeamMeetPacketExtension.KEYTYPE_PUBLIC);
 	}
-	
+
 	public boolean isSharedSecret() {
-		return mType == TeamMeetPacketExtension.KEYTYPE_SECRET;
+		return mType.equals(TeamMeetPacketExtension.KEYTYPE_SECRET);
 	}
-	
+
 	public byte[] getKey() {
 		return mKey;
 	}
@@ -29,7 +29,7 @@ public class CryptoPacket {
 	public String getTeam() {
 		return mTeam;
 	}
-	
+
 	public String toXML() {
 		return String.format("<%s>" +
 				             "<%s %s=\"%s\" >" +

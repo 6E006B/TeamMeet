@@ -460,7 +460,7 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void sendKey(String mate, String type, byte[] publicKey, String team) throws XMPPException {
+	public void sendKey(String mate, String type, byte[] key, String team) throws XMPPException {
 		if (mXMPP != null) {
 			if (mXMPP.isAuthenticated()) {
 				Log.d(CLASS, String.format("Sending key to '%s' in '%s'", mate, team));
@@ -468,7 +468,7 @@ public class XMPPService extends Service implements IXMPPService {
 				Message message = new Message();
 				message.setType(Message.Type.chat);
 				message.setTo(mate);
-				CryptoPacket cryptoPacket = new CryptoPacket(type, publicKey, team);
+				CryptoPacket cryptoPacket = new CryptoPacket(type, key, team);
 				TeamMeetPacketExtension teamMeetExt = new TeamMeetPacketExtension(null,
 																				  null,
 																				  cryptoPacket);

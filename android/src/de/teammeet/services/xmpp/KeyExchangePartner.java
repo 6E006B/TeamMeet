@@ -6,16 +6,22 @@ import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.X509EncodedKeySpec;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.DHParameterSpec;
-
-import org.jivesoftware.smack.util.Base64;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import android.util.Log;
 
@@ -29,12 +35,15 @@ public class KeyExchangePartner {
 
 	private final String mName;
 	private KeyPair mKeyPair;
-	private byte[] mSharedSecret;
+	private Cipher mAES;
+	private SecretKeySpec mSharedSecretSpec;
+
 
 	public KeyExchangePartner(String name) {
 		mName = name;
 		mKeyPair = generateKeyPair();
-		mSharedSecret = null;
+		mAES = createAESCipher();
+		mSharedSecretSpec = null;
 	}
 
 	private KeyPair generateKeyPair() {
@@ -48,17 +57,28 @@ public class KeyExchangePartner {
 			//TODO: Inform user via UI
 			Log.e(CLASS, String.format("Could not acquire Diffie-Hellman key pair generator " +
 									   "to exchange session key with '%s': %s", mName, e.getMessage()));
-//		} catch (NoSuchProviderException e) {
-//			//TODO: Inform user via UI
-//			Log.e(CLASS, String.format("Could not acquire Diffie-Hellman key pair generator " +
-//									   "from SpongyCastle provider to exchange session key with '%s': %s", 
-//									   mName, e.getMessage()));
 		} catch (InvalidAlgorithmParameterException e) {
 			//TODO: Inform user via UI
 			Log.e(CLASS, String.format("Could not initialize key pair generator to exchange " +
 									   "session key with '%s': %s", mName, e.getMessage()));
 		}
 		return keyPair;
+	}
+
+	private Cipher createAESCipher() {
+		Cipher aes = null;
+
+		try {
+			aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		} catch (NoSuchAlgorithmException e) {
+			//TODO: Inform user via UI
+			Log.e(CLASS, String.format("Can't get AES cipher: %s", e.getMessage()), e);
+		} catch (NoSuchPaddingException e) {
+			//TODO: Inform user via UI
+			Log.e(CLASS, String.format("Can't pad AES cipher: %s", e.getMessage()), e);
+		}
+
+		return aes;
 	}
 
 	public String getName() {
@@ -69,21 +89,24 @@ public class KeyExchangePartner {
 		return mKeyPair.getPublic().getEncoded();
 	}
 
-	public void calculateSharedSecret(byte[] publicKeyBytes) {
+	public void calculateSharedSecret(byte[] publicKeyBytes) throws InvalidKeyException {
 		Log.d(CLASS, String.format("Generating shared secret for '%s'", mName));
 
+		PrivateKey ownPrivateKey = mKeyPair.getPrivate();
+		PublicKey foreignPublicKey = restoreKey(publicKeyBytes);
+		KeyAgreement keyAgreement = setupKeyAgreement(ownPrivateKey, foreignPublicKey);
+
+		byte[] sharedSecret = keyAgreement.generateSecret();
+		Log.d(CLASS, String.format("Generated '%d' bits shared secret", sharedSecret.length * 8));
+
 		try {
-			PrivateKey ownPrivateKey = mKeyPair.getPrivate();
-			PublicKey foreignPublicKey = restoreKey(publicKeyBytes);
-			KeyAgreement keyAgreement = setupKeyAgreement(ownPrivateKey, foreignPublicKey);
+			MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+			byte[] aesKey = sha256.digest(sharedSecret);
+			Log.d(CLASS, String.format("AES key is '%d' bits long", aesKey.length * 8));
 
-			mSharedSecret = keyAgreement.generateSecret();
-			Log.d(CLASS, String.format("Generated shared secret: %s [%d bits]", Base64.encodeBytes(mSharedSecret), mSharedSecret.length * 8));
-
-		} catch (InvalidKeyException e) {
-			//TODO: Notify user via UI
-			Log.e(CLASS, String.format("Key used to agree upon secret is invalid: %s",
-										e.getMessage()));
+			mSharedSecretSpec = new SecretKeySpec(aesKey, "AES");
+		} catch (NoSuchAlgorithmException e) {
+			Log.e(CLASS, String.format("Could not instantiate SHA-256 message digest: %s", e.getMessage()));
 		}
 	}
 
@@ -117,6 +140,33 @@ public class KeyExchangePartner {
 										e.getMessage()));
 		}
 		return keyAgreement;
+	}
+
+	public byte[] encryptSessionKey(byte[] sessionKey) throws InvalidKeyException {
+
+		byte[] encryptedKey = null;
+
+		mAES.init(Cipher.ENCRYPT_MODE, mSharedSecretSpec);
+
+		try {
+			encryptedKey = mAES.doFinal(sessionKey);
+		} catch (IllegalBlockSizeException e) {
+			Log.e(CLASS, String.format("Can't encrypt session key: %s", e.getMessage()));
+		} catch (BadPaddingException e) {
+			Log.e(CLASS, String.format("Can't pad session key: %s", e.getMessage()));
+		}
+
+		return encryptedKey;
+	}
+
+	public byte[] getIV() {
+		byte[] iv = null;
+		try {
+			iv = mAES.getParameters().getParameterSpec(IvParameterSpec.class).getIV();
+		} catch (InvalidParameterSpecException e) {
+			Log.e(CLASS, String.format("Can't get IV: %s", e.getMessage()));
+		}
+		return iv;
 	}
 
 	@Override
