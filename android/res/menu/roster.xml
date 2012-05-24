@@ -3,6 +3,7 @@
 
     <item
         android:id="@+id/roster_menu_connect"
+        android:icon="@drawable/ic_menu_connect"
         android:enabled="false"
         android:showAsAction="ifRoom"
         android:title="@string/roster_menu_connect"
