@@ -84,6 +84,9 @@ public class XMPPService extends Service implements IXMPPService {
 	private static final String MUC_JIDRESOLVERS_FIELD = "muc#roomconfig_whois";
 	private static final String MUC_ALLAFFILIATIONS_VALUE = "anyone";
 
+	public static final String ACTION = "de.teammeet.xmpp_service.action";
+	public static final String ACTION_CONNECT = "connect";
+
 	private XMPPConnection mXMPP = null;
 	private String mUserID = null;
 	private String mServer = null;
@@ -133,6 +136,23 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.d(CLASS, "XMPPService.onStartCommand()");
+		if (intent.hasExtra(ACTION)) {
+			if (intent.getStringExtra(ACTION).equals(ACTION_CONNECT)) {
+				Log.d(CLASS, "contains connect extra");
+				try {
+					connect();
+				} catch (XMPPException e) {
+					Log.e(CLASS, "Failed to login: " + e.getLocalizedMessage());
+					e.printStackTrace();
+				}
+			}
+		}
+		return super.onStartCommand(intent, flags, startId);
+	}
+
+	@Override
 	public IBinder onBind(Intent intent) {
 		mBindCounter++;
 		return mBinder;
@@ -179,12 +199,16 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void connect(String userID, String server, String password) throws XMPPException {
+	public void connect() throws XMPPException {
 		mTeams = new HashMap<String, Team>();
-		mUserID = userID;
-		mServer = server;
-
-		Log.d(CLASS, "XMPPService.connect('" + mUserID + "', '" + mServer + "')");
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		String userID =
+				settings.getString(getString(R.string.preference_user_id_key), "");
+		String server =
+				settings.getString(getString(R.string.preference_server_key), "");
+		String password =
+				settings.getString(getString(R.string.preference_password_key), "");
+		Log.d(CLASS, "XMPPService.connect() as " + userID);
 
 		if (mXMPP != null) {
 			Log.w(CLASS, "XMPPService.connect() : XMPPConnection not null -> disconnecting it");
