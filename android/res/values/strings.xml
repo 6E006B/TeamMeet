@@ -40,6 +40,9 @@
     <string name="preference_conference_server_key">conferenceServer</string>
     <string name="preference_conference_server_title">Conference Server</string>
     <string name="preference_conference_server_summary">The server housing your teams conferences.</string>
+    <string name="preference_autostart_key">autostart</string>
+    <string name="preference_autostart_title">Autostart</string>
+    <string name="preference_autostart_summary">Start and connect when device is booted.</string>
     <string name="menu_auto_center">Follow position</string>
     <string name="menu_fullscreen">Fullscreen</string>
     <string name="menu_goto_mylocation">Current location</string>
