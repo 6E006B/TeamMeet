@@ -391,7 +391,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public Set<String> getTeams() throws XMPPException {
-		Set teams = null;
+		Set<String> teams = null;
 		if (mTeams != null) {
 			teams = mTeams.keySet();
 		} else {
