@@ -38,8 +38,6 @@ import de.teammeet.tasks.DisconnectTask;
 
 public class RosterActivity extends SherlockFragmentActivity {
 	private static String CLASS = RosterActivity.class.getSimpleName();
-	private static String CONTACTS_TAB_ID = "contacts_tab";
-	private static String TEAMS_TAB_ID = "teams_tab";
 	private static String SAVED_TAB_KEY = "last_tab";
 
 	private IXMPPService mXMPPService = null;

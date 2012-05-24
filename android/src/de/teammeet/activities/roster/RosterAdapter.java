@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 
 public class RosterAdapter extends FragmentPagerAdapter {
 
-	private static final String CLASS = RosterAdapter.class.getSimpleName();
 	private static final int NUM_FRAGMENTS = 2;
 	
 	public static final int CONTACTS_FRAGMENT_POS = 0;
