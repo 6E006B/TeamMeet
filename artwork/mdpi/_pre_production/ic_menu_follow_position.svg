@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="31.999998"
+   height="32"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.1 r9760"
+   sodipodi:docname="shoeprint3.svg"
+   inkscape:export-filename="/media/devel/teammeet/teammeet.git/artwork/mdpi/ics_menu_followpos_shoes.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <title
+     id="title2892">Shoe Print</title>
+  <defs
+     id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+    <inkscape:perspective
+       id="perspective2884"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective2944"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective2966"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#c1c1c1"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.65882353"
+     inkscape:pageshadow="2"
+     inkscape:zoom="13.8125"
+     inkscape:cx="15.999999"
+     inkscape:cy="16"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1022"
+     inkscape:window-height="655"
+     inkscape:window-x="0"
+     inkscape:window-y="80"
+     inkscape:window-maximized="0"
+     units="px"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:showpageshadow="false"
+     showborder="true" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Shoe Print</dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/publicdomain/" />
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Tavin</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:date>12. Sep. 2010</dc:date>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-17.843381,-117.95521)">
+    <g
+       id="g5726"
+       transform="matrix(-0.03442261,0.10647429,-0.10647429,-0.03442261,38.993544,124.62307)"
+       style="fill:#ffffff;fill-opacity:1">
+      <path
+         sodipodi:nodetypes="cccccscccc"
+         id="path2890"
+         d="m 74.602464,12.753774 c -10.969997,3.887878 -20.656426,6.366973 -34.57123,10.79215 5.455765,69.54683 69.326616,41.819534 34.57123,-10.79215 z M 71.438231,0.13470154 C 71.625067,-9.5285821 71.127219,-18.842525 75.219274,-28.029026 c 4.6484,-9.850659 5.39125,-18.490962 2.81967,-32.796321 -4.67729,-26.019271 -14.56477,-42.241053 -27.91782,-45.803083 -28.48249,-4.2447 -32.01048,24.309246 -32.70088,45.195485 -1.572268,11.688971 8.106701,61.71180093 19.81144,70.1850494 C 48.73402,5.7486058 60.027152,2.8017429 71.438231,0.13470154 z"
+         style="fill:#ffffff;fill-opacity:1"
+         inkscape:connector-curvature="0" />
+      <path
+         sodipodi:nodetypes="cccccscccc"
+         id="path2890-7"
+         d="m 109.678,96.545313 c 10.97,3.887877 20.65643,6.366977 34.57123,10.792147 C 138.79347,176.88429 74.922617,149.157 109.678,96.545313 z m 3.16424,-12.619074 c -0.18684,-9.66328 0.31101,-18.977225 -3.78105,-28.163726 -4.6484,-9.850659 -5.39125,-18.490962 -2.81967,-32.796321 4.67729,-26.0192715 14.56477,-42.241055 27.91782,-45.803084 28.48249,-4.2447 32.01048,24.3092468 32.70088,45.195486 1.57227,11.688971 -8.1067,61.711805 -19.81144,70.185049 -11.50233,-3.003494 -22.79547,-5.950364 -34.20654,-8.617404 z"
+         style="fill:#ffffff;fill-opacity:1"
+         inkscape:connector-curvature="0" />
+    </g>
+  </g>
+</svg>

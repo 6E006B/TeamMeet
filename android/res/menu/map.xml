@@ -26,10 +26,6 @@
         android:title="@string/context_open_chat"
         android:titleCondensed="@string/context_open_chat_condensed"/>
     <item
-        android:id="@+id/auto_center"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_auto_center"/>
-    <item
         android:id="@+id/goto_mylocation"
         android:icon="@drawable/device_access_location_found"
         android:showAsAction="ifRoom"
@@ -39,6 +35,11 @@
         android:icon="@drawable/location_map"
         android:showAsAction="ifRoom"
         android:title="@string/menu_satellite_view"/>
+    <item
+        android:id="@+id/auto_center"
+        android:icon="@drawable/ic_menu_follow_position"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_auto_center" />
     <item
         android:id="@+id/fullscreen"
         android:icon="@drawable/av_full_screen"
