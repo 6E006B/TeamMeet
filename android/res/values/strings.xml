@@ -40,7 +40,7 @@
     <string name="preference_conference_server_key">conferenceServer</string>
     <string name="preference_conference_server_title">Conference Server</string>
     <string name="preference_conference_server_summary">The server housing your teams conferences.</string>
-    <string name="menu_auto_center">Auto center position</string>
+    <string name="menu_auto_center">Follow position</string>
     <string name="menu_fullscreen">Fullscreen</string>
     <string name="menu_goto_mylocation">Current location</string>
     <string name="menu_satellite_view">Satellite map</string>

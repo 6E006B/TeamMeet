@@ -37,6 +37,7 @@
         android:title="@string/menu_satellite_view"/>
     <item
         android:id="@+id/auto_center"
+        android:icon="@drawable/ic_menu_follow_position"
         android:showAsAction="ifRoom"
         android:title="@string/menu_auto_center" />
     <item
