@@ -166,16 +166,15 @@ public class RosterActivity extends SherlockFragmentActivity {
 		final String inviter = intent.getStringExtra(XMPPService.INVITER);
 		final String reason = intent.getStringExtra(XMPPService.REASON);
 		final String password = intent.getStringExtra(XMPPService.PASSWORD);
-		final String from = intent.getStringExtra(XMPPService.FROM);
 
-		Log.d(CLASS, String.format("team: '%s' inviter: '%s' reason: '%s' password: '%s' from: '%s'",
-									team, inviter, reason, password, from));
+		Log.d(CLASS, String.format("team: '%s' inviter: '%s' reason: '%s' password: '%s'",
+									team, inviter, reason, password));
 
 		// cleanup the extras so that this is only executed once, not every time the activity is
 		// brought to foreground again
 		cleanupJoinIntent(intent);
 
-		if (team != null && inviter != null && reason != null && from != null) {
+		if (team != null && inviter != null && reason != null) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Group Invitation");
 			builder.setMessage(String.format("%s wants you to join '%s':\n%s",
