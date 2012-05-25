@@ -70,6 +70,7 @@ public class XMPPService extends Service implements IXMPPService {
 	public static final String FROM = "from";
 	public static final String GROUP = "group";
 	public static final String SENDER = "sender";
+	public static final String MESSAGE = "message";
 
 	public static final int TYPE_NONE = 0;
 	public static final int TYPE_JOIN = 1;
@@ -115,7 +116,8 @@ public class XMPPService extends Service implements IXMPPService {
 	private NotificationCompat.Builder mServiceNotificationBuilder;
 //	private NotificationCompat.Builder mInvitationNotificationBuilder;
 	private InvitationNotificationHandler mInvitationNotificationHandler;
-	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
+//	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
+	private GroupMessageNotificationHandler mGroupMessageNotificationHandler;
 	private NotificationCompat.Builder mChatMessageNotificationBuilder;
 
 
@@ -135,6 +137,9 @@ public class XMPPService extends Service implements IXMPPService {
 		mInvitationNotificationHandler =
 				new InvitationNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
 				                                  NOTIFICATION_GROUP_INVITATION_ID);
+		mGroupMessageNotificationHandler =
+				new GroupMessageNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
+				                                    NOTIFICATION_GROUP_CHAT_MESSAGE_ID);
 	}
 
 	@Override
@@ -764,34 +769,12 @@ public class XMPPService extends Service implements IXMPPService {
 			releaseGroupMessageLock();
 		}
 		if (!handled) {
-			notifyGroupMessage(message);
+			final Bundle bundle =
+					GroupMessageNotificationHandler.generateBundle(message.getTo(),
+					                                               message.getFrom(),
+					                                               message.getMessage());
+			mGroupMessageNotificationHandler.newNotification(bundle);
 		}
-	}
-
-	private void notifyGroupMessage(ChatMessage message) {
-		final String notificationText = String.format("%s (%s) : %s",
-		                                              message.getFrom(),
-		                                              message.getTo(),
-		                                              message.getMessage());
-		Log.d(CLASS, notificationText);
-		final int icon = R.drawable.ic_stat_notify_teammeet;
-		final CharSequence tickerText = String.format("New team message in %s", notificationText);
-		final CharSequence contentTitle = "Group chat message received";
-		final Intent notificationIntent = new Intent(this, ChatsActivity.class);
-		notificationIntent.putExtra(TYPE, Chat.TYPE_GROUP_CHAT);
-		notificationIntent.putExtra(SENDER, message.getTo());
-		final PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, notificationIntent,
-				                          PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
-
-		if (mGroupMessageNotificationBuilder == null) {
-			mGroupMessageNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-		}
-		showAutoCancelNotificaton(contentTitle, notificationText, tickerText, icon, contentIntent,
-		                          NOTIFICATION_GROUP_CHAT_MESSAGE_ID,
-		                          mGroupMessageNotificationBuilder);
 	}
 
 	@Override
