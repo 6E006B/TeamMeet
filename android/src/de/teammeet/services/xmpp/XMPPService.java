@@ -38,6 +38,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -112,7 +113,8 @@ public class XMPPService extends Service implements IXMPPService {
 	private SecureRandom mKeyGenerator = null;
 
 	private NotificationCompat.Builder mServiceNotificationBuilder;
-	private NotificationCompat.Builder mInvitationNotificationBuilder;
+//	private NotificationCompat.Builder mInvitationNotificationBuilder;
+	private InvitationNotificationHandler mInvitationNotificationHandler;
 	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
 	private NotificationCompat.Builder mChatMessageNotificationBuilder;
 
@@ -130,6 +132,9 @@ public class XMPPService extends Service implements IXMPPService {
 		ConfigureProviderManager.configureProviderManager();
 		mChatDatabase = new ChatOpenHelper(this);
 		mKeyGenerator = new SecureRandom();
+		mInvitationNotificationHandler =
+				new InvitationNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
+				                                  NOTIFICATION_GROUP_INVITATION_ID);
 	}
 
 	@Override
@@ -697,7 +702,9 @@ public class XMPPService extends Service implements IXMPPService {
 			releaseInvitationsLock();
 		}
 		if (!handled) {
-			notifyNewInvitation(room, inviter, reason, password, message);
+			final Bundle bundle = InvitationNotificationHandler.generateBundle(room, inviter,
+			                                                                   reason, password);
+			mInvitationNotificationHandler.newNotification(bundle);
 		}
 	}
 
@@ -717,31 +724,6 @@ public class XMPPService extends Service implements IXMPPService {
 		Notification notification = builder.getNotification();
 
 		notificationManager.notify(notificationID, notification);
-	}
-	private void notifyNewInvitation(String room, String inviter, String reason,
-			  String password, Message message) {
-		final int icon = R.drawable.ic_stat_notify_teammeet;
-		final CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
-		                                        room, inviter, reason);
-		final CharSequence contentTitle = "Group Invitation received";
-		final Intent notificationIntent = new Intent(this, RosterActivity.class);
-		notificationIntent.putExtra(TYPE, TYPE_JOIN);
-		notificationIntent.putExtra(ROOM, room);
-		notificationIntent.putExtra(INVITER, inviter);
-		notificationIntent.putExtra(REASON, reason);
-		notificationIntent.putExtra(PASSWORD, password);
-		notificationIntent.putExtra(FROM, message.getFrom());
-		final PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, notificationIntent,
-				                          PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
-
-		if (mInvitationNotificationBuilder == null) {
-			mInvitationNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-		}
-		showAutoCancelNotificaton(contentTitle, tickerText, tickerText, icon, contentIntent,
-		                          NOTIFICATION_GROUP_INVITATION_ID, mInvitationNotificationBuilder);
 	}
 
 	@Override
