@@ -11,7 +11,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.BadPaddingException;
@@ -37,6 +36,7 @@ public class KeyExchangePartner {
 	private KeyPair mKeyPair;
 	private Cipher mAES;
 	private SecretKeySpec mSharedSecretSpec;
+	private IvParameterSpec mIVSpec;
 
 
 	public KeyExchangePartner(String name) {
@@ -102,11 +102,14 @@ public class KeyExchangePartner {
 		try {
 			MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
 			byte[] aesKey = sha256.digest(sharedSecret);
-			Log.d(CLASS, String.format("AES key is '%d' bits long", aesKey.length * 8));
-
 			mSharedSecretSpec = new SecretKeySpec(aesKey, "AES");
+
+			MessageDigest md5 = MessageDigest.getInstance("MD5");
+			byte[] aesIV = md5.digest(sharedSecret);
+			mIVSpec = new IvParameterSpec(aesIV);
+
 		} catch (NoSuchAlgorithmException e) {
-			Log.e(CLASS, String.format("Could not instantiate SHA-256 message digest: %s", e.getMessage()));
+			Log.e(CLASS, String.format("Could not instantiate message digest: %s", e.getMessage()));
 		}
 	}
 
@@ -142,16 +145,20 @@ public class KeyExchangePartner {
 		return keyAgreement;
 	}
 
-	public byte[] encryptSessionKey(byte[] sessionKey) throws InvalidKeyException {
+	public byte[] encryptSessionKey(byte[] sessionKey) {
 
 		byte[] encryptedKey = null;
 
-		mAES.init(Cipher.ENCRYPT_MODE, mSharedSecretSpec);
-
 		try {
+			mAES.init(Cipher.ENCRYPT_MODE, mSharedSecretSpec, mIVSpec);
 			encryptedKey = mAES.doFinal(sessionKey);
+		} catch (InvalidKeyException e) {
+			Log.e(CLASS, String.format("Can't initialize AES with key: %s", e.getMessage()));
+		} catch (InvalidAlgorithmParameterException e) {
+			Log.e(CLASS, String.format("Can't initialize AES with IV: %s", e.getMessage()));
 		} catch (IllegalBlockSizeException e) {
-			Log.e(CLASS, String.format("Can't encrypt session key: %s", e.getMessage()));
+			Log.e(CLASS, String.format("Can't encrypt session key with bad block size: %s",
+										e.getMessage()));
 		} catch (BadPaddingException e) {
 			Log.e(CLASS, String.format("Can't pad session key: %s", e.getMessage()));
 		}
@@ -159,14 +166,25 @@ public class KeyExchangePartner {
 		return encryptedKey;
 	}
 
-	public byte[] getIV() {
-		byte[] iv = null;
+	public byte[] decryptSessionKey(byte[] encryptedKey) {
+
+		byte[] sessionKey = null;
+
 		try {
-			iv = mAES.getParameters().getParameterSpec(IvParameterSpec.class).getIV();
-		} catch (InvalidParameterSpecException e) {
-			Log.e(CLASS, String.format("Can't get IV: %s", e.getMessage()));
+			mAES.init(Cipher.DECRYPT_MODE, mSharedSecretSpec, mIVSpec);
+			sessionKey = mAES.doFinal(encryptedKey);
+		} catch (InvalidKeyException e) {
+			Log.e(CLASS, String.format("Can't initialize AES with key: %s", e.getMessage()));
+		} catch (InvalidAlgorithmParameterException e) {
+			Log.e(CLASS, String.format("Can't initialize AES with IV: %s", e.getMessage()));
+		} catch (IllegalBlockSizeException e) {
+			Log.e(CLASS, String.format("Can't decrypt session key with bad block size: %s",
+										e.getMessage()));
+		} catch (BadPaddingException e) {
+			Log.e(CLASS, String.format("Can't pad encrypted session key: %s", e.getMessage()));
 		}
-		return iv;
+
+		return sessionKey;
 	}
 
 	@Override

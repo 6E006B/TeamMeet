@@ -37,8 +37,7 @@ public class KeyExchangeListener implements PacketListener {
 				if (team.isInvitee(sender)) {
 					if (cryptoPacket.isPublicKey()) {
 
-						byte[] dummySessionKey = new byte[] { 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
-								 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
+						byte[] dummySessionKey = "This is just a dummy session key".getBytes();
 
 						byte[] encryptedKey = null;
 						KeyExchangePartner invitee = team.getInvitee(sender);
@@ -51,12 +50,13 @@ public class KeyExchangeListener implements PacketListener {
 					}
 
 				} else if (team.isInviter(sender)) {
+					KeyExchangePartner inviter = team.getInviter();
 					if (cryptoPacket.isPublicKey()) {
-						KeyExchangePartner inviter = team.getInviter();
 						mXMPPService.sendKey(sender, TeamMeetPacketExtension.KEYTYPE_PUBLIC, inviter.getPublicKey(), teamName);
 						inviter.calculateSharedSecret(key);
 					} else {
-						Log.d(CLASS, String.format("Received session key from inviter '%s' [not implemented]", sender));
+						byte[] sessionKey = inviter.decryptSessionKey(key);
+						Log.d(CLASS, String.format("Received session key from inviter '%s': %s", sender, new String(sessionKey)));
 					}
 
 				} else {
