@@ -22,7 +22,7 @@ public class TeamJoinListener implements ParticipantStatusListener {
 	public TeamJoinListener(XMPPService service, Team team) {
 		mXMPPService = service;
 		mTeam = team;
-		mToaster = ToastHelper.getInstance();
+		mToaster = new ToastHelper();
 	}
 	
 	@Override

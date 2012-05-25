@@ -21,7 +21,7 @@ public class KeyExchangeListener implements PacketListener {
 
 	public KeyExchangeListener(XMPPService service) {
 		mXMPPService = service;
-		mToaster = ToastHelper.getInstance();
+		mToaster = new ToastHelper();
 	}
 	
 	@Override
