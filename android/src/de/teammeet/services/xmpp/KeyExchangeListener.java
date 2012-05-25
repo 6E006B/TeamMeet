@@ -8,7 +8,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 
 import android.util.Log;
-import de.teammeet.helper.ToasterHelper;
+import de.teammeet.helper.ToastHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.Team.TeamException;
 
@@ -17,11 +17,11 @@ public class KeyExchangeListener implements PacketListener {
 	private static final String CLASS = KeyExchangeListener.class.getSimpleName();
 
 	private IXMPPService mXMPPService;
-	private ToasterHelper mToaster;
+	private ToastHelper mToaster;
 
 	public KeyExchangeListener(XMPPService service) {
 		mXMPPService = service;
-		mToaster = new ToasterHelper(service);
+		mToaster = ToastHelper.getInstance();
 	}
 	
 	@Override

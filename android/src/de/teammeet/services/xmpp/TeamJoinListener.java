@@ -6,7 +6,7 @@ import org.jivesoftware.smackx.muc.Occupant;
 import org.jivesoftware.smackx.muc.ParticipantStatusListener;
 
 import android.util.Log;
-import de.teammeet.helper.ToasterHelper;
+import de.teammeet.helper.ToastHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.Team.TeamException;
 
@@ -16,13 +16,13 @@ public class TeamJoinListener implements ParticipantStatusListener {
 	
 	private IXMPPService mXMPPService; 
 	private Team mTeam;
-	private ToasterHelper mToaster;
+	private ToastHelper mToaster;
 
 
 	public TeamJoinListener(XMPPService service, Team team) {
 		mXMPPService = service;
 		mTeam = team;
-		mToaster = new ToasterHelper(service);
+		mToaster = ToastHelper.getInstance();
 	}
 	
 	@Override

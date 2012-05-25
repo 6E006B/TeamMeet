@@ -54,6 +54,7 @@ import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.activities.roster.RosterActivity;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.helper.ChatOpenHelper;
+import de.teammeet.helper.ToastHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IInvitationHandler;
@@ -131,6 +132,7 @@ public class XMPPService extends Service implements IXMPPService {
 		super.onCreate();
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
+		ToastHelper.initialize(this);
 		mChatDatabase = new ChatOpenHelper(this);
 		mRandomNumberGenerator = new SecureRandom();
 	}
