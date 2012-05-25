@@ -69,7 +69,7 @@ public class XMPPService extends Service implements IXMPPService {
 	public static final String PASSWORD = "password";
 	public static final String FROM = "from";
 	public static final String GROUP = "group";
-	public static final String SENDER = null;
+	public static final String SENDER = "sender";
 
 	public static final int TYPE_NONE = 0;
 	public static final int TYPE_JOIN = 1;
