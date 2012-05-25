@@ -387,7 +387,7 @@ public class XMPPService extends Service implements IXMPPService {
 			String server =
 					settings.getString(getString(R.string.preference_server_key), "");
 			String alternateAddress = String.format("%s@%s", userID, server);
-			team.getRoom().destroy("reason", alternateAddress);
+			team.getRoom().destroy(getString(R.string.reason_team_destroy), alternateAddress);
 			removeTeam(teamName);
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));
@@ -443,7 +443,7 @@ public class XMPPService extends Service implements IXMPPService {
 	public void invite(String contact, String teamName) throws XMPPException {
 		Team team = mTeams.get(teamName);
 		if (team != null) {
-			team.getRoom().invite(contact, "reason");
+			team.getRoom().invite(contact, getString(R.string.reason_team_invite));
 			team.addInvitee(contact);
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));

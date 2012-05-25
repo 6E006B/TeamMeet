@@ -6,6 +6,7 @@ import org.jivesoftware.smackx.muc.Occupant;
 import org.jivesoftware.smackx.muc.ParticipantStatusListener;
 
 import android.util.Log;
+import de.teammeet.helper.ToasterHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.Team.TeamException;
 
@@ -15,11 +16,13 @@ public class TeamJoinListener implements ParticipantStatusListener {
 	
 	private IXMPPService mXMPPService; 
 	private Team mTeam;
+	private ToasterHelper mToaster;
 
 
-	public TeamJoinListener(IXMPPService service, Team team) {
+	public TeamJoinListener(XMPPService service, Team team) {
 		mXMPPService = service;
 		mTeam = team;
+		mToaster = new ToasterHelper(service);
 	}
 	
 	@Override
@@ -42,15 +45,25 @@ public class TeamJoinListener implements ParticipantStatusListener {
 
 	@Override
 	public void joined(String fullAddress) {
-		Log.d(CLASS, String.format("%s just joined team '%s'", fullAddress, mTeam));
 		String mateName = null;
 		try {
 			String fullJID = getFullJID(mTeam, fullAddress);
 			Log.d(CLASS, String.format("full JID is '%s'", fullJID));
 			mateName = StringUtils.parseBareAddress(fullJID);
 
+			String status = String.format("%s just joined team '%s'",
+										   StringUtils.parseName(mateName),
+										   StringUtils.parseName(mTeam.toString()));
+			Log.d(CLASS, status);
+			mToaster.toast(status);
+
 			if (mTeam.isInvitee(mateName)) {
-				Log.d(CLASS, String.format("Initiating session key exchange for team '%s' with '%s'", mTeam, mateName));
+				status = String.format("Exchanging public keys...",
+										StringUtils.parseName(mateName),
+										StringUtils.parseName(mTeam.toString()));
+				Log.d(CLASS, status);
+				mToaster.toast(status);
+
 				KeyExchangePartner mate = mTeam.getInvitee(mateName);
 				mXMPPService.sendKey(mate.getName(), TeamMeetPacketExtension.KEYTYPE_PUBLIC, mate.getPublicKey(), mTeam.toString());
 			}

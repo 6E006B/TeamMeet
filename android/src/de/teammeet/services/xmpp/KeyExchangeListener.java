@@ -8,17 +8,20 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 
 import android.util.Log;
+import de.teammeet.helper.ToasterHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.Team.TeamException;
 
 public class KeyExchangeListener implements PacketListener {
 
 	private static final String CLASS = KeyExchangeListener.class.getSimpleName();
-	
-	private IXMPPService mXMPPService;
 
-	public KeyExchangeListener(IXMPPService service) {
+	private IXMPPService mXMPPService;
+	private ToasterHelper mToaster;
+
+	public KeyExchangeListener(XMPPService service) {
 		mXMPPService = service;
+		mToaster = new ToasterHelper(service);
 	}
 	
 	@Override
@@ -32,10 +35,14 @@ public class KeyExchangeListener implements PacketListener {
 			String teamName = cryptoPacket.getTeam();
 			try {
 				Team team = mXMPPService.getTeam(teamName);
-				Log.d(CLASS, String.format("Checking legitimacy of crypto packet from '%s' in '%s'", sender, team));
+				String status = String.format("Checking legitimacy of crypto packet from '%s' in '%s'", sender, team);
+				Log.d(CLASS, status);
 
 				if (team.isInvitee(sender)) {
 					if (cryptoPacket.isPublicKey()) {
+						status = "Sending session key";
+						Log.d(CLASS, status);
+						mToaster.toast(status);
 
 						byte[] dummySessionKey = "This is just a dummy session key".getBytes();
 
@@ -52,11 +59,18 @@ public class KeyExchangeListener implements PacketListener {
 				} else if (team.isInviter(sender)) {
 					KeyExchangePartner inviter = team.getInviter();
 					if (cryptoPacket.isPublicKey()) {
+						status = "Exchanging public keys...";
+						Log.d(CLASS, status);
+						mToaster.toast(status);
+
 						mXMPPService.sendKey(sender, TeamMeetPacketExtension.KEYTYPE_PUBLIC, inviter.getPublicKey(), teamName);
 						inviter.calculateSharedSecret(key);
 					} else {
+						status = "Received session key";
+						Log.d(CLASS, status);
+						mToaster.toast(status);
 						byte[] sessionKey = inviter.decryptSessionKey(key);
-						Log.d(CLASS, String.format("Received session key from inviter '%s': %s", sender, new String(sessionKey)));
+						Log.d(CLASS, String.format("Decrypted session key: '%s'", new String(sessionKey)));
 					}
 
 				} else {

@@ -368,7 +368,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 	private class JoinTeamHandler extends BaseAsyncTaskCallback<String> {
 		@Override
 		public void onTaskCompleted(String teamName) {
-			String user_feedback = String.format("Joined team '%s'", teamName);
+			String user_feedback = String.format("Joined team '%s'", StringUtils.parseName(teamName));
 			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
 
 			Intent newTeam = new Intent(getString(R.string.broadcast_teams_updated));
