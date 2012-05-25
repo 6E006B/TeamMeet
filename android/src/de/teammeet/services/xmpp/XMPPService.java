@@ -48,8 +48,6 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
 import de.teammeet.R;
-import de.teammeet.activities.chat.Chat;
-import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.activities.roster.RosterActivity;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.helper.ChatOpenHelper;
@@ -118,8 +116,8 @@ public class XMPPService extends Service implements IXMPPService {
 	private InvitationNotificationHandler mInvitationNotificationHandler;
 //	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
 	private GroupMessageNotificationHandler mGroupMessageNotificationHandler;
-	private NotificationCompat.Builder mChatMessageNotificationBuilder;
-
+//	private NotificationCompat.Builder mChatMessageNotificationBuilder;
+	private ChatMessageNotificationHandler mChatMessageNotificationHandler;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -140,6 +138,9 @@ public class XMPPService extends Service implements IXMPPService {
 		mGroupMessageNotificationHandler =
 				new GroupMessageNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
 				                                    NOTIFICATION_GROUP_CHAT_MESSAGE_ID);
+		mChatMessageNotificationHandler =
+				new ChatMessageNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
+				                                    NOTIFICATION_CHAT_MESSAGE_ID);
 	}
 
 	@Override
@@ -813,34 +814,11 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 		if (!handled) {
 			Log.d(CLASS, "chat message has not been handled.");
-			notifyNewChatMessage(message);
+			final Bundle bundle =
+					ChatMessageNotificationHandler.generateBundle(message.getFrom(),
+					                                              message.getMessage());
+			mChatMessageNotificationHandler.newNotification(bundle);
 		}
-	}
-
-	private void notifyNewChatMessage(ChatMessage message) {
-		final String notificationText = String.format("%s: %s",
-		                                              message.getFrom(),
-		                                              message.getMessage());
-		Log.d(CLASS, notificationText);
-
-		final int icon = R.drawable.ic_stat_notify_teammeet;
-		final CharSequence tickerText = String.format("New message from %s", notificationText);
-
-		final CharSequence contentTitle = "Chat message received";
-		final Intent notificationIntent = new Intent(this, ChatsActivity.class);
-		notificationIntent.putExtra(TYPE, Chat.TYPE_NORMAL_CHAT);
-		notificationIntent.putExtra(SENDER, message.getFrom());
-		final PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, notificationIntent,
-				                          PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
-
-		if (mChatMessageNotificationBuilder == null) {
-			mChatMessageNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-		}
-		showAutoCancelNotificaton(contentTitle, notificationText, tickerText, icon, contentIntent,
-		                          NOTIFICATION_CHAT_MESSAGE_ID, mChatMessageNotificationBuilder);
 	}
 
 	@Override
