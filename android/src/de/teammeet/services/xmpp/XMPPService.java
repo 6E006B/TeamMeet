@@ -714,24 +714,6 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 	}
 
-	private void showAutoCancelNotificaton(CharSequence title, CharSequence text,
-			CharSequence tickerText, int icon, PendingIntent pendingIntent, int notificationID,
-			NotificationCompat.Builder builder) {
-		final String ns = Context.NOTIFICATION_SERVICE;
-		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
-
-		builder.setContentTitle(title);
-		builder.setContentText(text);
-		builder.setTicker(tickerText);
-		builder.setSmallIcon(icon);
-		builder.setAutoCancel(true);
-		builder.setDefaults(Notification.DEFAULT_ALL);
-		builder.setContentIntent(pendingIntent);
-		Notification notification = builder.getNotification();
-
-		notificationManager.notify(notificationID, notification);
-	}
-
 	@Override
 	public void registerInvitationHandler(IInvitationHandler object) {
 		acquireInvitationsLock();
