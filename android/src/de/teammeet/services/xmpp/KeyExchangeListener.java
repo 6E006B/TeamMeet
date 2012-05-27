@@ -41,8 +41,8 @@ public class KeyExchangeListener implements PacketListener {
 				if (team.isInvitee(sender)) {
 					if (cryptoPacket.isPublicKey()) {
 						status = "Sending session key";
-						Log.d(CLASS, status);
 						mToaster.toast(status);
+						Log.d(CLASS, status);
 
 						byte[] dummySessionKey = "This is just a dummy session key".getBytes();
 
@@ -52,44 +52,50 @@ public class KeyExchangeListener implements PacketListener {
 						encryptedKey = invitee.encryptSessionKey(dummySessionKey);
 						mXMPPService.sendKey(sender, TeamMeetPacketExtension.KEYTYPE_SECRET, encryptedKey, teamName);
 					} else {
-						//TODO: Inform user via UI
-						Log.w(CLASS, String.format("Protocol breach: Received session key from invitee '%s'", sender));
+						String problem = String.format("Protocol breach: Received session key from invitee '%s'", sender);
+						mToaster.toast(problem);
+						Log.w(CLASS, problem);
 					}
 
 				} else if (team.isInviter(sender)) {
 					KeyExchangePartner inviter = team.getInviter();
 					if (cryptoPacket.isPublicKey()) {
 						status = "Exchanging public keys...";
-						Log.d(CLASS, status);
 						mToaster.toast(status);
+						Log.d(CLASS, status);
 
 						mXMPPService.sendKey(sender, TeamMeetPacketExtension.KEYTYPE_PUBLIC, inviter.getPublicKey(), teamName);
 						inviter.calculateSharedSecret(key);
 					} else {
 						status = "Received session key";
-						Log.d(CLASS, status);
 						mToaster.toast(status);
+						Log.d(CLASS, status);
 						byte[] sessionKey = inviter.decryptSessionKey(key);
 						Log.d(CLASS, String.format("Decrypted session key: '%s'", new String(sessionKey)));
 					}
 
 				} else {
-					//TODO: Inform user via UI
-					Log.w(CLASS, String.format("Received bogus public key from '%s'!", sender));
+					String problem = String.format("Protocol breach: Received bogus public key from '%s'!", sender);
+					mToaster.toast(problem);
+					Log.w(CLASS, problem);
 				}
 			} catch (XMPPException e) {
-				//TODO: Inform user via UI
-				Log.e(CLASS, String.format("'%s' sent crypto packet for unknown team '%s': %s", sender, teamName, e.getMessage()));
+				String problem = String.format("'%s' sent crypto packet for unknown team '%s': %s", sender, teamName, e.getMessage());
+				mToaster.toast(problem);
+				Log.e(CLASS, problem);
 			} catch (TeamException e) {
-				//TODO: Inform user via UI
-				Log.e(CLASS, String.format("Could not get exchange partner in '%s': %s", teamName, e.getMessage()));
+				String problem = String.format("Could not get exchange partner in '%s': %s", teamName, e.getMessage());
+				mToaster.toast(problem);
+				Log.e(CLASS, problem);
 			} catch (InvalidKeyException e) {
-				//TODO: Inform user via UI
-				Log.e(CLASS, String.format("Could not calculate key for '%s': %s", sender, e.getMessage()));
+				String problem = String.format("Could not calculate key for '%s': %s", sender, e.getMessage());
+				mToaster.toast(problem);
+				Log.e(CLASS, problem);
 			}
 		} else {
-			//TODO: Inform user via UI
-			Log.e(CLASS, String.format("Protocol breach: '%s' sent teammeet packet through chat without crypto packet!", sender));
+			String problem = String.format("Protocol breach: '%s' sent teammeet packet through chat without crypto packet!", sender);
+			mToaster.toast(problem);
+			Log.e(CLASS, problem);
 		}
 	}
 }

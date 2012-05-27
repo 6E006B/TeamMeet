@@ -54,25 +54,27 @@ public class TeamJoinListener implements ParticipantStatusListener {
 			String status = String.format("%s just joined team '%s'",
 										   StringUtils.parseName(mateName),
 										   StringUtils.parseName(mTeam.toString()));
-			Log.d(CLASS, status);
 			mToaster.toast(status);
+			Log.d(CLASS, status);
 
 			if (mTeam.isInvitee(mateName)) {
 				status = String.format("Exchanging public keys...",
 										StringUtils.parseName(mateName),
 										StringUtils.parseName(mTeam.toString()));
-				Log.d(CLASS, status);
 				mToaster.toast(status);
+				Log.d(CLASS, status);
 
 				KeyExchangePartner mate = mTeam.getInvitee(mateName);
 				mXMPPService.sendKey(mate.getName(), TeamMeetPacketExtension.KEYTYPE_PUBLIC, mate.getPublicKey(), mTeam.toString());
 			}
 		} catch (XMPPException e) {
-			//TODO: Notify user via UI
-			Log.e(CLASS, String.format("Failed to resolve full JID for '%s' in '%s': %s", fullAddress, mTeam, e.getMessage()));
+			String problem = String.format("Failed to resolve full JID for '%s' in '%s': %s", fullAddress, mTeam, e.getMessage());
+			mToaster.toast(problem);
+			Log.e(CLASS, problem);
 		} catch (TeamException e) {
-			//TODO: Notify user via UI
-			Log.e(CLASS, String.format("Could not get mate '%s' from team '%s': %s", mateName, mTeam, e.getMessage()));
+			String problem = String.format("Could not get mate '%s' from team '%s': %s", mateName, mTeam, e.getMessage());
+			mToaster.toast(problem);
+			Log.e(CLASS, problem);
 		}
 	}
 
