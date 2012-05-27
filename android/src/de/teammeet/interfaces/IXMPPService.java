@@ -57,7 +57,7 @@ public interface IXMPPService {
 
 	void createRoom(String groupName, String conferenceServer) throws XMPPException;
 
-	void joinRoom(String room, String userID, String password) throws XMPPException;
+	void joinTeam(String room, String userID, String password, String inviter) throws XMPPException;
 
 	void leaveTeam(String roomName) throws XMPPException;
 
@@ -90,5 +90,5 @@ public interface IXMPPService {
 
 	Team getTeam(String teamName) throws XMPPException;
 
-	String getFullJID(String teamName, String fullNick) throws XMPPException;
+	void sendKey(String mate, String type, byte[] publicKey, String team) throws XMPPException;
 }

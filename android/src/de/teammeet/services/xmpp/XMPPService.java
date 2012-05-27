@@ -18,13 +18,15 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.AndFilter;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
+import org.jivesoftware.smack.filter.PacketExtensionFilter;
+import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.muc.MultiUserChat;
-import org.jivesoftware.smackx.muc.Occupant;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -52,6 +54,7 @@ import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.activities.roster.RosterActivity;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.helper.ChatOpenHelper;
+import de.teammeet.helper.ToastHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IInvitationHandler;
@@ -90,6 +93,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private Map<String, Team> mTeams = null;
 	private RoomInvitationListener mRoomInvitationListener = null;
 	private ChatMessageListener mChatMessageListener = null;
+	private KeyExchangeListener mKeyExchangeRequestListener = null;
 
 	private final ReentrantLock mLockGroups = new ReentrantLock();
 	private final ReentrantLock mLockInvitations = new ReentrantLock();
@@ -109,7 +113,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private TimerTask mTimerTask = null;
 	private ChatOpenHelper mChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
-	private SecureRandom mKeyGenerator = null;
+	private SecureRandom mRandomNumberGenerator = null;
 
 	private NotificationCompat.Builder mServiceNotificationBuilder;
 	private NotificationCompat.Builder mInvitationNotificationBuilder;
@@ -128,8 +132,9 @@ public class XMPPService extends Service implements IXMPPService {
 		super.onCreate();
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
+		ToastHelper.initialize(this);
 		mChatDatabase = new ChatOpenHelper(this);
-		mKeyGenerator = new SecureRandom();
+		mRandomNumberGenerator = new SecureRandom();
 	}
 
 	@Override
@@ -208,6 +213,10 @@ public class XMPPService extends Service implements IXMPPService {
 		mRoomInvitationListener  = new RoomInvitationListener(this);
 		MultiUserChat.addInvitationListener(mXMPP, mRoomInvitationListener);
 
+		mKeyExchangeRequestListener = new KeyExchangeListener(this);
+		final PacketFilter keyExchangeRequestfilter = new AndFilter(new MessageTypeFilter(Message.Type.chat),
+													  new PacketExtensionFilter(TeamMeetPacketExtension.NAMESPACE));
+		mXMPP.addPacketListener(mKeyExchangeRequestListener, keyExchangeRequestfilter);
 		mChatMessageListener = new ChatMessageListener(this);
 		final MessageTypeFilter chatMessageFilter = new MessageTypeFilter(Message.Type.chat);
 		mXMPP.addPacketListener(mChatMessageListener, chatMessageFilter);
@@ -305,7 +314,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 		muc.sendConfigurationForm(configForm);
 
-		Team team = new Team(muc);
+		Team team = new Team(group, muc);
 		addTeam(group, team);
 	}
 
@@ -325,17 +334,16 @@ public class XMPPService extends Service implements IXMPPService {
 
 	private String generateMUCPassword() {
 		byte[] roomKey = new byte[18]; // 18 bytes = 144 bits = 24 base64-chars
-		mKeyGenerator.nextBytes(roomKey);
+		mRandomNumberGenerator.nextBytes(roomKey);
 		return Base64.encodeBytes(roomKey);
 	}
 
 	@Override
-	public void joinRoom(String room, String userID, String password) throws XMPPException {
-		Log.d(CLASS, String.format("joinRoom('%s', '%s', '%s')",
-		                           room, userID, password));
+	public void joinTeam(String room, String userID, String password, String inviter) throws XMPPException {
 		MultiUserChat muc = new MultiUserChat(mXMPP, room);
+		Team team = new Team(room, muc);
+		team.setInviter(inviter);
 		muc.join(userID, password);
-		Team team = new Team(muc);
 		addTeam(room, team);
 	}
 
@@ -343,7 +351,7 @@ public class XMPPService extends Service implements IXMPPService {
 		Log.d(CLASS, String.format("adding team '%s'", teamName));
 		acquireTeamsLock();
 		team.getRoom().addMessageListener(new RoomMessageListener(this, teamName));
-		team.getRoom().addParticipantStatusListener(new TeamJoinListener(this, teamName));
+		team.getRoom().addParticipantStatusListener(new TeamJoinListener(this, team));
 		team.getRoom().addInvitationRejectionListener(new TeamJoinDeclinedListener(this, teamName));
 		mTeams.put(teamName, team);
 		releaseTeamsLock();
@@ -381,7 +389,7 @@ public class XMPPService extends Service implements IXMPPService {
 			String server =
 					settings.getString(getString(R.string.preference_server_key), "");
 			String alternateAddress = String.format("%s@%s", userID, server);
-			team.getRoom().destroy("reason", alternateAddress);
+			team.getRoom().destroy(getString(R.string.reason_team_destroy), alternateAddress);
 			removeTeam(teamName);
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));
@@ -422,29 +430,6 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public String getFullJID(String teamName, String fullNick) throws XMPPException {
-		String fullJID = null;
-
-		Team team = mTeams.get(teamName);
-		if (team != null) {
-			Occupant occupant = team.getRoom().getOccupant(fullNick);
-			if (occupant != null) {
-				fullJID = occupant.getJid();
-				if (fullJID == null) {
-					throw new XMPPException(String.format("Full JID for '%s' not available in '%s'",
-														   fullNick, teamName));
-				}
-			} else {
-				throw new XMPPException(String.format("No user '%s' in '%s'", fullNick, teamName));
-			}
-		} else {
-			throw new XMPPException(String.format("No team '%s'", teamName));
-		}
-
-		return fullJID;
-	}
-
-	@Override
 	public String getNickname(String teamName) throws XMPPException {
 		String nick;
 		Team team = mTeams.get(teamName);
@@ -460,7 +445,7 @@ public class XMPPService extends Service implements IXMPPService {
 	public void invite(String contact, String teamName) throws XMPPException {
 		Team team = mTeams.get(teamName);
 		if (team != null) {
-			team.getRoom().invite(contact, "reason");
+			team.getRoom().invite(contact, getString(R.string.reason_team_invite));
 			team.addInvitee(contact);
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));
@@ -471,6 +456,30 @@ public class XMPPService extends Service implements IXMPPService {
 	public void declineInvitation(String teamName, String inviter, String reason) throws XMPPException {
 		if (mXMPP != null) {
 		MultiUserChat.decline(mXMPP, teamName, inviter, reason);
+		} else {
+			throw new XMPPException("Not connected");
+		}
+	}
+
+	@Override
+	public void sendKey(String mate, String type, byte[] key, String team) throws XMPPException {
+		if (mXMPP != null) {
+			if (mXMPP.isAuthenticated()) {
+				Log.d(CLASS, String.format("Sending key to '%s' in '%s'", mate, team));
+
+				Message message = new Message();
+				message.setType(Message.Type.chat);
+				message.setTo(mate);
+				CryptoPacket cryptoPacket = new CryptoPacket(type, key, team);
+				TeamMeetPacketExtension teamMeetExt = new TeamMeetPacketExtension(null,
+																				  null,
+																				  cryptoPacket);
+				message.addExtension(teamMeetExt);
+
+				mXMPP.sendPacket(message);
+			} else {
+				throw new XMPPException("Not authenticated");
+			}
 		} else {
 			throw new XMPPException("Not connected");
 		}
@@ -532,6 +541,7 @@ public class XMPPService extends Service implements IXMPPService {
 				                                       location.getLatitudeE6(),
 				                                       accuracy);
 				TeamMeetPacketExtension teamMeetPacket = new TeamMeetPacketExtension(matePacket,
+				                                                                     null,
 				                                                                     null);
 				message.addExtension(teamMeetPacket);
 				message.addBody("", "");
@@ -558,7 +568,7 @@ public class XMPPService extends Service implements IXMPPService {
 				 						                             location.getLongitudeE6(),
 										                             info, remove);
 				TeamMeetPacketExtension teamMeetPacket =
-						new TeamMeetPacketExtension(null, indicatorPacket);
+						new TeamMeetPacketExtension(null, indicatorPacket, null);
 				message.addExtension(teamMeetPacket);
 				message.addBody("", "");
 				sendAllTeams(message);
@@ -628,6 +638,7 @@ public class XMPPService extends Service implements IXMPPService {
 		packet.setBody(message);
 		packet.setType(Message.Type.chat);
 		packet.setTo(to);
+		//TODO: Do we have/want to set from? May b0rk if we make a mistake, should be set by the server?
 		packet.setFrom(String.format("%s@%s", mUserID, mServer));
 		mXMPP.sendPacket(packet);
 	}
@@ -730,7 +741,6 @@ public class XMPPService extends Service implements IXMPPService {
 		notificationIntent.putExtra(INVITER, inviter);
 		notificationIntent.putExtra(REASON, reason);
 		notificationIntent.putExtra(PASSWORD, password);
-		notificationIntent.putExtra(FROM, message.getFrom());
 		final PendingIntent contentIntent =
 				PendingIntent.getActivity(this, 0, notificationIntent,
 				                          PendingIntent.FLAG_UPDATE_CURRENT);
@@ -931,4 +941,5 @@ public class XMPPService extends Service implements IXMPPService {
 	private void acquireChatMessageLock() {
 		mLockChatMessages.lock();
 	}
+
 }
