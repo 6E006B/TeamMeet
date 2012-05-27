@@ -5,7 +5,10 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.muc.Occupant;
 import org.jivesoftware.smackx.muc.ParticipantStatusListener;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
+import de.teammeet.R;
 import de.teammeet.helper.ToastHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.Team.TeamException;
@@ -37,6 +40,11 @@ public class TeamJoinListener implements ParticipantStatusListener {
 	@Override
 	public void joined(String fullAddress) {
 		String mateName = null;
+
+		Context ctx = (Context) mXMPPService;
+		Intent newTeam = new Intent(ctx.getString(R.string.broadcast_teams_updated));
+		ctx.sendStickyBroadcast(newTeam);
+
 		try {
 			String fullJID = getFullJID(mTeam, fullAddress);
 			Log.d(CLASS, String.format("full JID is '%s'", fullJID));
