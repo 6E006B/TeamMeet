@@ -26,22 +26,13 @@ public class TeamJoinListener implements ParticipantStatusListener {
 	}
 	
 	@Override
-	public void adminGranted(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void adminGranted(String arg0) {}
 
 	@Override
-	public void adminRevoked(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void adminRevoked(String arg0) {}
 
 	@Override
-	public void banned(String arg0, String arg1, String arg2) {
-		// TODO Auto-generated method stub
-
-	}
+	public void banned(String arg0, String arg1, String arg2) {}
 
 	@Override
 	public void joined(String fullAddress) {
@@ -96,69 +87,36 @@ public class TeamJoinListener implements ParticipantStatusListener {
 	}
 
 	@Override
-	public void kicked(String arg0, String arg1, String arg2) {
-		// TODO Auto-generated method stub
-
-	}
+	public void kicked(String arg0, String arg1, String arg2) {}
 
 	@Override
-	public void left(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void left(String arg0) {}
 
 	@Override
-	public void membershipGranted(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void membershipGranted(String arg0) {}
 
 	@Override
-	public void membershipRevoked(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void membershipRevoked(String arg0) {}
 
 	@Override
-	public void moderatorGranted(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void moderatorGranted(String arg0) {}
 
 	@Override
-	public void moderatorRevoked(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void moderatorRevoked(String arg0) {}
 
 	@Override
-	public void nicknameChanged(String arg0, String arg1) {
-		// TODO Auto-generated method stub
-
-	}
+	public void nicknameChanged(String arg0, String arg1) {}
 
 	@Override
-	public void ownershipGranted(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void ownershipGranted(String arg0) {}
 
 	@Override
-	public void ownershipRevoked(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void ownershipRevoked(String arg0) {}
 
 	@Override
-	public void voiceGranted(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void voiceGranted(String arg0) {}
 
 	@Override
-	public void voiceRevoked(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void voiceRevoked(String arg0) {}
 
 }
