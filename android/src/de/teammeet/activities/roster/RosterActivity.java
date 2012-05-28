@@ -319,7 +319,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 		if (mXMPPService.isAuthenticated()) {
 			new DisconnectTask((XMPPService)mXMPPService, new DisconnectHandler()).execute();
 		} else {
-			new ConnectTask((XMPPService)mXMPPService, new ConnectHandler()).execute();
+			new ConnectTask(this, (XMPPService)mXMPPService, new ConnectHandler()).execute();
 		}
 	}
 
