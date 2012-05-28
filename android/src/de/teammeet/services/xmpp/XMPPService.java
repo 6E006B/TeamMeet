@@ -40,6 +40,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -49,8 +50,6 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
 import de.teammeet.R;
-import de.teammeet.activities.chat.Chat;
-import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.activities.roster.RosterActivity;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.helper.ChatOpenHelper;
@@ -72,6 +71,7 @@ public class XMPPService extends Service implements IXMPPService {
 	public static final String FROM = "from";
 	public static final String GROUP = "group";
 	public static final String SENDER = "sender";
+	public static final String MESSAGE = "message";
 
 	public static final int TYPE_NONE = 0;
 	public static final int TYPE_JOIN = 1;
@@ -116,10 +116,12 @@ public class XMPPService extends Service implements IXMPPService {
 	private SecureRandom mRandomNumberGenerator = null;
 
 	private NotificationCompat.Builder mServiceNotificationBuilder;
-	private NotificationCompat.Builder mInvitationNotificationBuilder;
-	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
-	private NotificationCompat.Builder mChatMessageNotificationBuilder;
-
+//	private NotificationCompat.Builder mInvitationNotificationBuilder;
+	private InvitationNotificationHandler mInvitationNotificationHandler;
+//	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
+	private GroupMessageNotificationHandler mGroupMessageNotificationHandler;
+//	private NotificationCompat.Builder mChatMessageNotificationBuilder;
+	private ChatMessageNotificationHandler mChatMessageNotificationHandler;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -135,6 +137,15 @@ public class XMPPService extends Service implements IXMPPService {
 		ToastHelper.initialize(this);
 		mChatDatabase = new ChatOpenHelper(this);
 		mRandomNumberGenerator = new SecureRandom();
+		mInvitationNotificationHandler =
+				new InvitationNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
+				                                  NOTIFICATION_GROUP_INVITATION_ID);
+		mGroupMessageNotificationHandler =
+				new GroupMessageNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
+				                                    NOTIFICATION_GROUP_CHAT_MESSAGE_ID);
+		mChatMessageNotificationHandler =
+				new ChatMessageNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
+				                                    NOTIFICATION_CHAT_MESSAGE_ID);
 	}
 
 	@Override
@@ -708,50 +719,10 @@ public class XMPPService extends Service implements IXMPPService {
 			releaseInvitationsLock();
 		}
 		if (!handled) {
-			notifyNewInvitation(room, inviter, reason, password, message);
+			final Bundle bundle = InvitationNotificationHandler.generateBundle(room, inviter,
+			                                                                   reason, password);
+			mInvitationNotificationHandler.newNotification(bundle);
 		}
-	}
-
-	private void showAutoCancelNotificaton(CharSequence title, CharSequence text,
-			CharSequence tickerText, int icon, PendingIntent pendingIntent, int notificationID,
-			NotificationCompat.Builder builder) {
-		final String ns = Context.NOTIFICATION_SERVICE;
-		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
-
-		builder.setContentTitle(title);
-		builder.setContentText(text);
-		builder.setTicker(tickerText);
-		builder.setSmallIcon(icon);
-		builder.setAutoCancel(true);
-		builder.setDefaults(Notification.DEFAULT_ALL);
-		builder.setContentIntent(pendingIntent);
-		Notification notification = builder.getNotification();
-
-		notificationManager.notify(notificationID, notification);
-	}
-	private void notifyNewInvitation(String room, String inviter, String reason,
-			  String password, Message message) {
-		final int icon = R.drawable.ic_stat_notify_teammeet;
-		final CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
-		                                        room, inviter, reason);
-		final CharSequence contentTitle = "Group Invitation received";
-		final Intent notificationIntent = new Intent(this, RosterActivity.class);
-		notificationIntent.putExtra(TYPE, TYPE_JOIN);
-		notificationIntent.putExtra(ROOM, room);
-		notificationIntent.putExtra(INVITER, inviter);
-		notificationIntent.putExtra(REASON, reason);
-		notificationIntent.putExtra(PASSWORD, password);
-		final PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, notificationIntent,
-				                          PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
-
-		if (mInvitationNotificationBuilder == null) {
-			mInvitationNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-		}
-		showAutoCancelNotificaton(contentTitle, tickerText, tickerText, icon, contentIntent,
-		                          NOTIFICATION_GROUP_INVITATION_ID, mInvitationNotificationBuilder);
 	}
 
 	@Override
@@ -792,34 +763,12 @@ public class XMPPService extends Service implements IXMPPService {
 			releaseGroupMessageLock();
 		}
 		if (!handled) {
-			notifyGroupMessage(message);
+			final Bundle bundle =
+					GroupMessageNotificationHandler.generateBundle(message.getTo(),
+					                                               message.getFrom(),
+					                                               message.getMessage());
+			mGroupMessageNotificationHandler.newNotification(bundle);
 		}
-	}
-
-	private void notifyGroupMessage(ChatMessage message) {
-		final String notificationText = String.format("%s (%s) : %s",
-		                                              message.getFrom(),
-		                                              message.getTo(),
-		                                              message.getMessage());
-		Log.d(CLASS, notificationText);
-		final int icon = R.drawable.ic_stat_notify_teammeet;
-		final CharSequence tickerText = String.format("New team message in %s", notificationText);
-		final CharSequence contentTitle = "Group chat message received";
-		final Intent notificationIntent = new Intent(this, ChatsActivity.class);
-		notificationIntent.putExtra(TYPE, Chat.TYPE_GROUP_CHAT);
-		notificationIntent.putExtra(SENDER, message.getTo());
-		final PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, notificationIntent,
-				                          PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
-
-		if (mGroupMessageNotificationBuilder == null) {
-			mGroupMessageNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-		}
-		showAutoCancelNotificaton(contentTitle, notificationText, tickerText, icon, contentIntent,
-		                          NOTIFICATION_GROUP_CHAT_MESSAGE_ID,
-		                          mGroupMessageNotificationBuilder);
 	}
 
 	@Override
@@ -858,34 +807,11 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 		if (!handled) {
 			Log.d(CLASS, "chat message has not been handled.");
-			notifyNewChatMessage(message);
+			final Bundle bundle =
+					ChatMessageNotificationHandler.generateBundle(message.getFrom(),
+					                                              message.getMessage());
+			mChatMessageNotificationHandler.newNotification(bundle);
 		}
-	}
-
-	private void notifyNewChatMessage(ChatMessage message) {
-		final String notificationText = String.format("%s: %s",
-		                                              message.getFrom(),
-		                                              message.getMessage());
-		Log.d(CLASS, notificationText);
-
-		final int icon = R.drawable.ic_stat_notify_teammeet;
-		final CharSequence tickerText = String.format("New message from %s", notificationText);
-
-		final CharSequence contentTitle = "Chat message received";
-		final Intent notificationIntent = new Intent(this, ChatsActivity.class);
-		notificationIntent.putExtra(TYPE, Chat.TYPE_NORMAL_CHAT);
-		notificationIntent.putExtra(SENDER, message.getFrom());
-		final PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, notificationIntent,
-				                          PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
-
-		if (mChatMessageNotificationBuilder == null) {
-			mChatMessageNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-		}
-		showAutoCancelNotificaton(contentTitle, notificationText, tickerText, icon, contentIntent,
-		                          NOTIFICATION_CHAT_MESSAGE_ID, mChatMessageNotificationBuilder);
 	}
 
 	@Override
@@ -941,5 +867,4 @@ public class XMPPService extends Service implements IXMPPService {
 	private void acquireChatMessageLock() {
 		mLockChatMessages.lock();
 	}
-
 }
