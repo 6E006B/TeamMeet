@@ -38,7 +38,7 @@ public class ChatMessageNotificationHandler extends NotificationHandler {
 	 */
 	public static Bundle generateBundle(String sender, String message) {
 		Bundle bundle = new Bundle();
-		bundle.putInt(XMPPService.TYPE, Chat.TYPE_GROUP_CHAT);
+		bundle.putInt(XMPPService.TYPE, Chat.TYPE_NORMAL_CHAT);
 		bundle.putString(XMPPService.SENDER, sender);
 		bundle.putString(XMPPService.MESSAGE, message);
 		return bundle;
