@@ -20,7 +20,7 @@ public class ChatMessageNotificationHandler extends NotificationHandler {
 		final PendingIntent contentIntent = createPendingIntent(ChatsActivity.class, bundle);
 
 		final CharSequence notificationText = createNotificationText(bundle);
-		final String tickerText = String.format("New team message in %s", notificationText);
+		final String tickerText = String.format("New chat message %s", notificationText);
 		final Notification notification = buildNotificaton(CONTENT_TITLE, notificationText,
 		                                                   tickerText, contentIntent);
 		notify(notification);
@@ -47,6 +47,6 @@ public class ChatMessageNotificationHandler extends NotificationHandler {
 	protected String createNotificationText(Bundle bundle) {
 		final String sender = bundle.getString(XMPPService.SENDER, "");
 		final String message = bundle.getString(XMPPService.MESSAGE, "");
-		return String.format("%s : %s", sender, message);
+		return String.format("%s: %s", sender, message);
 	}
 }
