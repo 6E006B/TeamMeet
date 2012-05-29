@@ -6,7 +6,11 @@ import de.teammeet.interfaces.IAsyncTaskCallback;
 public abstract class BaseAsyncTaskCallback<T> implements IAsyncTaskCallback<T> {
 
 	private static final String CLASS = BaseAsyncTaskCallback.class.getSimpleName();
-	
+
+	public void onPreExecute() {
+		Log.d(CLASS, String.format("%s pre execution", getTaskType()));
+	}
+
 	@Override
 	public void onTaskCompleted(T result) {
 		Log.d(CLASS, String.format("%s completed successfully", getTaskType()));

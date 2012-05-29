@@ -3,6 +3,8 @@ package de.teammeet.activities.roster;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.util.StringUtils;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.widget.Toast;
@@ -317,9 +320,17 @@ public class RosterActivity extends SherlockFragmentActivity {
 	};
 
 	private class ConnectHandler extends BaseAsyncTaskCallback<Void> {
+		private de.teammeet.activities.roster.RosterActivity.ConnectHandler.ConnectProgressDialog mProgressDialog;
+
+		@Override
+		public void onPreExecute() {
+			showProgressDialog();
+		}
+
 		@Override
 		public void onTaskCompleted(Void nothing) {
 			Log.d(CLASS, "Connect task completed!!");
+			dismissProgressDialog();
 			invalidateOptionsMenu();
 
 			// broadcast connected
@@ -330,8 +341,31 @@ public class RosterActivity extends SherlockFragmentActivity {
 
 		@Override
 		public void onTaskAborted(Exception e) {
+			dismissProgressDialog();
 			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
 			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+		}
+
+		private void showProgressDialog() {
+			mProgressDialog = new ConnectProgressDialog();
+			FragmentManager fm = getSupportFragmentManager();
+			mProgressDialog.show(fm, null);
+		}
+
+		private void dismissProgressDialog() {
+			mProgressDialog.dismiss();
+		}
+
+		private class ConnectProgressDialog extends DialogFragment {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				ProgressDialog dialog = new ProgressDialog(RosterActivity.this);
+				dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+				dialog.setMessage("Connecting...");
+				dialog.setCancelable(false);
+				dialog.setIndeterminate(true);
+				return dialog;
+			}
 		}
 	}
 
