@@ -5,6 +5,7 @@ import java.security.InvalidKeyException;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smack.util.StringUtils;
 
 import android.util.Log;
@@ -44,12 +45,12 @@ public class KeyExchangeListener implements PacketListener {
 						mToaster.toast(status);
 						Log.d(CLASS, status);
 
-						byte[] dummySessionKey = "This is just a dummy session key".getBytes();
+						byte[] sessionKey = team.getSessionKey();
 
 						byte[] encryptedKey = null;
 						KeyExchangePartner invitee = team.getInvitee(sender);
 						invitee.calculateSharedSecret(key);
-						encryptedKey = invitee.encryptSessionKey(dummySessionKey);
+						encryptedKey = invitee.encryptSessionKey(sessionKey);
 						mXMPPService.sendKey(sender, TeamMeetPacketExtension.KEYTYPE_SECRET, encryptedKey, teamName);
 					} else {
 						String problem = String.format("Protocol breach: Received session key from invitee '%s'", sender);
@@ -71,7 +72,7 @@ public class KeyExchangeListener implements PacketListener {
 						mToaster.toast(status);
 						Log.d(CLASS, status);
 						byte[] sessionKey = inviter.decryptSessionKey(key);
-						Log.d(CLASS, String.format("Decrypted session key: '%s'", new String(sessionKey)));
+						Log.d(CLASS, String.format("Decrypted session key: '%s'", Base64.encodeBytes(sessionKey)));
 					}
 
 				} else {
