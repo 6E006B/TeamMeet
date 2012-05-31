@@ -1,8 +1,13 @@
 package de.teammeet.services.xmpp;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.util.Log;
@@ -12,6 +17,7 @@ public class Team {
 	
 	private final String mName;
 	private final MultiUserChat mRoom;
+	private final SecretKeySpec mSessionKey;
 	private KeyExchangePartner mInviter;
 	private Map<String, KeyExchangePartner> mInvitees;
 
@@ -19,12 +25,34 @@ public class Team {
 	public Team(String name, MultiUserChat room) {
 		mName = name;
 		mRoom = room;
+		mSessionKey = generateSessionKey();
 		mInviter = null;
 		mInvitees = new HashMap<String, KeyExchangePartner>();
 	}
-	
+
+	private SecretKeySpec generateSessionKey() {
+		Log.d(CLASS, "generating session key");
+		SecretKeySpec sessionKeySpec = null;
+
+		try {
+			KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+			keyGenerator.init(256);
+			byte[] sessionKey = keyGenerator.generateKey().getEncoded();
+			sessionKeySpec = new SecretKeySpec(sessionKey, "AES");
+		} catch (NoSuchAlgorithmException e) {
+			Log.e(CLASS, String.format("Could not instantiate AES key generator: %s", e.getMessage()), e);
+		}
+
+		Log.d(CLASS, String.format("generated session key '%s'", Base64.encodeBytes(sessionKeySpec.getEncoded())));
+		return sessionKeySpec;
+	}
+
 	public MultiUserChat getRoom() {
 		return mRoom;
+	}
+
+	public byte[] getSessionKey() {
+		return mSessionKey.getEncoded();
 	}
 
 	public void setInviter(String name) {
