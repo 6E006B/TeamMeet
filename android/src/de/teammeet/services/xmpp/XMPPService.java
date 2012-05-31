@@ -350,12 +350,17 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void joinTeam(String room, String userID, String password, String inviter) throws XMPPException {
-		MultiUserChat muc = new MultiUserChat(mXMPP, room);
-		Team team = new Team(room, muc);
+	public void joinTeam(String teamName, String userID, String password, String inviter) throws XMPPException {
+		MultiUserChat muc = new MultiUserChat(mXMPP, teamName);
+		Team team = new Team(teamName, muc);
 		team.setInviter(inviter);
-		muc.join(userID, password);
-		addTeam(room, team);
+		addTeam(teamName, team);
+		try {
+			muc.join(userID, password);
+		} catch (XMPPException error) {
+			removeTeam(teamName);
+			throw error;
+		}
 	}
 
 	private void addTeam(final String teamName, Team team) {
