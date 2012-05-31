@@ -34,12 +34,11 @@ public class InvitationNotificationHandler extends NotificationHandler {
 	 * @param password The password for the room, that is needed to join.
 	 * @return A ready to use Bundle for newNotification().
 	 */
-	public static Bundle generateBundle(String room, String inviter, String reason, String password) {
+	public static Bundle generateBundle(String room, String inviter, String password) {
 		Bundle bundle = new Bundle();
 		bundle.putInt(XMPPService.TYPE, XMPPService.TYPE_JOIN);
 		bundle.putString(XMPPService.ROOM, room);
 		bundle.putString(XMPPService.INVITER, inviter);
-		bundle.putString(XMPPService.REASON, reason);
 		bundle.putString(XMPPService.PASSWORD, password);
 		return bundle;
 	}
@@ -47,7 +46,6 @@ public class InvitationNotificationHandler extends NotificationHandler {
 	protected String createTickerText(Bundle bundle) {
 		final String room = bundle.getString(XMPPService.ROOM);
 		final String inviter = bundle.getString(XMPPService.INVITER);
-		final String reason = bundle.getString(XMPPService.REASON);
-		return String.format("Invitation to '%s' from %s reason: '%s'", room, inviter, reason);
+		return String.format("Invitation to '%s' from %s", room, inviter);
 	}
 }

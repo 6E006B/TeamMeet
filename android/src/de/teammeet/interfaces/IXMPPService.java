@@ -86,7 +86,7 @@ public interface IXMPPService {
 
 	String getNickname(String room) throws XMPPException;
 
-	void declineInvitation(String teamName, String inviter, String reason) throws XMPPException;
+	void declineInvitation(String teamName, String inviter) throws XMPPException;
 
 	Team getTeam(String teamName) throws XMPPException;
 

@@ -15,14 +15,12 @@ public class JoinTeamDialog extends DialogFragment {
 	
 	private final String mTeam;
 	private final String mInviter;
-	private final String mReason;
 	private final String mPassword;
 
-	public JoinTeamDialog(String team, String inviter, String reason, String password) {
+	public JoinTeamDialog(String team, String inviter, String password) {
 		super();
 		mTeam = team;
 		mInviter = inviter;
-		mReason = reason;
 		mPassword = password;
 	}
 	
@@ -33,10 +31,9 @@ public class JoinTeamDialog extends DialogFragment {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		builder.setTitle(R.string.join_team_dialog_title);
 		builder.setCancelable(false);
-		builder.setMessage(String.format("%s wants you to join '%s':\n%s",
+		builder.setMessage(String.format("%s wants you to join '%s'",
 				 StringUtils.parseName(mInviter),
-				 StringUtils.parseName(mTeam),
-				 mReason)
+				 StringUtils.parseName(mTeam))
 				);
 		builder.setPositiveButton(R.string.button_join, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {

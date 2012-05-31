@@ -160,18 +160,17 @@ public class RosterActivity extends SherlockFragmentActivity {
 	private void handleJoinIntent(Intent intent) {
 		final String team = intent.getStringExtra(XMPPService.ROOM);
 		final String inviter = StringUtils.parseBareAddress(intent.getStringExtra(XMPPService.INVITER));
-		final String reason = intent.getStringExtra(XMPPService.REASON);
 		final String password = intent.getStringExtra(XMPPService.PASSWORD);
 
-		Log.d(CLASS, String.format("team: '%s' inviter: '%s' reason: '%s' password: '%s'",
-									team, inviter, reason, password));
+		Log.d(CLASS, String.format("team: '%s' | inviter: '%s' | password: '%s'",
+									team, inviter, password));
 
 		// cleanup the extras so that this is only executed once, not every time the activity is
 		// brought to foreground again
 		cleanupJoinIntent(intent);
 
-		if (team != null && inviter != null && reason != null) {
-			displayDialog(new JoinTeamDialog(team, inviter, reason, password));
+		if (team != null && inviter != null) {
+			displayDialog(new JoinTeamDialog(team, inviter, password));
 		} else {
 			Log.e(CLASS, "Cannot handle invite: Missing parameters.");
 		}
@@ -180,7 +179,6 @@ public class RosterActivity extends SherlockFragmentActivity {
 	private void cleanupJoinIntent(Intent intent) {
 		intent.removeExtra(XMPPService.ROOM);
 		intent.removeExtra(XMPPService.INVITER);
-		intent.removeExtra(XMPPService.REASON);
 		intent.removeExtra(XMPPService.PASSWORD);
 		intent.removeExtra(XMPPService.FROM);
 	}
@@ -296,7 +294,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 
 	public void clickedRejectTeam(String team, String inviter) {
 		try {
-			mXMPPService.declineInvitation(team, inviter, getString(R.string.reason_team_rejection));
+			mXMPPService.declineInvitation(team, inviter);
 		} catch (XMPPException e) {
 			String problem = String.format("Error when declining invitation to team '%s': %s", team, e.getMessage());
 			Log.e(CLASS, problem);

@@ -96,8 +96,5 @@
     <string name="broadcast_category_location">de.teammeet.intent.category.LOCATION</string>
     <string name="broadcast_teams_updated">de.teammeet.intent.action.TEAMS_UPDATED</string>
     <string name="description_send_button">send button</string>
-    <string name="reason_team_invite">The team wants you!</string>
-    <string name="reason_team_rejection">We\'re not soldiers!</string>
-    <string name="reason_team_destroy">Everything dies, baby, that\'s a fact&#8230;</string>
 
 </resources>

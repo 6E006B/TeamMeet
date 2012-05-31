@@ -400,7 +400,7 @@ public class XMPPService extends Service implements IXMPPService {
 			String server =
 					settings.getString(getString(R.string.preference_server_key), "");
 			String alternateAddress = String.format("%s@%s", userID, server);
-			team.getRoom().destroy(getString(R.string.reason_team_destroy), alternateAddress);
+			team.getRoom().destroy("", alternateAddress);
 			removeTeam(teamName);
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));
@@ -456,7 +456,7 @@ public class XMPPService extends Service implements IXMPPService {
 	public void invite(String contact, String teamName) throws XMPPException {
 		Team team = mTeams.get(teamName);
 		if (team != null) {
-			team.getRoom().invite(contact, getString(R.string.reason_team_invite));
+			team.getRoom().invite(contact, "");
 			team.addInvitee(contact);
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));
@@ -464,9 +464,9 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void declineInvitation(String teamName, String inviter, String reason) throws XMPPException {
+	public void declineInvitation(String teamName, String inviter) throws XMPPException {
 		if (mXMPP != null) {
-		MultiUserChat.decline(mXMPP, teamName, inviter, reason);
+		MultiUserChat.decline(mXMPP, teamName, inviter, "");
 		} else {
 			throw new XMPPException("Not connected");
 		}
@@ -707,20 +707,20 @@ public class XMPPService extends Service implements IXMPPService {
 		mNotificationManager.cancelAll();
 	}
 
-	public void newInvitation(Connection connection, String room, String inviter, String reason,
+	public void newInvitation(Connection connection, String room, String inviter,
 							  String password, Message message) {
 		boolean handled = false;
 		acquireInvitationsLock();
 		try {
 			for (final IInvitationHandler object : mInvitationHandlers) {
-				handled |= object.handleInvitation(connection, room, inviter, reason, password, message);
+				handled |= object.handleInvitation(connection, room, inviter, password, message);
 			}
 		} finally {
 			releaseInvitationsLock();
 		}
 		if (!handled) {
 			final Bundle bundle = InvitationNotificationHandler.generateBundle(room, inviter,
-			                                                                   reason, password);
+			                                                                   password);
 			mInvitationNotificationHandler.newNotification(bundle);
 		}
 	}
