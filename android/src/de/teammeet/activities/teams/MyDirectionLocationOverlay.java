@@ -20,7 +20,7 @@ public class MyDirectionLocationOverlay extends MyLocationOverlay {
 	private MapView mMapView = null;
 	private MapController mMapController = null;
 	private Paint mPaintPlayer = null;
-	private double mArrowLength = 0;
+	private int mArrowLength = 0;
 	private boolean mFollowLocation = false;
 	
 	public MyDirectionLocationOverlay(Context context, MapView mapView) {
@@ -31,7 +31,7 @@ public class MyDirectionLocationOverlay extends MyLocationOverlay {
 		mPaintPlayer = new Paint();
 		mPaintPlayer.setStyle(Paint.Style.FILL);
 		mPaintPlayer.setColor(resources.getColor(R.color.paint_default));
-		mArrowLength = resources.getInteger(R.integer.arrow_length);
+		mArrowLength = context.getResources().getDimensionPixelSize(R.dimen.direction_arrow_size);
 	}
 
 	@Override
