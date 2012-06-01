@@ -153,7 +153,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> {
 							mMates.get(mate.getID()).setLocation(mate.getLocation(), mate.getAccuracy());
 						} else {
 							mMates.put(mate.getID(), mate);
-							mOverlayItems.add(new MateOverlayItem(mate));
+							mOverlayItems.add(new MateOverlayItem(mate, mContext));
 						}
 					} finally {
 						releaseLock();
