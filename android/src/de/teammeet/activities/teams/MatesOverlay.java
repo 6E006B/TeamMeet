@@ -133,7 +133,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> {
 	public boolean draw(Canvas canvas, MapView mapView, boolean shadow, long when) {
 		boolean isRedrawNeeded = mOverlayItems.size() > 0;
 		if (isRedrawNeeded) {
-			super.draw(canvas, mapView, shadow, when);
+			super.draw(canvas, mapView, false, when);
 		}
 		return isRedrawNeeded;
 	}
