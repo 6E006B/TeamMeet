@@ -300,7 +300,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 		} catch (XMPPException e) {
 			String problem = String.format("Error when declining invitation to team '%s': %s", team, e.getMessage());
 			Log.e(CLASS, problem);
-			Toast.makeText(this, problem, Toast.LENGTH_LONG);
+			Toast.makeText(this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
 
