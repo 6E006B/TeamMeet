@@ -36,7 +36,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
@@ -119,14 +118,6 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> {
 			releaseLock();
 		}
 		return size;
-	}
-
-	@Override
-	protected boolean onTap(int index) {
-		final String mateID = ((MateOverlayItem)mOverlayItems.get(index)).getMate().getID();
-		final String mateNick = Chat.getPath(mateID);
-		Toast.makeText(mContext, mateNick, Toast.LENGTH_SHORT).show();
-		return super.onTap(index);
 	}
 
 	@Override
