@@ -19,7 +19,6 @@
 -->
 <resources>
 
-    <integer name="arrow_length">20</integer>
     <integer name="indicator_size">10</integer>
     <integer name="indicator_width">10</integer>
     <integer name="indicator_text_size">18</integer>
