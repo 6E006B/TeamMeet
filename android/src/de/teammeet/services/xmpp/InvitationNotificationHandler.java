@@ -45,9 +45,9 @@ public class InvitationNotificationHandler extends NotificationHandler {
 	}
 
 	protected String createTickerText(Bundle bundle) {
-		final String room = bundle.getString(XMPPService.ROOM, "");
-		final String inviter = bundle.getString(XMPPService.INVITER, "");
-		final String reason = bundle.getString(XMPPService.REASON, "");
+		final String room = bundle.getString(XMPPService.ROOM);
+		final String inviter = bundle.getString(XMPPService.INVITER);
+		final String reason = bundle.getString(XMPPService.REASON);
 		return String.format("Invitation to '%s' from %s reason: '%s'", room, inviter, reason);
 	}
 }
