@@ -340,6 +340,12 @@ public class XMPPService extends Service implements IXMPPService {
 			}
 		}
 
+		if (config.getField(MUC_PASSWORDPROTECTED_FIELD) == null) {
+			FormField passwordProtectedField = new FormField(MUC_PASSWORDPROTECTED_FIELD);
+			passwordProtectedField.setType(FormField.TYPE_BOOLEAN);
+			config.addField(passwordProtectedField);
+		}
+
 		return config;
 	}
 
