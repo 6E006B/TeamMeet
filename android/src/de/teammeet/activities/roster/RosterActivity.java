@@ -342,6 +342,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 		@Override
 		public void onTaskAborted(Exception e) {
 			dismissProgressDialog();
+			invalidateOptionsMenu();
 			String problem = String.format("Failed to connect to XMPP server: %s", e.getMessage());
 			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
