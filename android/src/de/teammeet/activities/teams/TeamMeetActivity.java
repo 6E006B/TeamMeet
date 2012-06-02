@@ -108,6 +108,8 @@ public class TeamMeetActivity extends SherlockMapActivity {
 		mFullscreen = settings.getBoolean(fullscreenKey, false);
 		final String followLocationKey = getString(R.string.preference_auto_center_key);
 		mFollowingLocation = settings.getBoolean(followLocationKey, false);
+		final String satelliteViewKey = getString(R.string.preference_satellite_key);
+		mSatelliteView = settings.getBoolean(satelliteViewKey, false);
 
 		mCurrentIntent = getIntent();
 	}
