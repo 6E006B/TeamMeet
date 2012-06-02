@@ -45,8 +45,8 @@ public class ChatMessageNotificationHandler extends NotificationHandler {
 	}
 
 	protected String createNotificationText(Bundle bundle) {
-		final String sender = bundle.getString(XMPPService.SENDER, "");
-		final String message = bundle.getString(XMPPService.MESSAGE, "");
+		final String sender = bundle.getString(XMPPService.SENDER);
+		final String message = bundle.getString(XMPPService.MESSAGE);
 		return String.format("%s: %s", sender, message);
 	}
 }

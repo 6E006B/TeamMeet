@@ -46,9 +46,9 @@ public class GroupMessageNotificationHandler extends NotificationHandler {
 	}
 
 	protected String createNotificationText(Bundle bundle) {
-		final String from = bundle.getString(XMPPService.FROM, "");
-		final String sender = bundle.getString(XMPPService.SENDER, "");
-		final String message = bundle.getString(XMPPService.MESSAGE, "");
+		final String from = bundle.getString(XMPPService.FROM);
+		final String sender = bundle.getString(XMPPService.SENDER);
+		final String message = bundle.getString(XMPPService.MESSAGE);
 		return String.format("%s (%s) : %s", from, sender, message);
 	}
 }
