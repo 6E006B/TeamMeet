@@ -35,9 +35,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
@@ -233,9 +235,14 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 			@Override
 			public void onClick(DialogInterface dialog, int id) {
 				Log.d(CLASS, "User clicked Navigate Here");
-				String intentData = String.format("google.navigation:ll=%f,%f&mode=w",
+				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
+				String navigationModeKey =
+						mContext.getString(R.string.preference_navigation_mode_key);
+				String navigationMode = settings.getString(navigationModeKey, "w");
+				String intentData = String.format("google.navigation:ll=%f,%f&mode=%s",
 				                                  location.getLatitudeE6() * 1E-6,
-				                                  location.getLongitudeE6() * 1E-6);
+				                                  location.getLongitudeE6() * 1E-6,
+				                                  navigationMode);
 				Intent navigationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(intentData));
 				mContext.startActivity(navigationIntent);
 			}
