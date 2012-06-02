@@ -77,14 +77,7 @@
     <string name="button_invite">Invite Mate</string>
     <string name="button_join">Join Team</string>
     <string name="button_decline">Decline</string>
-    <string name="text_xmpp_section">XMPP</string>
-    <string name="text_xmpp_account">XMPP Account Details</string>
-    <string name="text_user_id">User ID:</string>
-    <string name="text_server">Server:</string>
-    <string name="text_password">Password:</string>
-    <string name="text_conference_server">Conference Server:</string>
     <string name="text_group_name">Team Name:</string>
-    <string name="text_contact_to_invite">Contact to invite:</string>
     <string name="notification_service_title">TeamMeet is running.</string>
     <string name="notification_service_text">Click to bring to front.</string>
     <string name="broadcast_connection_state">de.teammeet.intent.category.XMPP_CONNECTION_STATE</string>
