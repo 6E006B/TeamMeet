@@ -137,7 +137,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> {
 			Mate mate = parseMate(intent.getExtras());
 			if (mate != null) {
 				Log.d(CLASS, "MatesOverlay.MateUpdateReceiver.onReceive()");
-				if (!Chat.getPath(mate.getID()).equals(mOwnID)) {
+				if (!Chat.getResource(mate.getID()).equals(mOwnID)) {
 					acquireLock();
 					try {
 						if (mMates.containsKey(mate.getID())) {
