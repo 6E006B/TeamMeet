@@ -300,12 +300,6 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void addContact(String userID, String identifier) throws XMPPException {
-		Roster roster = mXMPP.getRoster();
-		roster.createEntry(userID, identifier, null);
-	}
-
-	@Override
 	public void createRoom(String groupName, String conferenceServer) throws XMPPException {
 		final String group = String.format("%s@%s", groupName, conferenceServer);
 		MultiUserChat muc = new MultiUserChat(mXMPP, group);
@@ -462,6 +456,13 @@ public class XMPPService extends Service implements IXMPPService {
 			throw new XMPPException(String.format("No team '%s'", team));
 		}
 		return nick;
+	}
+
+	@Override
+	public void addContact(String contact, String name, String group) throws XMPPException {
+		Log.d(CLASS, "XMPPService.addContact()");
+		Roster roster = mXMPP.getRoster();
+		roster.createEntry(contact, name, new String[]{group});
 	}
 
 	@Override

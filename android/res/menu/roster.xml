@@ -16,6 +16,11 @@
         android:titleCondensed="@string/roster_menu_form_team_condensed"
         android:visible="false"/>
     <item
+        android:id="@+id/roster_menu_add_contact"
+        android:icon="@drawable/social_add_person"
+        android:title="@string/roster_menu_add_contact"
+        android:titleCondensed="@string/roster_menu_add_contact_condensed"/>
+    <item
         android:id="@+id/roster_menu_settings"
         android:icon="@drawable/action_settings"
         android:title="@string/roster_menu_settings"
