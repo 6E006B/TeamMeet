@@ -15,6 +15,7 @@ import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -461,6 +462,17 @@ public class XMPPService extends Service implements IXMPPService {
 			throw new XMPPException(String.format("No team '%s'", team));
 		}
 		return nick;
+	}
+
+	@Override
+	public void removeContact(String contact) throws XMPPException {
+		Roster roster = mXMPP.getRoster();
+		if (roster.contains(contact)) {
+			RosterEntry contactEntry = roster.getEntry(contact);
+			roster.removeEntry(contactEntry);
+		} else {
+			throw new XMPPException(String.format("No contact '%s'", contact));
+		}
 	}
 
 	@Override

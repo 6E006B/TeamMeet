@@ -91,4 +91,6 @@ public interface IXMPPService {
 	Team getTeam(String teamName) throws XMPPException;
 
 	void sendKey(String mate, String type, byte[] publicKey, String team) throws XMPPException;
+
+	void removeContact(String contact) throws XMPPException;
 }
