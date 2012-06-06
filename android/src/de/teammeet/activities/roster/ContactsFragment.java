@@ -47,6 +47,7 @@ import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.FetchRosterTask;
 import de.teammeet.tasks.InviteTask;
+import de.teammeet.tasks.RemoveMateTask;
 
 
 /**
@@ -59,6 +60,7 @@ public class ContactsFragment extends Fragment {
 	private static final String UNFILED_GROUP = "Unfiled contacts";
 	private static final int CONTEXT_MENU_INVITE_PARENT_ID = 0x7e000002;
 	private static final int CONTEXT_MENU_INVITE_ROOM_ID = 0x7e000003;
+	private static final int CONTEXT_MENU_REMOVE_MATE_ID = 0x7e000004;
 
 	private BroadcastReceiver mConnectReceiver;
 	private BroadcastReceiver mDisconnectReceiver;
@@ -164,14 +166,16 @@ public class ContactsFragment extends Fragment {
 
 		try {
 		Set<String> teams = ((RosterActivity) getActivity()).getXMPPService().getTeams();
-		if (!teams.isEmpty()) {
-			SubMenu inviteSubMenu = menu.addSubMenu(Menu.NONE, CONTEXT_MENU_INVITE_PARENT_ID,
-													Menu.NONE, R.string.context_invite);
-			for (String teamName : teams) {
-				Log.d(CLASS, "team: " + teamName);
-				inviteSubMenu.add(Menu.NONE, CONTEXT_MENU_INVITE_ROOM_ID, Menu.NONE, teamName);
+			if (!teams.isEmpty()) {
+				SubMenu inviteSubMenu = menu.addSubMenu(Menu.NONE, CONTEXT_MENU_INVITE_PARENT_ID,
+														Menu.NONE, R.string.context_invite);
+				for (String teamName : teams) {
+					Log.d(CLASS, "team: " + teamName);
+					inviteSubMenu.add(Menu.NONE, CONTEXT_MENU_INVITE_ROOM_ID, Menu.NONE, teamName);
+				}
 			}
-		}
+			menu.add(Menu.NONE, CONTEXT_MENU_REMOVE_MATE_ID, Menu.NONE,
+			         R.string.context_remove_mate);
 		} catch (XMPPException e) {
 			String problem = String.format("Could not fetch teams: %s", e.getMessage());
 			Log.e(CLASS, problem);
@@ -193,6 +197,9 @@ public class ContactsFragment extends Fragment {
 			case CONTEXT_MENU_INVITE_ROOM_ID:
 				clickedInviteToTeam(item);
 				return true;
+			case CONTEXT_MENU_REMOVE_MATE_ID:
+				clickedRemoveMate(item);
+				return true;
 			default:
 				Log.d(CLASS, String.format("unhandeled item clicked: 0x%x", item.getItemId()));
 				return super.onContextItemSelected(item);
@@ -207,6 +214,16 @@ public class ContactsFragment extends Fragment {
 		AsyncTask<String, Void, String[]> inviteTask = new InviteTask(xmpp,
 																	  new InviteMateHandler());
 		inviteTask.execute(contact, teamName);
+	}
+
+	private void clickedRemoveMate(MenuItem item) {
+		ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo)item.getMenuInfo();
+		String contact = getExpandableListChild(menuInfo.packedPosition);
+		Log.d(CLASS, String.format("desire to remove contact '%s'", contact));
+		IXMPPService xmpp = ((RosterActivity) getActivity()).getXMPPService();
+		AsyncTask<String, Void, String> removeMateTask =
+				new RemoveMateTask(xmpp, new RemoveMateHandler());
+		removeMateTask.execute(contact);
 	}
 	
 	private String getExpandableListChild(long packedPosition) {
@@ -299,10 +316,24 @@ public class ContactsFragment extends Fragment {
 			String user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
 			Toast.makeText(getActivity(), user_feedback, Toast.LENGTH_LONG).show();
 		}
-	
+
 		@Override
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to invite contact to team: %s", e.getMessage());
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class RemoveMateHandler extends BaseAsyncTaskCallback<String> {
+		@Override
+		public void onTaskCompleted(String contact) {
+			String user_feedback = String.format("You removed %s", contact);
+			Toast.makeText(getActivity(), user_feedback, Toast.LENGTH_LONG).show();
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to remove contact: %s", e.getMessage());
 			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
 	}
@@ -314,19 +345,19 @@ public class ContactsFragment extends Fragment {
 			Log.d(CLASS, "Entries have been added to the roster");
 			redrawOnUiThread();
 		}
-	
+
 		@Override
 		public void entriesDeleted(Collection<String> arg0) {
 			Log.d(CLASS, "Entries have been deleted from the roster");
 			redrawOnUiThread();
 		}
-	
+
 		@Override
 		public void entriesUpdated(Collection<String> arg0) {
 			Log.d(CLASS, "Entries have been updated in the roster");
 			redrawOnUiThread();
 		}
-	
+
 		@Override
 		public void presenceChanged(Presence presence) {
 			/*
@@ -340,10 +371,10 @@ public class ContactsFragment extends Fragment {
 			}
 			Log.d(CLASS, String.format("presence of '%s' in group '%s' has changed in the roster.", contact, groupName));
 			*/
-			
+
 			redrawOnUiThread();
 		}
-		
+
 		private void redrawOnUiThread() {
 			mContactsList.post(new Runnable() {
 				
