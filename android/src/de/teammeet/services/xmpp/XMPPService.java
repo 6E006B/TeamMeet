@@ -299,12 +299,6 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public void addContact(String userID, String identifier) throws XMPPException {
-		Roster roster = mXMPP.getRoster();
-		roster.createEntry(userID, identifier, null);
-	}
-
-	@Override
 	public void createRoom(String groupName, String conferenceServer) throws XMPPException {
 		final String group = String.format("%s@%s", groupName, conferenceServer);
 		MultiUserChat muc = new MultiUserChat(mXMPP, group);

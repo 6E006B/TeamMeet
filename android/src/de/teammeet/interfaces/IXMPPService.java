@@ -53,8 +53,6 @@ public interface IXMPPService {
 
 	Roster getRoster() throws XMPPException;
 
-	void addContact(String userID, String identifier) throws XMPPException;
-
 	void createRoom(String groupName, String conferenceServer) throws XMPPException;
 
 	void joinTeam(String room, String userID, String password, String inviter) throws XMPPException;
