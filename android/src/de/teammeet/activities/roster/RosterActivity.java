@@ -32,6 +32,7 @@ import de.teammeet.activities.preferences.SettingsActivity;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
+import de.teammeet.tasks.AddContactTask;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.DisconnectTask;
@@ -196,12 +197,13 @@ public class RosterActivity extends SherlockFragmentActivity {
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MenuItem connectMenu = menu.findItem(R.id.roster_menu_connect);
 		MenuItem formTeamMenu = menu.findItem(R.id.roster_menu_form_team);
+		MenuItem removeMateMenu = menu.findItem(R.id.roster_menu_add_contact);
 
 		Resources res = getResources();
 		int connectTitle = R.string.roster_menu_connect;
 		CharSequence connectTitleCondensed = res.getString(R.string.roster_menu_connect_condensed);
 		boolean enableConnect = false;
-		boolean showFormTeam = false;
+		boolean connected = false;
 
 		if (mXMPPService != null) {
 			enableConnect = true;
@@ -210,13 +212,14 @@ public class RosterActivity extends SherlockFragmentActivity {
 				Log.d(CLASS, "setting menu option to 'disconnect'");
 				connectTitle = R.string.roster_menu_disconnect;
 				connectTitleCondensed = res.getString(R.string.roster_menu_disconnect_condensed);
-				showFormTeam = true;
+				connected = true;
 			}
 		}
 		connectMenu.setTitle(connectTitle);
 		connectMenu.setTitleCondensed(connectTitleCondensed);
 		connectMenu.setEnabled(enableConnect);
-		formTeamMenu.setVisible(showFormTeam);
+		formTeamMenu.setVisible(connected);
+		removeMateMenu.setVisible(connected);
 
 		return true;
 	}
@@ -233,6 +236,11 @@ public class RosterActivity extends SherlockFragmentActivity {
 			case R.id.roster_menu_form_team:
 				Log.d(CLASS, "User clicked 'form team' in menu");
 				displayDialog(new FormTeamDialog());
+				return true;
+
+			case R.id.roster_menu_add_contact:
+				Log.d(CLASS, "User clicked 'add contact' in menu");
+				displayDialog(new AddContactDialog());
 				return true;
 
 			case R.id.roster_menu_settings:
@@ -288,6 +296,10 @@ public class RosterActivity extends SherlockFragmentActivity {
 		final String conferenceSrvKey = getString(R.string.preference_conference_server_key);
 		final String conferenceSrv = settings.getString(conferenceSrvKey, "");
 		new FormTeamTask(mXMPPService, new FormTeamHandler()).execute(sanitizedTeamName, conferenceSrv);
+	}
+
+	public void addContact(String contact, String group) {
+		new AddContactTask(mXMPPService, new AddContactHandler()).execute(contact, group);
 	}
 
 	public void clickedJoinTeam(String team, String userID, String password, String inviter) {
@@ -396,6 +408,20 @@ public class RosterActivity extends SherlockFragmentActivity {
 		@Override
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to form team: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class AddContactHandler extends BaseAsyncTaskCallback<String[]> {
+		@Override
+		public void onTaskCompleted(String[] connection_data) {
+			String user_feedback = String.format("You added %s to %s", connection_data[0], connection_data[1]);
+			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to add contact: %s", e.getMessage());
 			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
 		}
 	}
