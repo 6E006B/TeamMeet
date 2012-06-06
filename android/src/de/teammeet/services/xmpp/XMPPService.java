@@ -458,6 +458,13 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
+	public void addContact(String contact, String name, String group) throws XMPPException {
+		Log.d(CLASS, "XMPPService.addContact()");
+		Roster roster = mXMPP.getRoster();
+		roster.createEntry(contact, name, new String[]{group});
+	}
+
+	@Override
 	public void invite(String contact, String teamName) throws XMPPException {
 		Team team = mTeams.get(teamName);
 		if (team != null) {
