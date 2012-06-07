@@ -240,7 +240,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 
 			case R.id.roster_menu_add_contact:
 				Log.d(CLASS, "User clicked 'add contact' in menu");
-				displayDialog(new AddContactDialog());
+				displayDialog(new AddContactDialog(mXMPPService));
 				return true;
 
 			case R.id.roster_menu_settings:

@@ -24,7 +24,7 @@
         android:layout_margin="3dip"
         android:text="@string/text_group_name" />
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/add_contact_dialog_groupname"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
