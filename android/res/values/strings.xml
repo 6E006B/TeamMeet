@@ -91,7 +91,7 @@
     <string name="button_invite">Invite Mate</string>
     <string name="button_join">Join Team</string>
     <string name="button_decline">Decline</string>
-    <string name="text_group_name">Team Name:</string>
+    <string name="text_group_name">Group Name:</string>
     <string name="text_contact_name">Contact:</string>
     <string name="notification_service_title">TeamMeet is running.</string>
     <string name="notification_service_text">Click to bring to front.</string>
