@@ -93,4 +93,6 @@ public interface IXMPPService {
 	void removeContact(String contact) throws XMPPException;
 
 	void addContact(String contact, String name, String group) throws XMPPException;
+
+	String[] getGroups();
 }

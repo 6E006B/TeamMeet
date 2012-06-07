@@ -2,6 +2,7 @@ package de.teammeet.services.xmpp;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -412,6 +414,16 @@ public class XMPPService extends Service implements IXMPPService {
 			throw new XMPPException(String.format("No team '%s'", teamName));
 		}
 		releaseTeamsLock();
+	}
+
+	@Override
+	public String[] getGroups() {
+		List<String> groupList = new ArrayList<String>();
+		Collection<RosterGroup> rosterGroups = mXMPP.getRoster().getGroups();
+		for (RosterGroup rosterGroup : rosterGroups) {
+			groupList.add(rosterGroup.getName());
+		}
+		return groupList.toArray(new String[]{});
 	}
 
 	@Override
