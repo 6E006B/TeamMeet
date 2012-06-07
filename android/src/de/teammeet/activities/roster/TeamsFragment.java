@@ -256,6 +256,8 @@ public class TeamsFragment extends SherlockFragment {
 		public void onTaskCompleted(String team) {
 			final String message = String.format("Left team %s", team);
 			Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+			Intent teamsChangedIntent = new Intent(getString(R.string.broadcast_teams_updated));
+			getActivity().sendBroadcast(teamsChangedIntent);
 		}
 
 		@Override
