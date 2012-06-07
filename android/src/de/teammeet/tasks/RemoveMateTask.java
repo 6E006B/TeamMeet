@@ -8,7 +8,7 @@ import de.teammeet.interfaces.IXMPPService;
 
 public class RemoveMateTask extends BaseAsyncTask<String, Void, String> {
 
-	private static final String CLASS = ConnectTask.class.getSimpleName();
+	private static final String CLASS = RemoveMateTask.class.getSimpleName();
 
 	public RemoveMateTask(IXMPPService service, IAsyncTaskCallback<String> callback) {
 		super(service, callback);
