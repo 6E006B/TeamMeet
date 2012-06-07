@@ -8,7 +8,7 @@ import de.teammeet.interfaces.IXMPPService;
 
 public class AddContactTask extends BaseAsyncTask<String, Void, String[]> {
 
-	private static final String CLASS = ConnectTask.class.getSimpleName();
+	private static final String CLASS = AddContactTask.class.getSimpleName();
 
 	public AddContactTask(IXMPPService service, IAsyncTaskCallback<String[]> callback) {
 		super(service, callback);
