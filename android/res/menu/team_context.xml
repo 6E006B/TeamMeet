@@ -11,5 +11,9 @@
         android:icon="@drawable/social_chat"
         android:title="@string/context_open_chat"
         android:titleCondensed="@string/context_open_chat_condensed"/>
+    <item
+        android:id="@+id/teams_list_context_leave"
+        android:title="@string/context_leave_team"
+        android:titleCondensed="@string/context_leave_team_condensed"/>
 
 </menu>

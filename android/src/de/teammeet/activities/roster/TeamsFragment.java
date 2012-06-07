@@ -40,6 +40,7 @@ import de.teammeet.interfaces.IXMPPService;
 import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.FetchTeamsTask;
+import de.teammeet.tasks.LeaveTeamTask;
 
 public class TeamsFragment extends SherlockFragment {
 
@@ -133,6 +134,9 @@ public class TeamsFragment extends SherlockFragment {
 		case R.id.teams_list_context_open_chat:
 			clickedOpenChat(item);
 			return true;
+		case R.id.teams_list_context_leave:
+			clickedLeaveTeam(item);
+			return true;
 		default:
 			Log.d(CLASS, String.format("unhandeled item clicked: 0x%x", item.getItemId()));
 			return super.onContextItemSelected(item);
@@ -210,6 +214,15 @@ public class TeamsFragment extends SherlockFragment {
 		startActivity(intent);
 	}
 
+	private void clickedLeaveTeam(MenuItem item) {
+		ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo)item.getMenuInfo();
+		String team = getExpandableListChild(menuInfo.packedPosition);
+		Toast.makeText(getActivity(), String.format("Want to leave %s", team), Toast.LENGTH_SHORT).
+			  show();
+		new LeaveTeamTask(((RosterActivity)getActivity()).getXMPPService(),
+		                  new LeaveTeamHandler()).execute(team);
+	}
+
 	private String getExpandableListChild(long packedPosition) {
 		final int group_position = ExpandableListView.getPackedPositionGroup(packedPosition);
 		final Map<String, String> group = (Map<String, String>) mAdapter.getGroup(group_position);
@@ -234,6 +247,20 @@ public class TeamsFragment extends SherlockFragment {
 		@Override
 		public void onTaskAborted(Exception e) {
 			final String problem = String.format("Could not fetch teams: %s", e.getMessage());
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	protected class LeaveTeamHandler extends BaseAsyncTaskCallback<String> {
+		@Override
+		public void onTaskCompleted(String team) {
+			final String message = String.format("Left team %s", team);
+			Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			final String problem = String.format("Could leave team: %s", e.getMessage());
 			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
 	}
