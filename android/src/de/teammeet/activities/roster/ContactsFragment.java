@@ -26,6 +26,7 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
@@ -159,6 +160,63 @@ public class ContactsFragment extends Fragment {
 	public void onCreateContextMenu(ContextMenu menu, View v,
 									ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
+
+		ExpandableListView.ExpandableListContextMenuInfo info =
+				(ExpandableListView.ExpandableListContextMenuInfo) menuInfo;
+		final int type = ExpandableListView.getPackedPositionType(info.packedPosition);
+//		final int group = ExpandableListView.getPackedPositionGroup(info.packedPosition);
+//		final int child = ExpandableListView.getPackedPositionChild(info.packedPosition);
+
+		//Only create a context menu for child items
+		if (type == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+			createChildContextMenu(menu);
+		} else {
+			// long-press on a group
+			Log.d(CLASS, "Long-Press on a group.");
+			createGroupContextMenu(menu);
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		Log.d(CLASS, String.format("Context item '%s' clicked", item.getTitleCondensed()));
+
+		ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item.getMenuInfo();
+		int type = ExpandableListView.getPackedPositionType(info.packedPosition);
+		if (type == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+			switch(item.getItemId()) {
+				case CONTEXT_MENU_INVITE_PARENT_ID:
+					/* backup info, will need it when sub-menu item gets selected.
+					 * cf http://code.google.com/p/android/issues/detail?id=7139.
+					 */
+					mLastContextItemInfo = ((ExpandableListContextMenuInfo)item.getMenuInfo());
+					return true;
+				case CONTEXT_MENU_INVITE_ROOM_ID:
+					clickedInviteToTeam(item);
+					return true;
+				case CONTEXT_MENU_REMOVE_MATE_ID:
+					clickedRemoveMate(item);
+					return true;
+				default:
+					Log.d(CLASS, String.format("unhandeled context menu item clicked: 0x%x",
+					                           item.getItemId()));
+			}
+		} else {
+			// selected item is a group
+			Log.d(CLASS, "Clicked on a context menu item regarding a group.");
+			switch(item.getItemId()) {
+			case R.id.roster_list_context_group_add_contact:
+				clickedAddContactToGroup(item);
+				return true;
+			default:
+				Log.d(CLASS, String.format("unhandeled context menu item clicked: 0x%x",
+				                           item.getItemId()));
+			}
+		}
+		return super.onContextItemSelected(item);
+	}
+
+	private void createChildContextMenu(ContextMenu menu) {
 		//TODO Uncomment if you added static entries to an XML layout
 		//MenuInflater inflater = getMenuInflater();
 		//inflater.inflate(R.menu.roster_context, menu);
@@ -181,28 +239,10 @@ public class ContactsFragment extends Fragment {
 		}
 		menu.add(Menu.NONE, CONTEXT_MENU_REMOVE_MATE_ID, Menu.NONE, R.string.context_remove_mate);
 	}
-	
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		Log.d(CLASS, String.format("Context item '%s' clicked", item.getTitleCondensed()));
 
-		switch(item.getItemId()) {
-			case CONTEXT_MENU_INVITE_PARENT_ID:
-				/* backup info, will need it when sub-menu item gets selected.
-				 * cf http://code.google.com/p/android/issues/detail?id=7139.
-				 */
-				mLastContextItemInfo = ((ExpandableListContextMenuInfo)item.getMenuInfo());
-				return true;
-			case CONTEXT_MENU_INVITE_ROOM_ID:
-				clickedInviteToTeam(item);
-				return true;
-			case CONTEXT_MENU_REMOVE_MATE_ID:
-				clickedRemoveMate(item);
-				return true;
-			default:
-				Log.d(CLASS, String.format("unhandeled item clicked: 0x%x", item.getItemId()));
-				return super.onContextItemSelected(item);
-		}
+	private void createGroupContextMenu(ContextMenu menu) {
+		MenuInflater inflater = getActivity().getMenuInflater();
+		inflater.inflate(R.menu.roster_context_group, menu);
 	}
 
 	private void clickedInviteToTeam(MenuItem item) {
@@ -224,7 +264,15 @@ public class ContactsFragment extends Fragment {
 				new RemoveMateTask(xmpp, new RemoveMateHandler());
 		removeMateTask.execute(contact);
 	}
-	
+
+	private void clickedAddContactToGroup(MenuItem item) {
+		ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo)item.getMenuInfo();
+		final String group = getExpandableListGroup(menuInfo.packedPosition);
+		RosterActivity activity = (RosterActivity)getActivity();
+		AddContactDialog dialog = new AddContactDialog(activity.getXMPPService(), group);
+		dialog.show(getFragmentManager(), null);
+	}
+
 	private String getExpandableListChild(long packedPosition) {
 		final int group_position = ExpandableListView.getPackedPositionGroup(packedPosition);
 		final int child_position = ExpandableListView.getPackedPositionChild(packedPosition);
@@ -232,7 +280,12 @@ public class ContactsFragment extends Fragment {
 																				  child_position);
 		return child.get(NAME);
 	}
-	
+
+	private String getExpandableListGroup(long packedPosition) {
+		final int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+		Map<String, String> group = (Map<String, String>)mAdapter.getGroup(groupPosition);
+		return group.get(NAME);
+	}
 
 	public void handleDisconnect() {
 		mExpandableGroups.clear();
