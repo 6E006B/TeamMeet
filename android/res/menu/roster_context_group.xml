@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/roster_list_context_group_add_contact"
+        android:title="@string/context_add_contact_to_group"
+        android:titleCondensed="@string/context_add_contact_to_group_condensed"/>
+
+</menu>
