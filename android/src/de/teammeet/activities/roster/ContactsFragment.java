@@ -62,6 +62,7 @@ public class ContactsFragment extends Fragment {
 	private static final int CONTEXT_MENU_INVITE_PARENT_ID = 0x7e000002;
 	private static final int CONTEXT_MENU_INVITE_ROOM_ID = 0x7e000003;
 	private static final int CONTEXT_MENU_REMOVE_MATE_ID = 0x7e000004;
+	private static final int CONTEXT_MENU_OPEN_CHAT_ID = 0x7e000005;
 
 	private BroadcastReceiver mConnectReceiver;
 	private BroadcastReceiver mDisconnectReceiver;
@@ -112,10 +113,7 @@ public class ContactsFragment extends Fragment {
 				TextView textView = (TextView) listItem.getChildAt(0);
 				final String contact = textView.getText().toString();
 				Log.d(CLASS, String.format("clicked on child: %s", contact));
-				Intent intent = new Intent(getActivity(), ChatsActivity.class);
-				intent.putExtra(XMPPService.TYPE, Chat.TYPE_NORMAL_CHAT);
-				intent.putExtra(XMPPService.SENDER, contact);
-				startActivity(intent);
+				openChat(contact);
 				//return super.onChildClick(parent, v, groupPosition, childPosition, id);
 				return true;
 			}
@@ -185,6 +183,9 @@ public class ContactsFragment extends Fragment {
 		int type = ExpandableListView.getPackedPositionType(info.packedPosition);
 		if (type == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
 			switch(item.getItemId()) {
+				case CONTEXT_MENU_OPEN_CHAT_ID:
+					clickedOpenChat(item);
+					return true;
 				case CONTEXT_MENU_INVITE_PARENT_ID:
 					/* backup info, will need it when sub-menu item gets selected.
 					 * cf http://code.google.com/p/android/issues/detail?id=7139.
@@ -222,6 +223,7 @@ public class ContactsFragment extends Fragment {
 		//inflater.inflate(R.menu.roster_context, menu);
 		Log.d(CLASS, "creating context menu");
 
+		menu.add(Menu.NONE, CONTEXT_MENU_OPEN_CHAT_ID, Menu.NONE, R.string.context_open_chat);
 		try {
 			Set<String> teams = ((RosterActivity) getActivity()).getXMPPService().getTeams();
 			if (!teams.isEmpty()) {
@@ -243,6 +245,12 @@ public class ContactsFragment extends Fragment {
 	private void createGroupContextMenu(ContextMenu menu) {
 		MenuInflater inflater = getActivity().getMenuInflater();
 		inflater.inflate(R.menu.roster_context_group, menu);
+	}
+
+	private void clickedOpenChat(MenuItem item) {
+		ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo)item.getMenuInfo();
+		final String contact = getExpandableListChild(menuInfo.packedPosition);
+		openChat(contact);
 	}
 
 	private void clickedInviteToTeam(MenuItem item) {
@@ -319,6 +327,13 @@ public class ContactsFragment extends Fragment {
 			mExpandableGroups.add(newEntry.mGroup);
 			mExpandableChildren.add(newEntry.mChildren);
 		}
+	}
+
+	private void openChat(String contact) {
+		Intent intent = new Intent(getActivity(), ChatsActivity.class);
+		intent.putExtra(XMPPService.TYPE, Chat.TYPE_NORMAL_CHAT);
+		intent.putExtra(XMPPService.SENDER, contact);
+		startActivity(intent);
 	}
 
 	private class ExpandableContactEntry {
