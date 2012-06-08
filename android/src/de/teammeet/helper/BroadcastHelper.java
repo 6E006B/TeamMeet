@@ -58,7 +58,7 @@ public class BroadcastHelper {
 		return instance;
 	}
 	
-	private static BroadcastReceiver createBroadcastReceiver(Fragment parent, Class<? extends BroadcastReceiver> type) {
+	private static BroadcastReceiver createBroadcastReceiver(Object parent, Class<? extends BroadcastReceiver> type) {
 		BroadcastReceiver instance = null;
 	
 		try {
