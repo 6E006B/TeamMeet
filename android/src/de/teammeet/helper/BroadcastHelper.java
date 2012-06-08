@@ -32,7 +32,19 @@ public class BroadcastHelper {
 		intent.setAction(newAction);
 		context.sendStickyBroadcast(intent);
 	}
-	
+
+	public static BroadcastReceiver getBroadcastReceiverInstance(Activity parent,
+			Class<? extends BroadcastReceiver> type, int category, int action) {
+		BroadcastReceiver instance = createBroadcastReceiver(parent, type);
+
+		IntentFilter filter = new IntentFilter(parent.getString(action));
+		filter.addCategory(parent.getString(category));
+
+		parent.registerReceiver(instance, filter);
+
+		return instance;
+	}
+
 	public static BroadcastReceiver getBroadcastReceiverInstance(Fragment parent, Class<? extends BroadcastReceiver> type,
 			 											   		 int category, int action) {
 		BroadcastReceiver instance = createBroadcastReceiver(parent, type);
