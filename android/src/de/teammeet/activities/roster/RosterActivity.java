@@ -5,7 +5,9 @@ import org.jivesoftware.smack.util.StringUtils;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -46,6 +48,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 	private IXMPPService mXMPPService = null;
 	private XMPPServiceConnection mXMPPServiceConnection = new XMPPServiceConnection();
 	private Intent mCurrentIntent = null;
+	private BroadcastReceiver mDisconnectReceiver = null;
 	
 	
 	protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +91,11 @@ public class RosterActivity extends SherlockFragmentActivity {
 			Log.e(CLASS, "onResume(): bind to XMPP service failed");
 			Toast.makeText(this, "Couldn't connect to XMPP service.", Toast.LENGTH_LONG).show();
 		}
+
+		mDisconnectReceiver =
+				BroadcastHelper.getBroadcastReceiverInstance(this, DisconnectReceiver.class,
+				                                             R.string.broadcast_connection_state,
+				                                             R.string.broadcast_disconnected);
 		super.onResume();
 	}
 
@@ -95,6 +103,9 @@ public class RosterActivity extends SherlockFragmentActivity {
 	protected void onPause() {
 		Log.d(CLASS, "Pausing tabbed roster activity");
 
+		if (mDisconnectReceiver != null) {
+			unregisterReceiver(mDisconnectReceiver);
+		}
 		if (mXMPPServiceConnection != null) {
 			unbindService(mXMPPServiceConnection);
 		}
@@ -440,6 +451,14 @@ public class RosterActivity extends SherlockFragmentActivity {
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to join team: %s", e.getMessage());
 			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class DisconnectReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(CLASS, String.format("*** Received DISCONNECT broadcast in '%s'", CLASS));
+			invalidateOptionsMenu();
 		}
 	}
 }
