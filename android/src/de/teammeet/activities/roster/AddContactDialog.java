@@ -17,11 +17,17 @@ import de.teammeet.interfaces.IXMPPService;
 public class AddContactDialog extends DialogFragment {
 	private static final String CLASS = AddContactDialog.class.getSimpleName();
 
-	private IXMPPService mXMPPService;
+	private IXMPPService mXMPPService = null;
+	private String mGroup = null;
 
 	public AddContactDialog(IXMPPService xmppService) {
 		super();
 		mXMPPService = xmppService;
+	}
+
+	public AddContactDialog(IXMPPService xmppService, String group) {
+		this(xmppService);
+		mGroup = group;
 	}
 
 	@Override
@@ -33,7 +39,10 @@ public class AddContactDialog extends DialogFragment {
 				android.R.layout.simple_dropdown_item_1line, groups);
 		AutoCompleteTextView textView = (AutoCompleteTextView) addContactView.
 				findViewById(R.id.add_contact_dialog_groupname);
-        textView.setAdapter(adapter);
+		textView.setAdapter(adapter);
+		if (mGroup != null) {
+			textView.setText(mGroup);
+		}
 
 		final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		builder.setTitle(R.string.add_contact_dialog_title);
