@@ -183,7 +183,6 @@ public class TeamsFragment extends SherlockFragment {
 				Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 			}
 		}
-
 	}
 
 	public void handleDisconnect() {
