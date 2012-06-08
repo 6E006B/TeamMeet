@@ -76,6 +76,8 @@
     <string name="tab_teams">Teams</string>
     <string name="context_invite">Invite to team</string>
     <string name="context_invite_condensed">Invite</string>
+    <string name="context_add_contact_to_group">Add Contact to Group</string>
+    <string name="context_add_contact_to_group_condensed">Add Contact</string>
     <string name="context_remove_mate">Remove Mate</string>
     <string name="context_remove_mate_condensed">Remove</string>
     <string name="context_open_map">Open team in map</string>
