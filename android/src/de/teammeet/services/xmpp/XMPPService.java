@@ -237,7 +237,11 @@ public class XMPPService extends Service implements IXMPPService {
 		mXMPP.addPacketSendingListener(mChatMessageListener, chatMessageFilter);
 		mXMPP.addConnectionListener(new ConnectionListener() {
 			@Override
-			public void reconnectionSuccessful() {}
+			public void reconnectionSuccessful() {
+				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+				                                               R.string.broadcast_disconnected,
+				                                               R.string.broadcast_connected);
+			}
 			@Override
 			public void reconnectionFailed(Exception arg0) {
 				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
@@ -245,7 +249,11 @@ public class XMPPService extends Service implements IXMPPService {
 															   R.string.broadcast_disconnected);
 			}
 			@Override
-			public void reconnectingIn(int arg0) {}
+			public void reconnectingIn(int arg0) {
+				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+															   R.string.broadcast_connected,
+															   R.string.broadcast_disconnected);
+			}
 			@Override
 			public void connectionClosedOnError(Exception arg0) {
 				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
