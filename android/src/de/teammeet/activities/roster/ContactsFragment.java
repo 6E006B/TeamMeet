@@ -165,7 +165,7 @@ public class ContactsFragment extends Fragment {
 		Log.d(CLASS, "creating context menu");
 
 		try {
-		Set<String> teams = ((RosterActivity) getActivity()).getXMPPService().getTeams();
+			Set<String> teams = ((RosterActivity) getActivity()).getXMPPService().getTeams();
 			if (!teams.isEmpty()) {
 				SubMenu inviteSubMenu = menu.addSubMenu(Menu.NONE, CONTEXT_MENU_INVITE_PARENT_ID,
 														Menu.NONE, R.string.context_invite);
@@ -174,13 +174,12 @@ public class ContactsFragment extends Fragment {
 					inviteSubMenu.add(Menu.NONE, CONTEXT_MENU_INVITE_ROOM_ID, Menu.NONE, teamName);
 				}
 			}
-			menu.add(Menu.NONE, CONTEXT_MENU_REMOVE_MATE_ID, Menu.NONE,
-			         R.string.context_remove_mate);
 		} catch (XMPPException e) {
 			String problem = String.format("Could not fetch teams: %s", e.getMessage());
 			Log.e(CLASS, problem);
 			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
+		menu.add(Menu.NONE, CONTEXT_MENU_REMOVE_MATE_ID, Menu.NONE, R.string.context_remove_mate);
 	}
 	
 	@Override
