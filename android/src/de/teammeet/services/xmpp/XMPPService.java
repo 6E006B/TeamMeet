@@ -198,6 +198,13 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
+	public void registerAccount(String server, String username, String password) throws XMPPException {
+		//TODO: check if these are the correct arguments
+		XMPPConnection connection = new XMPPConnection(server);
+		mXMPP.getAccountManager().createAccount(username, password);
+	}
+
+	@Override
 	public void connect(String userID, String server, String password) throws XMPPException {
 		mTeams = new HashMap<String, Team>();
 		mUserID = userID;

@@ -45,6 +45,8 @@ public interface IXMPPService {
 
 	void unregisterChatMessageHandler(IChatMessageHandler object);
 
+	void registerAccount(String server, String username, String password) throws XMPPException;
+
 	void connect(String userID, String server, String password) throws XMPPException;
 
 	boolean isAuthenticated();
