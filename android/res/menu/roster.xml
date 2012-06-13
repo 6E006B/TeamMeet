@@ -21,6 +21,12 @@
         android:title="@string/roster_menu_add_contact"
         android:titleCondensed="@string/roster_menu_add_contact_condensed"/>
     <item
+        android:id="@+id/roster_menu_register"
+        android:icon="@drawable/social_add_person"
+        android:showAsAction="ifRoom"
+        android:title="@string/roster_menu_register"
+        android:titleCondensed="@string/roster_menu_register_condensed"/>
+    <item
         android:id="@+id/roster_menu_settings"
         android:icon="@drawable/action_settings"
         android:title="@string/roster_menu_settings"
