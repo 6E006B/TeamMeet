@@ -40,6 +40,7 @@ import de.teammeet.tasks.ConnectTask;
 import de.teammeet.tasks.DisconnectTask;
 import de.teammeet.tasks.FormTeamTask;
 import de.teammeet.tasks.JoinTeamTask;
+import de.teammeet.tasks.RegisterTask;
 
 public class RosterActivity extends SherlockFragmentActivity {
 	private static String CLASS = RosterActivity.class.getSimpleName();
@@ -209,6 +210,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 		MenuItem connectMenu = menu.findItem(R.id.roster_menu_connect);
 		MenuItem formTeamMenu = menu.findItem(R.id.roster_menu_form_team);
 		MenuItem removeMateMenu = menu.findItem(R.id.roster_menu_add_contact);
+		MenuItem registerMenu = menu.findItem(R.id.roster_menu_register);
 
 		Resources res = getResources();
 		int connectTitle = R.string.roster_menu_connect;
@@ -231,6 +233,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 		connectMenu.setEnabled(enableConnect);
 		formTeamMenu.setVisible(connected);
 		removeMateMenu.setVisible(connected);
+		registerMenu.setVisible(!connected);
 
 		return true;
 	}
@@ -252,6 +255,11 @@ public class RosterActivity extends SherlockFragmentActivity {
 			case R.id.roster_menu_add_contact:
 				Log.d(CLASS, "User clicked 'add contact' in menu");
 				displayDialog(new AddContactDialog(mXMPPService));
+				return true;
+
+			case R.id.roster_menu_register:
+				Log.d(CLASS, "User clicked 'register' in menu");
+				displayDialog(new RegistrationDialog(mXMPPService));
 				return true;
 
 			case R.id.roster_menu_settings:
@@ -311,6 +319,10 @@ public class RosterActivity extends SherlockFragmentActivity {
 
 	public void addContact(String contact, String group) {
 		new AddContactTask(mXMPPService, new AddContactHandler()).execute(contact, group);
+	}
+
+	public void registerAccount(String server, String username, String password) {
+		new RegisterTask(mXMPPService, new RegisterHandler()).execute(server, username, password);
 	}
 
 	public void clickedJoinTeam(String team, String userID, String password, String inviter) {
