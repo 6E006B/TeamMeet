@@ -437,6 +437,21 @@ public class RosterActivity extends SherlockFragmentActivity {
 		}
 	}
 
+	private class RegisterHandler extends BaseAsyncTaskCallback<String[]> {
+		@Override
+		public void onTaskCompleted(String[] connection_data) {
+			String user_feedback = String.format("You registered %s@jabber.ccc.de", connection_data[0], connection_data[1]);
+			Toast.makeText(RosterActivity.this, user_feedback, Toast.LENGTH_LONG).show();
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to register: %s", e.getMessage());
+			Toast.makeText(RosterActivity.this, problem, Toast.LENGTH_LONG).show();
+			displayDialog(new RegistrationDialog(mXMPPService));//, server, username, password));
+		}
+	}
+
 	private class JoinTeamHandler extends BaseAsyncTaskCallback<String> {
 		@Override
 		public void onTaskCompleted(String teamName) {
