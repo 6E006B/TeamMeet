@@ -29,14 +29,17 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.jivesoftware.smack.XMPPException;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
@@ -195,51 +198,13 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 	protected boolean onTap(int index) {
 		final GeoPoint location = mOverlayItems.get(index).getPoint();
 		final String info = mIndicators.get(location);
-		
-		AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-		builder.setTitle("Indicator");
-    	builder.setMessage(info+"\nWhat do you want to do?");
-    	builder.setCancelable(true);
-    	builder.setPositiveButton("Navigate Here", new DialogInterface.OnClickListener() {
-    		@Override
-    		public void onClick(DialogInterface dialog, int id) {
-    			Log.d(CLASS, "User clicked Navigate Here");
-    			String intentData = String.format("google.navigation:ll=%f,%f&mode=w",
-    			                                  location.getLatitudeE6() * 1E-6,
-    			                                  location.getLongitudeE6() * 1E-6);
-    			Intent navigationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(intentData));
-    			mContext.startActivity(navigationIntent);
-			}
-    	});
-    	builder.setNegativeButton("Remove Indicator", new DialogInterface.OnClickListener() {
-    		@Override
-    		public void onClick(DialogInterface dialog, int id) {
-    			Log.d(CLASS, "User clicked Remove Indicator");
-    			if (mXMPPService != null) {
-    				try {
-						mXMPPService.sendIndicator(location, info, true);
-					} catch (XMPPException e) {
-						Log.e(CLASS, "Unable to remove indicator:" + e.getLocalizedMessage());
-						e.printStackTrace();
-					}
-    			} else {
-    				Log.w(CLASS, "XMPPService unavailable");
-    			}
-    		}
-    	});
-    	builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-			}
-		});
-    	final AlertDialog alert = builder.create();
-    	mMapView.post(new Runnable() {
-			
+
+		final Dialog dialog = createIndicatorDialog(location, info);
+
+		mMapView.post(new Runnable() {
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
-				alert.show();	
+				dialog.show();
 			}
 		});
 		return super.onTap(index);
@@ -259,6 +224,52 @@ public class IndicatorsOverlay extends ItemizedOverlay<OverlayItem> {
 			super.draw(canvas, mapView, shadow, when);
 		}
 		return isRedrawNeeded;
+	}
+
+	private Dialog createIndicatorDialog(final GeoPoint location, final String info) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+		builder.setTitle("Indicator");
+		builder.setMessage(info+"\nWhat do you want to do?");
+		builder.setCancelable(true);
+		builder.setPositiveButton("Navigate Here", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				Log.d(CLASS, "User clicked Navigate Here");
+				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
+				String navigationModeKey =
+						mContext.getString(R.string.preference_navigation_mode_key);
+				String navigationMode = settings.getString(navigationModeKey, "w");
+				String intentData = String.format("google.navigation:ll=%f,%f&mode=%s",
+				                                  location.getLatitudeE6() * 1E-6,
+				                                  location.getLongitudeE6() * 1E-6,
+				                                  navigationMode);
+				Intent navigationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(intentData));
+				mContext.startActivity(navigationIntent);
+			}
+		});
+		builder.setNegativeButton("Remove Indicator", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				Log.d(CLASS, "User clicked Remove Indicator");
+				if (mXMPPService != null) {
+					try {
+						mXMPPService.sendIndicator(location, info, true);
+					} catch (XMPPException e) {
+						Log.e(CLASS, "Unable to remove indicator:" + e.getLocalizedMessage());
+						e.printStackTrace();
+					}
+				} else {
+					Log.w(CLASS, "XMPPService unavailable");
+				}
+			}
+		});
+		builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
+		return builder.create();
 	}
 
 	private class IndicatorBroadcastReceiver extends BroadcastReceiver {

@@ -36,7 +36,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
@@ -122,18 +121,10 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> {
 	}
 
 	@Override
-	protected boolean onTap(int index) {
-		final String mateID = ((MateOverlayItem)mOverlayItems.get(index)).getMate().getID();
-		final String mateNick = Chat.getPath(mateID);
-		Toast.makeText(mContext, mateNick, Toast.LENGTH_SHORT).show();
-		return super.onTap(index);
-	}
-
-	@Override
 	public boolean draw(Canvas canvas, MapView mapView, boolean shadow, long when) {
 		boolean isRedrawNeeded = mOverlayItems.size() > 0;
 		if (isRedrawNeeded) {
-			super.draw(canvas, mapView, shadow, when);
+			super.draw(canvas, mapView, false, when);
 		}
 		return isRedrawNeeded;
 	}
@@ -146,14 +137,14 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> {
 			Mate mate = parseMate(intent.getExtras());
 			if (mate != null) {
 				Log.d(CLASS, "MatesOverlay.MateUpdateReceiver.onReceive()");
-				if (!Chat.getPath(mate.getID()).equals(mOwnID)) {
+				if (!Chat.getResource(mate.getID()).equals(mOwnID)) {
 					acquireLock();
 					try {
 						if (mMates.containsKey(mate.getID())) {
 							mMates.get(mate.getID()).setLocation(mate.getLocation(), mate.getAccuracy());
 						} else {
 							mMates.put(mate.getID(), mate);
-							mOverlayItems.add(new MateOverlayItem(mate));
+							mOverlayItems.add(new MateOverlayItem(mate, mContext));
 						}
 					} finally {
 						releaseLock();

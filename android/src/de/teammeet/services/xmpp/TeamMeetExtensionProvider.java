@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
+import org.jivesoftware.smack.util.Base64;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -20,6 +21,7 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 		TeamMeetPacketExtension teamMeetPacket = null;
 		MatePacket matePacket = null;
 		IndicatorPacket indicatorPacket = null;
+		CryptoPacket cryptoPacket = null;
 
 		// iterate over all XML tags
 		boolean done = false;
@@ -32,19 +34,21 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 					matePacket = parseMatePacketExtension(parser);
 				} else if (parser.getName().equals(TeamMeetPacketExtension.INDICATOR)) {
 					indicatorPacket = parseIndicatorPacketExtension(parser);
+				} else if (parser.getName().equals(TeamMeetPacketExtension.CRYPTO)) {
+					cryptoPacket = parseCryptoPacketExtension(parser);
 				} else {
 					throw new InvalidProtocolException(String.format("Found invalid opening tag '%s'", parser.getName())); 
 				}
 			} else if (eventType == XmlPullParser.END_TAG) {
-				// TODO: What happens if we never meet a </teammet> tag and the parser runs out of tags?
+				// TODO: What happens if we never meet a </teammeet> tag and the parser runs out of tags?
 				if (parser.getName().equals(TeamMeetPacketExtension.TEAMMEET)) {
 					done = true;
 				}
 			}
 		}
 
-		if (matePacket != null || indicatorPacket != null) {
-			teamMeetPacket = new TeamMeetPacketExtension(matePacket, indicatorPacket);
+		if (matePacket != null || indicatorPacket != null || cryptoPacket != null) {
+			teamMeetPacket = new TeamMeetPacketExtension(matePacket, indicatorPacket, cryptoPacket);
 		} else {
 			throw new InvalidProtocolException("Missing value in TeamMeet XML message");
 		}
@@ -130,6 +134,54 @@ public class TeamMeetExtensionProvider implements PacketExtensionProvider {
 			throw new InvalidProtocolException("Missing value in Indicator message");
 		}
 		return indicatorPacket;
+	}
+
+	private CryptoPacket parseCryptoPacketExtension(XmlPullParser parser)
+			throws InvalidProtocolException, XmlPullParserException, IOException {
+		CryptoPacket cryptoPacket = null;
+		String keyType = null;
+		byte[] key = null;
+		String teamName = null;
+
+		// iterate over all XML tags
+		boolean done = false;
+		while (!done) {
+			int eventType = parser.next();
+			if (eventType == XmlPullParser.START_TAG) {
+				if (parser.getName().equals(TeamMeetPacketExtension.CRYPTO_KEY)) {
+					int numAttributes = parser.getAttributeCount();
+					if ( numAttributes == 1) {
+						keyType = parser.getAttributeValue(null, TeamMeetPacketExtension.KEYTYPE_ATTR);
+						if (!keyType.equals(TeamMeetPacketExtension.KEYTYPE_PUBLIC) &&
+							!keyType.equals(TeamMeetPacketExtension.KEYTYPE_SECRET)) {
+							throw new InvalidProtocolException(String.format("Invalid key type '%s'", keyType));
+						}
+					} else {
+						throw new InvalidProtocolException(String.format("Invalid number of attributes in 'key' tag: %d",
+																		  numAttributes));
+					}
+					key = Base64.decode(parser.nextText());
+				} else if (parser.getName().equals(TeamMeetPacketExtension.TEAM)) {
+					teamName = parser.nextText();
+				} else {
+					throw new InvalidProtocolException(String.format("Found invalid opening tag '%s'", parser.getName())); 
+				}
+			} else if (eventType == XmlPullParser.END_TAG) {
+				// TODO: What happens if we never meet a </keyExchange> tag and the parser runs out of tags?
+				if (parser.getName().equals(TeamMeetPacketExtension.CRYPTO)) {
+					done = true;
+				}
+			}
+
+		}
+
+		// check we've got everything we need
+		if (keyType != null && key != null && teamName != null) {
+			cryptoPacket = new CryptoPacket(keyType, key, teamName);
+		} else {
+			throw new InvalidProtocolException("Missing value in crypto message");
+		}
+		return cryptoPacket;
 	}
 
 	public static class InvalidProtocolException extends XMPPException {

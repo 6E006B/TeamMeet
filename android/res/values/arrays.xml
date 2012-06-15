@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="preference_navigation_mode_entries">
+        <item>Walking</item>
+        <item>Driving</item>
+    </string-array>
+    <string-array name="preference_navigation_mode_values">
+        <item>w</item>
+        <item>d</item>
+    </string-array>
+
+</resources>

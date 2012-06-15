@@ -26,6 +26,7 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
@@ -47,6 +48,7 @@ import de.teammeet.services.xmpp.XMPPService;
 import de.teammeet.tasks.BaseAsyncTaskCallback;
 import de.teammeet.tasks.FetchRosterTask;
 import de.teammeet.tasks.InviteTask;
+import de.teammeet.tasks.RemoveMateTask;
 
 
 /**
@@ -59,6 +61,8 @@ public class ContactsFragment extends Fragment {
 	private static final String UNFILED_GROUP = "Unfiled contacts";
 	private static final int CONTEXT_MENU_INVITE_PARENT_ID = 0x7e000002;
 	private static final int CONTEXT_MENU_INVITE_ROOM_ID = 0x7e000003;
+	private static final int CONTEXT_MENU_REMOVE_MATE_ID = 0x7e000004;
+	private static final int CONTEXT_MENU_OPEN_CHAT_ID = 0x7e000005;
 
 	private BroadcastReceiver mConnectReceiver;
 	private BroadcastReceiver mDisconnectReceiver;
@@ -109,10 +113,7 @@ public class ContactsFragment extends Fragment {
 				TextView textView = (TextView) listItem.getChildAt(0);
 				final String contact = textView.getText().toString();
 				Log.d(CLASS, String.format("clicked on child: %s", contact));
-				Intent intent = new Intent(getActivity(), ChatsActivity.class);
-				intent.putExtra(XMPPService.TYPE, Chat.TYPE_NORMAL_CHAT);
-				intent.putExtra(XMPPService.SENDER, contact);
-				startActivity(intent);
+				openChat(contact);
 				//return super.onChildClick(parent, v, groupPosition, childPosition, id);
 				return true;
 			}
@@ -157,46 +158,99 @@ public class ContactsFragment extends Fragment {
 	public void onCreateContextMenu(ContextMenu menu, View v,
 									ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
+
+		ExpandableListView.ExpandableListContextMenuInfo info =
+				(ExpandableListView.ExpandableListContextMenuInfo) menuInfo;
+		final int type = ExpandableListView.getPackedPositionType(info.packedPosition);
+//		final int group = ExpandableListView.getPackedPositionGroup(info.packedPosition);
+//		final int child = ExpandableListView.getPackedPositionChild(info.packedPosition);
+
+		//Only create a context menu for child items
+		if (type == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+			createChildContextMenu(menu);
+		} else {
+			// long-press on a group
+			Log.d(CLASS, "Long-Press on a group.");
+			createGroupContextMenu(menu);
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		Log.d(CLASS, String.format("Context item '%s' clicked", item.getTitleCondensed()));
+
+		ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item.getMenuInfo();
+		int type = ExpandableListView.getPackedPositionType(info.packedPosition);
+		if (type == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+			switch(item.getItemId()) {
+				case CONTEXT_MENU_OPEN_CHAT_ID:
+					clickedOpenChat(item);
+					return true;
+				case CONTEXT_MENU_INVITE_PARENT_ID:
+					/* backup info, will need it when sub-menu item gets selected.
+					 * cf http://code.google.com/p/android/issues/detail?id=7139.
+					 */
+					mLastContextItemInfo = ((ExpandableListContextMenuInfo)item.getMenuInfo());
+					return true;
+				case CONTEXT_MENU_INVITE_ROOM_ID:
+					clickedInviteToTeam(item);
+					return true;
+				case CONTEXT_MENU_REMOVE_MATE_ID:
+					clickedRemoveMate(item);
+					return true;
+				default:
+					Log.d(CLASS, String.format("unhandeled context menu item clicked: 0x%x",
+					                           item.getItemId()));
+			}
+		} else {
+			// selected item is a group
+			Log.d(CLASS, "Clicked on a context menu item regarding a group.");
+			switch(item.getItemId()) {
+			case R.id.roster_list_context_group_add_contact:
+				clickedAddContactToGroup(item);
+				return true;
+			default:
+				Log.d(CLASS, String.format("unhandeled context menu item clicked: 0x%x",
+				                           item.getItemId()));
+			}
+		}
+		return super.onContextItemSelected(item);
+	}
+
+	private void createChildContextMenu(ContextMenu menu) {
 		//TODO Uncomment if you added static entries to an XML layout
 		//MenuInflater inflater = getMenuInflater();
 		//inflater.inflate(R.menu.roster_context, menu);
 		Log.d(CLASS, "creating context menu");
 
+		menu.add(Menu.NONE, CONTEXT_MENU_OPEN_CHAT_ID, Menu.NONE, R.string.context_open_chat);
 		try {
-		Set<String> teams = ((RosterActivity) getActivity()).getXMPPService().getTeams();
-		if (!teams.isEmpty()) {
-			SubMenu inviteSubMenu = menu.addSubMenu(Menu.NONE, CONTEXT_MENU_INVITE_PARENT_ID,
-													Menu.NONE, R.string.context_invite);
-			for (String teamName : teams) {
-				Log.d(CLASS, "team: " + teamName);
-				inviteSubMenu.add(Menu.NONE, CONTEXT_MENU_INVITE_ROOM_ID, Menu.NONE, teamName);
+			Set<String> teams = ((RosterActivity) getActivity()).getXMPPService().getTeams();
+			if (!teams.isEmpty()) {
+				SubMenu inviteSubMenu = menu.addSubMenu(Menu.NONE, CONTEXT_MENU_INVITE_PARENT_ID,
+														Menu.NONE, R.string.context_invite);
+				for (String teamName : teams) {
+					Log.d(CLASS, "team: " + teamName);
+					inviteSubMenu.add(Menu.NONE, CONTEXT_MENU_INVITE_ROOM_ID, Menu.NONE, teamName);
+				}
 			}
-		}
 		} catch (XMPPException e) {
 			String problem = String.format("Could not fetch teams: %s", e.getMessage());
 			Log.e(CLASS, problem);
 			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
+		menu.add(Menu.NONE, CONTEXT_MENU_REMOVE_MATE_ID, Menu.NONE, R.string.context_remove_mate);
 	}
-	
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		Log.d(CLASS, String.format("Context item '%s' clicked", item.getTitleCondensed()));
 
-		switch(item.getItemId()) {
-			case CONTEXT_MENU_INVITE_PARENT_ID:
-				/* backup info, will need it when sub-menu item gets selected.
-				 * cf http://code.google.com/p/android/issues/detail?id=7139.
-				 */
-				mLastContextItemInfo = ((ExpandableListContextMenuInfo)item.getMenuInfo());
-				return true;
-			case CONTEXT_MENU_INVITE_ROOM_ID:
-				clickedInviteToTeam(item);
-				return true;
-			default:
-				Log.d(CLASS, String.format("unhandeled item clicked: 0x%x", item.getItemId()));
-				return super.onContextItemSelected(item);
-		}
+	private void createGroupContextMenu(ContextMenu menu) {
+		MenuInflater inflater = getActivity().getMenuInflater();
+		inflater.inflate(R.menu.roster_context_group, menu);
+	}
+
+	private void clickedOpenChat(MenuItem item) {
+		ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo)item.getMenuInfo();
+		final String contact = getExpandableListChild(menuInfo.packedPosition);
+		openChat(contact);
 	}
 
 	private void clickedInviteToTeam(MenuItem item) {
@@ -208,7 +262,25 @@ public class ContactsFragment extends Fragment {
 																	  new InviteMateHandler());
 		inviteTask.execute(contact, teamName);
 	}
-	
+
+	private void clickedRemoveMate(MenuItem item) {
+		ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo)item.getMenuInfo();
+		String contact = getExpandableListChild(menuInfo.packedPosition);
+		Log.d(CLASS, String.format("desire to remove contact '%s'", contact));
+		IXMPPService xmpp = ((RosterActivity) getActivity()).getXMPPService();
+		AsyncTask<String, Void, String> removeMateTask =
+				new RemoveMateTask(xmpp, new RemoveMateHandler());
+		removeMateTask.execute(contact);
+	}
+
+	private void clickedAddContactToGroup(MenuItem item) {
+		ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo)item.getMenuInfo();
+		final String group = getExpandableListGroup(menuInfo.packedPosition);
+		RosterActivity activity = (RosterActivity)getActivity();
+		AddContactDialog dialog = new AddContactDialog(activity.getXMPPService(), group);
+		dialog.show(getFragmentManager(), null);
+	}
+
 	private String getExpandableListChild(long packedPosition) {
 		final int group_position = ExpandableListView.getPackedPositionGroup(packedPosition);
 		final int child_position = ExpandableListView.getPackedPositionChild(packedPosition);
@@ -216,7 +288,12 @@ public class ContactsFragment extends Fragment {
 																				  child_position);
 		return child.get(NAME);
 	}
-	
+
+	private String getExpandableListGroup(long packedPosition) {
+		final int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+		Map<String, String> group = (Map<String, String>)mAdapter.getGroup(groupPosition);
+		return group.get(NAME);
+	}
 
 	public void handleDisconnect() {
 		mExpandableGroups.clear();
@@ -250,6 +327,13 @@ public class ContactsFragment extends Fragment {
 			mExpandableGroups.add(newEntry.mGroup);
 			mExpandableChildren.add(newEntry.mChildren);
 		}
+	}
+
+	private void openChat(String contact) {
+		Intent intent = new Intent(getActivity(), ChatsActivity.class);
+		intent.putExtra(XMPPService.TYPE, Chat.TYPE_NORMAL_CHAT);
+		intent.putExtra(XMPPService.SENDER, contact);
+		startActivity(intent);
 	}
 
 	private class ExpandableContactEntry {
@@ -299,10 +383,24 @@ public class ContactsFragment extends Fragment {
 			String user_feedback = String.format("You invited %s to %s", connection_data[0], connection_data[1]);
 			Toast.makeText(getActivity(), user_feedback, Toast.LENGTH_LONG).show();
 		}
-	
+
 		@Override
 		public void onTaskAborted(Exception e) {
 			String problem = String.format("Failed to invite contact to team: %s", e.getMessage());
+			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class RemoveMateHandler extends BaseAsyncTaskCallback<String> {
+		@Override
+		public void onTaskCompleted(String contact) {
+			String user_feedback = String.format("You removed %s", contact);
+			Toast.makeText(getActivity(), user_feedback, Toast.LENGTH_LONG).show();
+		}
+
+		@Override
+		public void onTaskAborted(Exception e) {
+			String problem = String.format("Failed to remove contact: %s", e.getMessage());
 			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
 	}
@@ -314,19 +412,19 @@ public class ContactsFragment extends Fragment {
 			Log.d(CLASS, "Entries have been added to the roster");
 			redrawOnUiThread();
 		}
-	
+
 		@Override
 		public void entriesDeleted(Collection<String> arg0) {
 			Log.d(CLASS, "Entries have been deleted from the roster");
 			redrawOnUiThread();
 		}
-	
+
 		@Override
 		public void entriesUpdated(Collection<String> arg0) {
 			Log.d(CLASS, "Entries have been updated in the roster");
 			redrawOnUiThread();
 		}
-	
+
 		@Override
 		public void presenceChanged(Presence presence) {
 			/*
@@ -340,10 +438,10 @@ public class ContactsFragment extends Fragment {
 			}
 			Log.d(CLASS, String.format("presence of '%s' in group '%s' has changed in the roster.", contact, groupName));
 			*/
-			
+
 			redrawOnUiThread();
 		}
-		
+
 		private void redrawOnUiThread() {
 			mContactsList.post(new Runnable() {
 				

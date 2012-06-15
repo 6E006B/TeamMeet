@@ -2,6 +2,7 @@ package de.teammeet.services.xmpp;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,16 +16,20 @@ import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.AndFilter;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
+import org.jivesoftware.smack.filter.PacketExtensionFilter;
+import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.muc.MultiUserChat;
-import org.jivesoftware.smackx.muc.Occupant;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -38,6 +43,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -47,11 +53,10 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
 
 import de.teammeet.R;
-import de.teammeet.activities.chat.Chat;
-import de.teammeet.activities.chat.ChatsActivity;
 import de.teammeet.activities.roster.RosterActivity;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.helper.ChatOpenHelper;
+import de.teammeet.helper.ToastHelper;
 import de.teammeet.interfaces.IChatMessageHandler;
 import de.teammeet.interfaces.IGroupMessageHandler;
 import de.teammeet.interfaces.IInvitationHandler;
@@ -68,7 +73,8 @@ public class XMPPService extends Service implements IXMPPService {
 	public static final String PASSWORD = "password";
 	public static final String FROM = "from";
 	public static final String GROUP = "group";
-	public static final String SENDER = null;
+	public static final String SENDER = "sender";
+	public static final String MESSAGE = "message";
 
 	public static final int TYPE_NONE = 0;
 	public static final int TYPE_JOIN = 1;
@@ -93,6 +99,7 @@ public class XMPPService extends Service implements IXMPPService {
 	private Map<String, Team> mTeams = null;
 	private RoomInvitationListener mRoomInvitationListener = null;
 	private ChatMessageListener mChatMessageListener = null;
+	private KeyExchangeListener mKeyExchangeRequestListener = null;
 
 	private final ReentrantLock mLockGroups = new ReentrantLock();
 	private final ReentrantLock mLockInvitations = new ReentrantLock();
@@ -107,18 +114,16 @@ public class XMPPService extends Service implements IXMPPService {
 			new ArrayList<IChatMessageHandler>();
 
 	private final IBinder mBinder = new LocalBinder();
-	private int mBindCounter = 0;
 
 	private TimerTask mTimerTask = null;
 	private ChatOpenHelper mChatDatabase = null;
 	private MyLocationOverlay mLocationOverlay = null;
-	private SecureRandom mKeyGenerator = null;
+	private SecureRandom mRandomNumberGenerator = null;
 
 	private NotificationCompat.Builder mServiceNotificationBuilder;
-	private NotificationCompat.Builder mInvitationNotificationBuilder;
-	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
-	private NotificationCompat.Builder mChatMessageNotificationBuilder;
-
+	private InvitationNotificationHandler mInvitationNotificationHandler;
+	private GroupMessageNotificationHandler mGroupMessageNotificationHandler;
+	private ChatMessageNotificationHandler mChatMessageNotificationHandler;
 
 	public class LocalBinder extends Binder {
 		public XMPPService getService() {
@@ -131,8 +136,19 @@ public class XMPPService extends Service implements IXMPPService {
 		super.onCreate();
 		Log.d(CLASS, "XMPPService.onCreate()");
 		ConfigureProviderManager.configureProviderManager();
+		ToastHelper.initialize(this);
 		mChatDatabase = new ChatOpenHelper(this);
-		mKeyGenerator = new SecureRandom();
+		mRandomNumberGenerator = new SecureRandom();
+		mInvitationNotificationHandler =
+				new InvitationNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
+				                                  NOTIFICATION_GROUP_INVITATION_ID);
+		mGroupMessageNotificationHandler =
+				new GroupMessageNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
+				                                    NOTIFICATION_GROUP_CHAT_MESSAGE_ID);
+		mChatMessageNotificationHandler =
+				new ChatMessageNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
+				                                    NOTIFICATION_CHAT_MESSAGE_ID);
+		showXMPPServiceNotification(false);
 	}
 
 	@Override
@@ -154,24 +170,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		mBindCounter++;
 		return mBinder;
-	}
-
-	@Override
-	public void onRebind(Intent intent) {
-		super.onRebind(intent);
-	}
-
-	@Override
-	public boolean onUnbind(Intent intent) {
-		mBindCounter--;
-		Log.d(CLASS, "XMPPService.onUnbind() still " + mBindCounter + " connected");
-		if (mBindCounter == 0 && !isAuthenticated()) {
-			Log.d(CLASS, "XMPPService: No one bound and not connected -> selfdestruction!");
-			stopSelf();
-		}
-		return super.onUnbind(intent);
 	}
 
 	@Override
@@ -189,11 +188,13 @@ public class XMPPService extends Service implements IXMPPService {
 		bcastConnected.addCategory(getString(R.string.broadcast_connection_state));
 		bcastConnected.setAction(getString(R.string.broadcast_connected));
 		removeStickyBroadcast(bcastConnected);
-		
+
 		Intent bcastDisconnected = new Intent();
 		bcastDisconnected.addCategory(getString(R.string.broadcast_connection_state));
 		bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
 		removeStickyBroadcast(bcastDisconnected);
+
+		removeNotifications();
 
 		super.onDestroy();
 	}
@@ -232,13 +233,21 @@ public class XMPPService extends Service implements IXMPPService {
 		mRoomInvitationListener  = new RoomInvitationListener(this);
 		MultiUserChat.addInvitationListener(mXMPP, mRoomInvitationListener);
 
+		mKeyExchangeRequestListener = new KeyExchangeListener(this);
+		final PacketFilter keyExchangeRequestfilter = new AndFilter(new MessageTypeFilter(Message.Type.chat),
+													  new PacketExtensionFilter(TeamMeetPacketExtension.NAMESPACE));
+		mXMPP.addPacketListener(mKeyExchangeRequestListener, keyExchangeRequestfilter);
 		mChatMessageListener = new ChatMessageListener(this);
 		final MessageTypeFilter chatMessageFilter = new MessageTypeFilter(Message.Type.chat);
 		mXMPP.addPacketListener(mChatMessageListener, chatMessageFilter);
 		mXMPP.addPacketSendingListener(mChatMessageListener, chatMessageFilter);
 		mXMPP.addConnectionListener(new ConnectionListener() {
 			@Override
-			public void reconnectionSuccessful() {}
+			public void reconnectionSuccessful() {
+				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+				                                               R.string.broadcast_disconnected,
+				                                               R.string.broadcast_connected);
+			}
 			@Override
 			public void reconnectionFailed(Exception arg0) {
 				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
@@ -246,7 +255,11 @@ public class XMPPService extends Service implements IXMPPService {
 															   R.string.broadcast_disconnected);
 			}
 			@Override
-			public void reconnectingIn(int arg0) {}
+			public void reconnectingIn(int arg0) {
+				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+															   R.string.broadcast_connected,
+															   R.string.broadcast_disconnected);
+			}
 			@Override
 			public void connectionClosedOnError(Exception arg0) {
 				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
@@ -260,7 +273,7 @@ public class XMPPService extends Service implements IXMPPService {
 															   R.string.broadcast_disconnected);
 			}
 		});
-		showXMPPServiceNotification();
+		showXMPPServiceNotification(true);
 	}
 
 	@Override
@@ -284,8 +297,9 @@ public class XMPPService extends Service implements IXMPPService {
 			if (mRoomInvitationListener != null) {
 				MultiUserChat.removeInvitationListener(mXMPP, mRoomInvitationListener);
 			}
+			showXMPPServiceNotification(false);
 		}
-		removeNotifications();
+
 		mTeams = null;
 		mRoomInvitationListener = null;
 		mXMPP = null;
@@ -300,12 +314,6 @@ public class XMPPService extends Service implements IXMPPService {
 			throw new XMPPException("Connect before getting contacts!");
 		}
 		return roster;
-	}
-
-	@Override
-	public void addContact(String userID, String identifier) throws XMPPException {
-		Roster roster = mXMPP.getRoster();
-		roster.createEntry(userID, identifier, null);
 	}
 
 	@Override
@@ -329,7 +337,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 		muc.sendConfigurationForm(configForm);
 
-		Team team = new Team(muc);
+		Team team = new Team(group, muc);
 		addTeam(group, team);
 	}
 
@@ -344,30 +352,40 @@ public class XMPPService extends Service implements IXMPPService {
 			}
 		}
 
+		if (config.getField(MUC_PASSWORDPROTECTED_FIELD) == null) {
+			FormField passwordProtectedField = new FormField(MUC_PASSWORDPROTECTED_FIELD);
+			passwordProtectedField.setType(FormField.TYPE_BOOLEAN);
+			config.addField(passwordProtectedField);
+		}
+
 		return config;
 	}
 
 	private String generateMUCPassword() {
 		byte[] roomKey = new byte[18]; // 18 bytes = 144 bits = 24 base64-chars
-		mKeyGenerator.nextBytes(roomKey);
+		mRandomNumberGenerator.nextBytes(roomKey);
 		return Base64.encodeBytes(roomKey);
 	}
 
 	@Override
-	public void joinRoom(String room, String userID, String password) throws XMPPException {
-		Log.d(CLASS, String.format("joinRoom('%s', '%s', '%s')",
-		                           room, userID, password));
-		MultiUserChat muc = new MultiUserChat(mXMPP, room);
-		muc.join(userID, password);
-		Team team = new Team(muc);
-		addTeam(room, team);
+	public void joinTeam(String teamName, String userID, String password, String inviter) throws XMPPException {
+		MultiUserChat muc = new MultiUserChat(mXMPP, teamName);
+		Team team = new Team(teamName, muc);
+		team.setInviter(inviter);
+		addTeam(teamName, team);
+		try {
+			muc.join(userID, password);
+		} catch (XMPPException error) {
+			removeTeam(teamName);
+			throw error;
+		}
 	}
 
 	private void addTeam(final String teamName, Team team) {
 		Log.d(CLASS, String.format("adding team '%s'", teamName));
 		acquireTeamsLock();
 		team.getRoom().addMessageListener(new RoomMessageListener(this, teamName));
-		team.getRoom().addParticipantStatusListener(new TeamJoinListener(this, teamName));
+		team.getRoom().addParticipantStatusListener(new TeamJoinListener(this, team));
 		team.getRoom().addInvitationRejectionListener(new TeamJoinDeclinedListener(this, teamName));
 		mTeams.put(teamName, team);
 		releaseTeamsLock();
@@ -405,12 +423,22 @@ public class XMPPService extends Service implements IXMPPService {
 			String server =
 					settings.getString(getString(R.string.preference_server_key), "");
 			String alternateAddress = String.format("%s@%s", userID, server);
-			team.getRoom().destroy("reason", alternateAddress);
+			team.getRoom().destroy(getString(R.string.reason_team_destroy), alternateAddress);
 			removeTeam(teamName);
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));
 		}
 		releaseTeamsLock();
+	}
+
+	@Override
+	public String[] getGroups() {
+		List<String> groupList = new ArrayList<String>();
+		Collection<RosterGroup> rosterGroups = mXMPP.getRoster().getGroups();
+		for (RosterGroup rosterGroup : rosterGroups) {
+			groupList.add(rosterGroup.getName());
+		}
+		return groupList.toArray(new String[]{});
 	}
 
 	@Override
@@ -446,29 +474,6 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
-	public String getFullJID(String teamName, String fullNick) throws XMPPException {
-		String fullJID = null;
-
-		Team team = mTeams.get(teamName);
-		if (team != null) {
-			Occupant occupant = team.getRoom().getOccupant(fullNick);
-			if (occupant != null) {
-				fullJID = occupant.getJid();
-				if (fullJID == null) {
-					throw new XMPPException(String.format("Full JID for '%s' not available in '%s'",
-														   fullNick, teamName));
-				}
-			} else {
-				throw new XMPPException(String.format("No user '%s' in '%s'", fullNick, teamName));
-			}
-		} else {
-			throw new XMPPException(String.format("No team '%s'", teamName));
-		}
-
-		return fullJID;
-	}
-
-	@Override
 	public String getNickname(String teamName) throws XMPPException {
 		String nick;
 		Team team = mTeams.get(teamName);
@@ -481,10 +486,28 @@ public class XMPPService extends Service implements IXMPPService {
 	}
 
 	@Override
+	public void addContact(String contact, String name, String group) throws XMPPException {
+		Log.d(CLASS, "XMPPService.addContact()");
+		Roster roster = mXMPP.getRoster();
+		roster.createEntry(contact, name, new String[]{group});
+	}
+
+	@Override
+	public void removeContact(String contact) throws XMPPException {
+		Roster roster = mXMPP.getRoster();
+		if (roster.contains(contact)) {
+			RosterEntry contactEntry = roster.getEntry(contact);
+			roster.removeEntry(contactEntry);
+		} else {
+			throw new XMPPException(String.format("No contact '%s'", contact));
+		}
+	}
+
+	@Override
 	public void invite(String contact, String teamName) throws XMPPException {
 		Team team = mTeams.get(teamName);
 		if (team != null) {
-			team.getRoom().invite(contact, "reason");
+			team.getRoom().invite(contact, getString(R.string.reason_team_invite));
 			team.addInvitee(contact);
 		} else {
 			throw new XMPPException(String.format("No team '%s'", teamName));
@@ -495,6 +518,30 @@ public class XMPPService extends Service implements IXMPPService {
 	public void declineInvitation(String teamName, String inviter, String reason) throws XMPPException {
 		if (mXMPP != null) {
 		MultiUserChat.decline(mXMPP, teamName, inviter, reason);
+		} else {
+			throw new XMPPException("Not connected");
+		}
+	}
+
+	@Override
+	public void sendKey(String mate, String type, byte[] key, String team) throws XMPPException {
+		if (mXMPP != null) {
+			if (mXMPP.isAuthenticated()) {
+				Log.d(CLASS, String.format("Sending key to '%s' in '%s'", mate, team));
+
+				Message message = new Message();
+				message.setType(Message.Type.chat);
+				message.setTo(mate);
+				CryptoPacket cryptoPacket = new CryptoPacket(type, key, team);
+				TeamMeetPacketExtension teamMeetExt = new TeamMeetPacketExtension(null,
+																				  null,
+																				  cryptoPacket);
+				message.addExtension(teamMeetExt);
+
+				mXMPP.sendPacket(message);
+			} else {
+				throw new XMPPException("Not authenticated");
+			}
 		} else {
 			throw new XMPPException("Not connected");
 		}
@@ -556,6 +603,7 @@ public class XMPPService extends Service implements IXMPPService {
 				                                       location.getLatitudeE6(),
 				                                       accuracy);
 				TeamMeetPacketExtension teamMeetPacket = new TeamMeetPacketExtension(matePacket,
+				                                                                     null,
 				                                                                     null);
 				message.addExtension(teamMeetPacket);
 				message.addBody("", "");
@@ -582,7 +630,7 @@ public class XMPPService extends Service implements IXMPPService {
 				 						                             location.getLongitudeE6(),
 										                             info, remove);
 				TeamMeetPacketExtension teamMeetPacket =
-						new TeamMeetPacketExtension(null, indicatorPacket);
+						new TeamMeetPacketExtension(null, indicatorPacket, null);
 				message.addExtension(teamMeetPacket);
 				message.addBody("", "");
 				sendAllTeams(message);
@@ -652,6 +700,7 @@ public class XMPPService extends Service implements IXMPPService {
 		packet.setBody(message);
 		packet.setType(Message.Type.chat);
 		packet.setTo(to);
+		//TODO: Do we have/want to set from? May b0rk if we make a mistake, should be set by the server?
 		packet.setFrom(String.format("%s@%s", mUserID, mServer));
 		mXMPP.sendPacket(packet);
 	}
@@ -677,14 +726,24 @@ public class XMPPService extends Service implements IXMPPService {
 		sendBroadcast(intent);
 	}
 
-	private void showXMPPServiceNotification() {
+	private void showXMPPServiceNotification(boolean connected) {
 		Log.d(CLASS, "XMPPService.showXMPPServiceNotification()");
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
 
-		CharSequence title = getText(R.string.notification_service_title);
-        CharSequence text = getText(R.string.notification_service_text);
-		int icon = R.drawable.ic_stat_notify_teammeet;
+		CharSequence title;
+        CharSequence text;
+		int icon;
+
+		if (connected) {
+			title = getText(R.string.notification_service_title_connected);
+			text = getText(R.string.notification_service_text_connected);
+			icon = R.drawable.ic_stat_notify_connected;
+		} else {
+			title = getText(R.string.notification_service_title_disconnected);
+	        text = getText(R.string.notification_service_text_disconnected);
+			icon = R.drawable.ic_stat_notify_teammeet;
+		}
 		CharSequence tickerText = String.format("%s %s", title, text);
 
 		Intent notificationIntent = new Intent(this, RosterActivity.class);
@@ -721,51 +780,10 @@ public class XMPPService extends Service implements IXMPPService {
 			releaseInvitationsLock();
 		}
 		if (!handled) {
-			notifyNewInvitation(room, inviter, reason, password, message);
+			final Bundle bundle = InvitationNotificationHandler.generateBundle(room, inviter,
+			                                                                   reason, password);
+			mInvitationNotificationHandler.newNotification(bundle);
 		}
-	}
-
-	private void showAutoCancelNotificaton(CharSequence title, CharSequence text,
-			CharSequence tickerText, int icon, PendingIntent pendingIntent, int notificationID,
-			NotificationCompat.Builder builder) {
-		final String ns = Context.NOTIFICATION_SERVICE;
-		final NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
-
-		builder.setContentTitle(title);
-		builder.setContentText(text);
-		builder.setTicker(tickerText);
-		builder.setSmallIcon(icon);
-		builder.setAutoCancel(true);
-		builder.setDefaults(Notification.DEFAULT_ALL);
-		builder.setContentIntent(pendingIntent);
-		Notification notification = builder.getNotification();
-
-		notificationManager.notify(notificationID, notification);
-	}
-	private void notifyNewInvitation(String room, String inviter, String reason,
-			  String password, Message message) {
-		final int icon = R.drawable.ic_stat_notify_teammeet;
-		final CharSequence tickerText = String.format("Invitation to '%s' from %s reason: '%s'",
-		                                        room, inviter, reason);
-		final CharSequence contentTitle = "Group Invitation received";
-		final Intent notificationIntent = new Intent(this, RosterActivity.class);
-		notificationIntent.putExtra(TYPE, TYPE_JOIN);
-		notificationIntent.putExtra(ROOM, room);
-		notificationIntent.putExtra(INVITER, inviter);
-		notificationIntent.putExtra(REASON, reason);
-		notificationIntent.putExtra(PASSWORD, password);
-		notificationIntent.putExtra(FROM, message.getFrom());
-		final PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, notificationIntent,
-				                          PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
-
-		if (mInvitationNotificationBuilder == null) {
-			mInvitationNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-		}
-		showAutoCancelNotificaton(contentTitle, tickerText, tickerText, icon, contentIntent,
-		                          NOTIFICATION_GROUP_INVITATION_ID, mInvitationNotificationBuilder);
 	}
 
 	@Override
@@ -806,34 +824,12 @@ public class XMPPService extends Service implements IXMPPService {
 			releaseGroupMessageLock();
 		}
 		if (!handled) {
-			notifyGroupMessage(message);
+			final Bundle bundle =
+					GroupMessageNotificationHandler.generateBundle(message.getTo(),
+					                                               message.getFrom(),
+					                                               message.getMessage());
+			mGroupMessageNotificationHandler.newNotification(bundle);
 		}
-	}
-
-	private void notifyGroupMessage(ChatMessage message) {
-		final String notificationText = String.format("%s (%s) : %s",
-		                                              message.getFrom(),
-		                                              message.getTo(),
-		                                              message.getMessage());
-		Log.d(CLASS, notificationText);
-		final int icon = R.drawable.ic_stat_notify_teammeet;
-		final CharSequence tickerText = String.format("New team message in %s", notificationText);
-		final CharSequence contentTitle = "Group chat message received";
-		final Intent notificationIntent = new Intent(this, ChatsActivity.class);
-		notificationIntent.putExtra(TYPE, Chat.TYPE_GROUP_CHAT);
-		notificationIntent.putExtra(SENDER, message.getTo());
-		final PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, notificationIntent,
-				                          PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
-
-		if (mGroupMessageNotificationBuilder == null) {
-			mGroupMessageNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-		}
-		showAutoCancelNotificaton(contentTitle, notificationText, tickerText, icon, contentIntent,
-		                          NOTIFICATION_GROUP_CHAT_MESSAGE_ID,
-		                          mGroupMessageNotificationBuilder);
 	}
 
 	@Override
@@ -872,34 +868,11 @@ public class XMPPService extends Service implements IXMPPService {
 		}
 		if (!handled) {
 			Log.d(CLASS, "chat message has not been handled.");
-			notifyNewChatMessage(message);
+			final Bundle bundle =
+					ChatMessageNotificationHandler.generateBundle(message.getFrom(),
+					                                              message.getMessage());
+			mChatMessageNotificationHandler.newNotification(bundle);
 		}
-	}
-
-	private void notifyNewChatMessage(ChatMessage message) {
-		final String notificationText = String.format("%s: %s",
-		                                              message.getFrom(),
-		                                              message.getMessage());
-		Log.d(CLASS, notificationText);
-
-		final int icon = R.drawable.ic_stat_notify_teammeet;
-		final CharSequence tickerText = String.format("New message from %s", notificationText);
-
-		final CharSequence contentTitle = "Chat message received";
-		final Intent notificationIntent = new Intent(this, ChatsActivity.class);
-		notificationIntent.putExtra(TYPE, Chat.TYPE_NORMAL_CHAT);
-		notificationIntent.putExtra(SENDER, message.getFrom());
-		final PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, notificationIntent,
-				                          PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Log.d(CLASS, "extra: " + notificationIntent.getExtras().toString());
-
-		if (mChatMessageNotificationBuilder == null) {
-			mChatMessageNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-		}
-		showAutoCancelNotificaton(contentTitle, notificationText, tickerText, icon, contentIntent,
-		                          NOTIFICATION_CHAT_MESSAGE_ID, mChatMessageNotificationBuilder);
 	}
 
 	@Override

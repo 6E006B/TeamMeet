@@ -13,7 +13,7 @@ public class ConnectTask extends BaseAsyncTask<Void, Void, Void> {
 	public ConnectTask(IXMPPService service, IAsyncTaskCallback<Void> callback) {
 		super(service, callback);
 	}
-	
+
 	@Override
 	protected Void doInBackground(Void... params) {
 		try {

@@ -16,6 +16,11 @@ public abstract class BaseAsyncTask<Params, Progress, Result> extends AsyncTask<
 	}
 
 	@Override
+	protected void onPreExecute() {
+		mCallback.onPreExecute();
+	}
+
+	@Override
 	protected void onPostExecute(Result result) {
 		mCallback.onTaskCompleted(result);
 	}

@@ -19,11 +19,6 @@
 -->
 <resources>
 
-    <integer name="arrow_length">20</integer>
-    <integer name="indicator_size">10</integer>
-    <integer name="indicator_width">10</integer>
-    <integer name="indicator_text_size">18</integer>
-    <integer name="indicator_text_border_width">4</integer>
     <integer name="location_message_delay">5000</integer>
     <integer name="max_chat_lines">3</integer>
 

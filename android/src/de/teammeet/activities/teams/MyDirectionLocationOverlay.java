@@ -20,7 +20,7 @@ public class MyDirectionLocationOverlay extends MyLocationOverlay {
 	private MapView mMapView = null;
 	private MapController mMapController = null;
 	private Paint mPaintPlayer = null;
-	private double mArrowLength = 0;
+	private int mArrowLength = 0;
 	private boolean mFollowLocation = false;
 	
 	public MyDirectionLocationOverlay(Context context, MapView mapView) {
@@ -30,8 +30,9 @@ public class MyDirectionLocationOverlay extends MyLocationOverlay {
 		Resources resources = mapView.getResources();
 		mPaintPlayer = new Paint();
 		mPaintPlayer.setStyle(Paint.Style.FILL);
+		mPaintPlayer.setFlags(Paint.ANTI_ALIAS_FLAG);
 		mPaintPlayer.setColor(resources.getColor(R.color.paint_default));
-		mArrowLength = resources.getInteger(R.integer.arrow_length);
+		mArrowLength = context.getResources().getDimensionPixelSize(R.dimen.direction_arrow_size);
 	}
 
 	@Override
@@ -46,13 +47,13 @@ public class MyDirectionLocationOverlay extends MyLocationOverlay {
 							Math.sin((-bearing + 180) * Math.PI / 180)),
 						(float) (coords.y + mArrowLength *
 							Math.cos((-bearing + 180) * Math.PI / 180)));
-			path.lineTo((float) (coords.x + (mArrowLength / 4) *
+			path.lineTo((float) (coords.x + (mArrowLength / 3) *
 							Math.sin((-bearing + 90) * Math.PI / 180)),
-						(float) (coords.y + (mArrowLength / 4) *
+						(float) (coords.y + (mArrowLength / 3) *
 							Math.cos((-bearing + 90) * Math.PI / 180)));
-			path.lineTo((float) (coords.x + (mArrowLength / 4) *
+			path.lineTo((float) (coords.x + (mArrowLength / 3) *
 							Math.sin((-bearing - 90) * Math.PI / 180)),
-						(float) (coords.y + (mArrowLength / 4) *
+						(float) (coords.y + (mArrowLength / 3) *
 							Math.cos((-bearing - 90) * Math.PI / 180)));
 			path.close();
 			canvas.drawPath(path, mPaintPlayer);

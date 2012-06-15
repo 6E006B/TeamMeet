@@ -3,6 +3,7 @@ package de.teammeet.activities.chat;
 import java.util.List;
 
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.util.StringUtils;
 import org.xbill.DNS.InvalidTypeException;
 
 import android.content.Intent;
@@ -143,7 +144,7 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 			if (message.getFrom().endsWith(String.format("/%s", mOwnUsername))) {
 				colour = "green";
 			}
-			from = getPath(message.getFrom());
+			from = getResource(message.getFrom());
 			break;
 		}
 
@@ -153,18 +154,15 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 	}
 
 	public static String getUsername(String jid) {
-		return jid.substring(0, jid.indexOf('@'));
+		return StringUtils.parseName(jid);
 	}
 
 	public static String getUsernameAndServer(String jid) {
-		final int slashIndex = jid.indexOf('/');
-		if (slashIndex != -1) {
-			jid = jid.substring(0, slashIndex);
-		}
-		return jid;
+		return StringUtils.parseBareAddress(jid);
 	}
-	public static String getPath(String jid) {
-		return jid.substring(jid.lastIndexOf('/') + 1);
+
+	public static String getResource(String jid) {
+		return StringUtils.parseResource(jid);
 	}
 
 	@Override

@@ -2,124 +2,129 @@ package de.teammeet.services.xmpp;
 
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.muc.Occupant;
 import org.jivesoftware.smackx.muc.ParticipantStatusListener;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
+import de.teammeet.R;
+import de.teammeet.helper.ToastHelper;
 import de.teammeet.interfaces.IXMPPService;
+import de.teammeet.services.xmpp.Team.TeamException;
 
 public class TeamJoinListener implements ParticipantStatusListener {
 
 	private static final String CLASS = TeamJoinListener.class.getSimpleName();
 	
 	private IXMPPService mXMPPService; 
-	private String mTeamName;
+	private Team mTeam;
+	private ToastHelper mToaster;
 
 
-	public TeamJoinListener(IXMPPService service, String teamName) {
+	public TeamJoinListener(XMPPService service, Team team) {
 		mXMPPService = service;
-		mTeamName = teamName;
+		mTeam = team;
+		mToaster = new ToastHelper();
 	}
 	
 	@Override
-	public void adminGranted(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void adminGranted(String arg0) {}
 
 	@Override
-	public void adminRevoked(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void adminRevoked(String arg0) {}
 
 	@Override
-	public void banned(String arg0, String arg1, String arg2) {
-		// TODO Auto-generated method stub
-
-	}
+	public void banned(String arg0, String arg1, String arg2) {}
 
 	@Override
 	public void joined(String fullAddress) {
-		Log.d(CLASS, String.format("%s just joined team '%s'", fullAddress, mTeamName));
+		String mateName = null;
+
+		Context ctx = (Context) mXMPPService;
+		Intent newTeam = new Intent(ctx.getString(R.string.broadcast_teams_updated));
+		ctx.sendStickyBroadcast(newTeam);
+
 		try {
-			Team team = mXMPPService.getTeam(mTeamName);
-			String fullJID = mXMPPService.getFullJID(mTeamName, fullAddress);
+			String fullJID = getFullJID(mTeam, fullAddress);
 			Log.d(CLASS, String.format("full JID is '%s'", fullJID));
-			String mate = StringUtils.parseBareAddress(fullJID);
-			if (team.isInvitee(mate)) {
-				Log.d(CLASS, String.format("Initiating session key exchange for team '%s' with '%s'", mTeamName, mate));
-				team.removeInvitee(mate);
+			mateName = StringUtils.parseBareAddress(fullJID);
+
+			String status = String.format("%s just joined team '%s'",
+										   StringUtils.parseName(mateName),
+										   StringUtils.parseName(mTeam.toString()));
+			mToaster.toast(status);
+			Log.d(CLASS, status);
+
+			if (mTeam.isInvitee(mateName)) {
+				status = String.format("Exchanging public keys...",
+										StringUtils.parseName(mateName),
+										StringUtils.parseName(mTeam.toString()));
+				mToaster.toast(status);
+				Log.d(CLASS, status);
+
+				KeyExchangePartner mate = mTeam.getInvitee(mateName);
+				mXMPPService.sendKey(mate.getName(), TeamMeetPacketExtension.KEYTYPE_PUBLIC, mate.getPublicKey(), mTeam.toString());
 			}
 		} catch (XMPPException e) {
-			//TODO: Notify user via UI
-			Log.e(CLASS, String.format("Failed to get team '%s': %s", mTeamName, e.getMessage()));
+			String problem = String.format("Failed to resolve full JID for '%s' in '%s': %s", fullAddress, mTeam, e.getMessage());
+			mToaster.toast(problem);
+			Log.e(CLASS, problem);
+		} catch (TeamException e) {
+			String problem = String.format("Could not get mate '%s' from team '%s': %s", mateName, mTeam, e.getMessage());
+			mToaster.toast(problem);
+			Log.e(CLASS, problem);
 		}
 	}
 
-	@Override
-	public void kicked(String arg0, String arg1, String arg2) {
-		// TODO Auto-generated method stub
+	private String getFullJID(Team team, String fullNick) throws XMPPException {
+		String fullJID = null;
 
+		Occupant occupant = team.getRoom().getOccupant(fullNick);
+		if (occupant != null) {
+			fullJID = occupant.getJid();
+			if (fullJID == null) {
+				throw new XMPPException(String.format("Full JID for '%s' not available in '%s'",
+													   fullNick, team));
+			}
+		} else {
+			throw new XMPPException(String.format("No user '%s' in '%s'", fullNick, team));
+		}
+
+		return fullJID;
 	}
 
 	@Override
-	public void left(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void kicked(String arg0, String arg1, String arg2) {}
 
 	@Override
-	public void membershipGranted(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void left(String arg0) {}
 
 	@Override
-	public void membershipRevoked(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void membershipGranted(String arg0) {}
 
 	@Override
-	public void moderatorGranted(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void membershipRevoked(String arg0) {}
 
 	@Override
-	public void moderatorRevoked(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void moderatorGranted(String arg0) {}
 
 	@Override
-	public void nicknameChanged(String arg0, String arg1) {
-		// TODO Auto-generated method stub
-
-	}
+	public void moderatorRevoked(String arg0) {}
 
 	@Override
-	public void ownershipGranted(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void nicknameChanged(String arg0, String arg1) {}
 
 	@Override
-	public void ownershipRevoked(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void ownershipGranted(String arg0) {}
 
 	@Override
-	public void voiceGranted(String arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void ownershipRevoked(String arg0) {}
 
 	@Override
-	public void voiceRevoked(String arg0) {
-		// TODO Auto-generated method stub
+	public void voiceGranted(String arg0) {}
 
-	}
+	@Override
+	public void voiceRevoked(String arg0) {}
 
 }

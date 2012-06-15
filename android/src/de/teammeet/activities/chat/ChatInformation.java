@@ -68,7 +68,7 @@ public class ChatInformation implements Parcelable {
 	public String getUsername() {
 		String username = "";
 		if (mType == Chat.TYPE_GROUP_CHAT) {
-			username = Chat.getPath(mCounterpart);
+			username = Chat.getResource(mCounterpart);
 		} else {
 			username = Chat.getUsername(mCounterpart);
 		}
