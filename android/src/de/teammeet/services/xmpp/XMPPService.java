@@ -714,7 +714,7 @@ public class XMPPService extends Service implements IXMPPService {
 		if (connected) {
 			title = getText(R.string.notification_service_title_connected);
 			text = getText(R.string.notification_service_text_connected);
-			icon = R.drawable.ic_stat_notify_teammeet_connected;
+			icon = R.drawable.ic_stat_notify_connected;
 		} else {
 			title = getText(R.string.notification_service_title_disconnected);
 	        text = getText(R.string.notification_service_text_disconnected);
