@@ -145,7 +145,7 @@ public class XMPPService extends Service implements IXMPPService {
 		mChatMessageNotificationHandler =
 				new ChatMessageNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
 				                                    NOTIFICATION_CHAT_MESSAGE_ID);
-		showXMPPServiceNotification();
+		showXMPPServiceNotification(false);
 	}
 
 	@Override
@@ -249,6 +249,7 @@ public class XMPPService extends Service implements IXMPPService {
 															   R.string.broadcast_disconnected);
 			}
 		});
+		showXMPPServiceNotification(true);
 	}
 
 	@Override
@@ -272,6 +273,7 @@ public class XMPPService extends Service implements IXMPPService {
 			if (mRoomInvitationListener != null) {
 				MultiUserChat.removeInvitationListener(mXMPP, mRoomInvitationListener);
 			}
+			showXMPPServiceNotification(false);
 		}
 
 		mTeams = null;
@@ -700,14 +702,24 @@ public class XMPPService extends Service implements IXMPPService {
 		sendBroadcast(intent);
 	}
 
-	private void showXMPPServiceNotification() {
+	private void showXMPPServiceNotification(boolean connected) {
 		Log.d(CLASS, "XMPPService.showXMPPServiceNotification()");
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
 
-		CharSequence title = getText(R.string.notification_service_title);
-        CharSequence text = getText(R.string.notification_service_text);
-		int icon = R.drawable.ic_stat_notify_teammeet;
+		CharSequence title;
+        CharSequence text;
+		int icon;
+
+		if (connected) {
+			title = getText(R.string.notification_service_title_connected);
+			text = getText(R.string.notification_service_text_connected);
+			icon = R.drawable.ic_stat_notify_teammeet_connected;
+		} else {
+			title = getText(R.string.notification_service_title_disconnected);
+	        text = getText(R.string.notification_service_text_disconnected);
+			icon = R.drawable.ic_stat_notify_teammeet;
+		}
 		CharSequence tickerText = String.format("%s %s", title, text);
 
 		Intent notificationIntent = new Intent(this, RosterActivity.class);
