@@ -2,6 +2,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <PreferenceCategory android:title="@string/preference_category_xmpp" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_autostart_key"
+            android:summary="@string/preference_autostart_summary"
+            android:title="@string/preference_autostart_title" />
+
         <EditTextPreference
             android:name="@string/preference_user_id_key"
             android:defaultValue=""
