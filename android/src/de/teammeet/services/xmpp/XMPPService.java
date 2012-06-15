@@ -157,12 +157,17 @@ public class XMPPService extends Service implements IXMPPService {
 		if (intent.hasExtra(ACTION)) {
 			if (intent.getStringExtra(ACTION).equals(ACTION_CONNECT)) {
 				Log.d(CLASS, "contains connect extra");
-				try {
-					connect();
-				} catch (XMPPException e) {
-					Log.e(CLASS, "Failed to login: " + e.getLocalizedMessage());
-					e.printStackTrace();
-				}
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							connect();
+						} catch (XMPPException e) {
+							Log.e(CLASS, "Failed to login: " + e.getLocalizedMessage());
+							e.printStackTrace();
+						}
+					}
+				}).start();
 			}
 		}
 		return super.onStartCommand(intent, flags, startId);
