@@ -726,7 +726,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 		CharSequence title = getText(R.string.notification_service_title);
         CharSequence text = getText(R.string.notification_service_text);
-		int icon = R.drawable.ic_stat_notify_teammeet;
+		int icon = R.drawable.ic_stat_notify_connected;
 		CharSequence tickerText = String.format("%s %s", title, text);
 
 		Intent notificationIntent = new Intent(this, RosterActivity.class);
