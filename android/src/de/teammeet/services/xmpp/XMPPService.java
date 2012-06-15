@@ -118,11 +118,8 @@ public class XMPPService extends Service implements IXMPPService {
 	private SecureRandom mRandomNumberGenerator = null;
 
 	private NotificationCompat.Builder mServiceNotificationBuilder;
-//	private NotificationCompat.Builder mInvitationNotificationBuilder;
 	private InvitationNotificationHandler mInvitationNotificationHandler;
-//	private NotificationCompat.Builder mGroupMessageNotificationBuilder;
 	private GroupMessageNotificationHandler mGroupMessageNotificationHandler;
-//	private NotificationCompat.Builder mChatMessageNotificationBuilder;
 	private ChatMessageNotificationHandler mChatMessageNotificationHandler;
 
 	public class LocalBinder extends Binder {
@@ -148,6 +145,7 @@ public class XMPPService extends Service implements IXMPPService {
 		mChatMessageNotificationHandler =
 				new ChatMessageNotificationHandler(this, R.drawable.ic_stat_notify_teammeet,
 				                                    NOTIFICATION_CHAT_MESSAGE_ID);
+		showXMPPServiceNotification();
 	}
 
 	@Override
@@ -170,11 +168,13 @@ public class XMPPService extends Service implements IXMPPService {
 		bcastConnected.addCategory(getString(R.string.broadcast_connection_state));
 		bcastConnected.setAction(getString(R.string.broadcast_connected));
 		removeStickyBroadcast(bcastConnected);
-		
+
 		Intent bcastDisconnected = new Intent();
 		bcastDisconnected.addCategory(getString(R.string.broadcast_connection_state));
 		bcastDisconnected.setAction(getString(R.string.broadcast_disconnected));
 		removeStickyBroadcast(bcastDisconnected);
+
+		removeNotifications();
 
 		super.onDestroy();
 	}
@@ -249,7 +249,6 @@ public class XMPPService extends Service implements IXMPPService {
 															   R.string.broadcast_disconnected);
 			}
 		});
-		showXMPPServiceNotification();
 	}
 
 	@Override
@@ -274,7 +273,7 @@ public class XMPPService extends Service implements IXMPPService {
 				MultiUserChat.removeInvitationListener(mXMPP, mRoomInvitationListener);
 			}
 		}
-		removeNotifications();
+
 		mTeams = null;
 		mRoomInvitationListener = null;
 		mXMPP = null;
