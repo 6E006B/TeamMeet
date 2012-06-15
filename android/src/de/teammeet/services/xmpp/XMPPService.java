@@ -111,7 +111,6 @@ public class XMPPService extends Service implements IXMPPService {
 			new ArrayList<IChatMessageHandler>();
 
 	private final IBinder mBinder = new LocalBinder();
-	private int mBindCounter = 0;
 
 	private TimerTask mTimerTask = null;
 	private ChatOpenHelper mChatDatabase = null;
@@ -153,24 +152,7 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		mBindCounter++;
 		return mBinder;
-	}
-
-	@Override
-	public void onRebind(Intent intent) {
-		super.onRebind(intent);
-	}
-
-	@Override
-	public boolean onUnbind(Intent intent) {
-		mBindCounter--;
-		Log.d(CLASS, "XMPPService.onUnbind() still " + mBindCounter + " connected");
-		if (mBindCounter == 0 && !isAuthenticated()) {
-			Log.d(CLASS, "XMPPService: No one bound and not connected -> selfdestruction!");
-			stopSelf();
-		}
-		return super.onUnbind(intent);
 	}
 
 	@Override
