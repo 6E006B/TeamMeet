@@ -50,6 +50,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MyLocationOverlay;
@@ -67,6 +68,8 @@ import de.teammeet.interfaces.IXMPPService;
 public class XMPPService extends Service implements IXMPPService {
 
 	private static final String CLASS = XMPPService.class.getSimpleName();
+
+	private enum State {CONNECTED, DISCONNECTED};
 
 	public static final String TYPE = "type";
 	public static final String ROOM = "room";
@@ -103,6 +106,8 @@ public class XMPPService extends Service implements IXMPPService {
 	private ChatMessageListener mChatMessageListener = null;
 	private KeyExchangeListener mKeyExchangeRequestListener = null;
 	private ConnectionReceiver mConnectionReceiver = null;
+	private State mState = State.DISCONNECTED;
+	private boolean mReconnect = false;
 
 	private final ReentrantLock mLockGroups = new ReentrantLock();
 	private final ReentrantLock mLockInvitations = new ReentrantLock();
@@ -157,7 +162,7 @@ public class XMPPService extends Service implements IXMPPService {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.d(CLASS, "XMPPService.onStartCommand()");
-		if (intent.hasExtra(ACTION)) {
+		if (intent != null && intent.hasExtra(ACTION)) {
 			if (intent.getStringExtra(ACTION).equals(ACTION_CONNECT)) {
 				Log.d(CLASS, "contains connect extra");
 				new Thread(new Runnable() {
@@ -213,8 +218,7 @@ public class XMPPService extends Service implements IXMPPService {
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		mUserID = settings.getString(getString(R.string.preference_user_id_key), "");
 		mServer = settings.getString(getString(R.string.preference_server_key), "");
-		String password =
-				settings.getString(getString(R.string.preference_password_key), "");
+		String password = settings.getString(getString(R.string.preference_password_key), "");
 		Log.d(CLASS, "XMPPService.connect() as " + mUserID);
 
 		if (mXMPP != null) {
@@ -236,6 +240,24 @@ public class XMPPService extends Service implements IXMPPService {
 		mXMPP.connect();
 		SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 		mXMPP.login(mUserID, password);
+
+		if (isAuthenticated()) {
+			setConnectedState();
+			mReconnect = true;
+	
+			addListener();
+	
+			if (mConnectionReceiver ==  null) {
+				mConnectionReceiver = new ConnectionReceiver();
+				registerReceiver(mConnectionReceiver,
+				                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+			}
+		} else {
+			throw new XMPPException("Error while connecting.");
+		}
+	}
+
+	private void addListener() {
 		mRoomInvitationListener  = new RoomInvitationListener(this);
 		MultiUserChat.addInvitationListener(mXMPP, mRoomInvitationListener);
 
@@ -250,42 +272,44 @@ public class XMPPService extends Service implements IXMPPService {
 		mXMPP.addConnectionListener(new ConnectionListener() {
 			@Override
 			public void reconnectionSuccessful() {
-				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
-				                                               R.string.broadcast_disconnected,
-				                                               R.string.broadcast_connected);
+				setConnectedState();
+//				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+//				                                               R.string.broadcast_disconnected,
+//				                                               R.string.broadcast_connected);
 			}
 			@Override
 			public void reconnectionFailed(Exception arg0) {
-				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
-															   R.string.broadcast_connected,
-															   R.string.broadcast_disconnected);
+				setDisconnectedState();
+//				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+//															   R.string.broadcast_connected,
+//															   R.string.broadcast_disconnected);
 			}
 			@Override
 			public void reconnectingIn(int arg0) {
-				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
-															   R.string.broadcast_connected,
-															   R.string.broadcast_disconnected);
+				setDisconnectedState();
+//				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+//															   R.string.broadcast_connected,
+//															   R.string.broadcast_disconnected);
 			}
 			@Override
 			public void connectionClosedOnError(Exception arg0) {
-				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
-															   R.string.broadcast_connected,
-															   R.string.broadcast_disconnected);
+				setDisconnectedState();
+//				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+//															   R.string.broadcast_connected,
+//															   R.string.broadcast_disconnected);
 			}
 			@Override
 			public void connectionClosed() {
-				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
-															   R.string.broadcast_connected,
-															   R.string.broadcast_disconnected);
+				setDisconnectedState();
+//				BroadcastHelper.toggleConnectionStateBroadcast(XMPPService.this,
+//															   R.string.broadcast_connected,
+//															   R.string.broadcast_disconnected);
 			}
 		});
-		mConnectionReceiver = new ConnectionReceiver();
-		registerReceiver(mConnectionReceiver,
-		                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-		showXMPPServiceNotification(true);
 	}
 
 	@Override
+	
 	public boolean isAuthenticated() {
 		boolean authenticated = false;
 		if (mXMPP != null) {
@@ -298,7 +322,7 @@ public class XMPPService extends Service implements IXMPPService {
 	@Override
 	public void disconnect() {
 		Log.d(CLASS, "XMPPService.disconnect()");
-		stopLocationTransmission();
+		mReconnect = false;
 		if (mConnectionReceiver != null) {
 			unregisterReceiver(mConnectionReceiver);
 			mConnectionReceiver = null;
@@ -315,9 +339,30 @@ public class XMPPService extends Service implements IXMPPService {
 
 		mUserID = null;
 		mServer = null;
+		pureDisconnect();
 		mTeams = null;
+	}
+
+	private void pureDisconnect() {
+		Log.d(CLASS, "XMPPService.pureDisconnect()");
+		// NOTE: we save and null the member variables, so that even if the disconnect() call
+		//       doesn't return immediately, we don't run into race conditions.
+		XMPPConnection xmppConnection = mXMPP;
+		RoomInvitationListener roomInvitationListener = mRoomInvitationListener;
+		stopLocationTransmission();
+		setDisconnectedState();
 		mRoomInvitationListener = null;
 		mXMPP = null;
+		if (xmppConnection != null) {
+			if (roomInvitationListener != null) {
+				MultiUserChat.removeInvitationListener(xmppConnection, roomInvitationListener);
+			}
+			// NOTE: the disconnect call comes last, because it blocks if currently not network
+			//       connection is available
+			if (xmppConnection.isConnected()) {
+				xmppConnection.disconnect();
+			}
+		}
 	}
 
 	@Override
@@ -779,8 +824,8 @@ public class XMPPService extends Service implements IXMPPService {
 
 	private void removeNotifications() {
 		String ns = Context.NOTIFICATION_SERVICE;
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
-		mNotificationManager.cancelAll();
+		NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
+		notificationManager.cancelAll();
 	}
 
 	public void newInvitation(Connection connection, String room, String inviter, String reason,
@@ -944,6 +989,51 @@ public class XMPPService extends Service implements IXMPPService {
 		mLockChatMessages.lock();
 	}
 
+	private void handleConnectionStateUpdate(State currentState) {
+		Log.d(CLASS, "XMPPService.handleConnectionStateUpdate(" + currentState + ")");
+		if (currentState != mState) {
+			Log.d(CLASS, "Connection state has changed to " + currentState);
+			if (currentState == State.DISCONNECTED) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						// NOTE: currently when no connection is available the mXMPP.disconnect()
+						//       call blocks until timeout is reached :/
+						pureDisconnect();
+					}
+				}).start();
+			} else if (currentState == State.CONNECTED) {
+				try {
+					connect();
+				} catch (XMPPException e) {
+					final String error = "Unable to reconnect: " + e.getLocalizedMessage();
+					Log.e(CLASS, error);
+					e.printStackTrace();
+					Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+				}
+			} else {
+				Log.w(CLASS, "Unknown State: " + currentState);
+			}
+		}
+	}
+
+	private void setDisconnectedState() {
+		mState = State.DISCONNECTED;
+		showXMPPServiceNotification(false);
+		BroadcastHelper.toggleConnectionStateBroadcast(this,
+													   R.string.broadcast_connected,
+													   R.string.broadcast_disconnected);
+	}
+
+	private void setConnectedState() {
+		mState = State.CONNECTED;
+		showXMPPServiceNotification(true);
+		BroadcastHelper.toggleConnectionStateBroadcast(this,
+		                                               R.string.broadcast_disconnected,
+		                                               R.string.broadcast_connected);
+
+	}
+
 	private class ConnectionReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -955,15 +1045,31 @@ public class XMPPService extends Service implements IXMPPService {
             NetworkInfo currentNetworkInfo = connectivityManager.getActiveNetworkInfo();
             NetworkInfo otherNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
 
+            State currentState = null;
             // do application-specific task(s) based on the current network state, such
             // as enabling queuing of HTTP requests when currentNetworkInfo is connected etc.
             Log.d(CLASS, "Connectivity changed: " + reason);
+            if (noConnectivity) {
+            	Log.d(CLASS, "no connectivity");
+            	currentState = State.DISCONNECTED;
+            } else {
+            	Log.d(CLASS, "having connectivity");
+            }
             if (isFailover) {
             	Log.d(CLASS, "IS_FAILOVER");
             } else {
             	Log.d(CLASS, "no failover");
             }
             Log.d(CLASS, "status: " + currentNetworkInfo);
+            if (currentNetworkInfo != null) {
+            	currentState = State.CONNECTED;
+            	Log.d(CLASS, "isConnected() -> " + currentNetworkInfo.isConnected());
+            }
+            Log.d(CLASS, "other network: " + otherNetworkInfo);
+            if (otherNetworkInfo != null) {
+            	Log.d(CLASS, "isConnected() -> " + otherNetworkInfo.isConnected());
+            }
+            handleConnectionStateUpdate(currentState);
         }
     };
 }
