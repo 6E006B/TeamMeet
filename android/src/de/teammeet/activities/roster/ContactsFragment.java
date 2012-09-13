@@ -87,10 +87,26 @@ public class ContactsFragment extends Fragment {
 				new String[] { NAME },
 				new int[] { android.R.id.text1},
 				mExpandableChildren,
-				android.R.layout.simple_expandable_list_item_2,
-				new String[] { NAME, AVAILABILITY },
-				new int[] { android.R.id.text1, android.R.id.text2}
-				);
+				0,
+				null,
+				new int[] {}
+				) {
+            @Override
+            public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+                final View v = super.getChildView(groupPosition, childPosition, isLastChild, convertView, parent);
+
+                // Populate your custom view here
+                ((TextView)v.findViewById(R.id.name)).setText( (String) ((Map<String,String>)getChild(groupPosition, childPosition)).get(NAME) );
+                ((TextView)v.findViewById(R.id.image)).setText( (String) ((Map<String,String>)getChild(groupPosition, childPosition)).get(AVAILABILITY) );
+
+                return v;
+            }
+
+            @Override
+            public View newChildView(boolean isLastChild, ViewGroup parent) {
+                 return getActivity().getLayoutInflater().inflate(R.layout.contactlist_child, null, false);
+            }
+        };
 		
 		mRosterEventHandler = new RosterEventHandler();
 	}
