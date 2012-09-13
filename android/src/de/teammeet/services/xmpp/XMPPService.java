@@ -208,20 +208,18 @@ public class XMPPService extends Service implements IXMPPService {
 	public void connect() throws XMPPException {
 		mTeams = new HashMap<String, Team>();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-		String userID =
-				settings.getString(getString(R.string.preference_user_id_key), "");
-		String server =
-				settings.getString(getString(R.string.preference_server_key), "");
+		mUserID = settings.getString(getString(R.string.preference_user_id_key), "");
+		mServer = settings.getString(getString(R.string.preference_server_key), "");
 		String password =
 				settings.getString(getString(R.string.preference_password_key), "");
-		Log.d(CLASS, "XMPPService.connect() as " + userID);
+		Log.d(CLASS, "XMPPService.connect() as " + mUserID);
 
 		if (mXMPP != null) {
 			Log.w(CLASS, "XMPPService.connect() : XMPPConnection not null -> disconnecting it");
 			mXMPP.disconnect();
 		}
 
-		ConnectionConfiguration config = new ConnectionConfiguration(server);
+		ConnectionConfiguration config = new ConnectionConfiguration(mServer);
 		config.setSelfSignedCertificateEnabled(true);
 		config.setDebuggerEnabled(true);
 		// TODO: This is the default. Enable for production mode?!
@@ -234,7 +232,7 @@ public class XMPPService extends Service implements IXMPPService {
 		mXMPP = new XMPPConnection(config);
 		mXMPP.connect();
 		SASLAuthentication.supportSASLMechanism("PLAIN", 0);
-		mXMPP.login(userID, password);
+		mXMPP.login(mUserID, password);
 		mRoomInvitationListener  = new RoomInvitationListener(this);
 		MultiUserChat.addInvitationListener(mXMPP, mRoomInvitationListener);
 
@@ -305,6 +303,8 @@ public class XMPPService extends Service implements IXMPPService {
 			showXMPPServiceNotification(false);
 		}
 
+		mUserID = null;
+		mServer = null;
 		mTeams = null;
 		mRoomInvitationListener = null;
 		mXMPP = null;
