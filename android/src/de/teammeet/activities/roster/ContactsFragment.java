@@ -35,10 +35,10 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TwoLineListItem;
 import de.teammeet.R;
 import de.teammeet.activities.chat.Chat;
 import de.teammeet.activities.chat.ChatsActivity;
@@ -87,10 +87,26 @@ public class ContactsFragment extends Fragment {
 				new String[] { NAME },
 				new int[] { android.R.id.text1},
 				mExpandableChildren,
-				R.layout.contactlist_child,
-				new String[] { NAME, AVAILABILITY },
-				new int[] {R.id.contact_name, R.id.contact_status }
-				);
+				0,
+				null,
+				new int[] {}
+				) {
+            @Override
+            public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+                final View v = super.getChildView(groupPosition, childPosition, isLastChild, convertView, parent);
+
+                // Populate your custom view here
+                ((TextView)v.findViewById(R.id.name)).setText( (String) ((Map<String,String>)getChild(groupPosition, childPosition)).get(NAME) );
+                ((TextView)v.findViewById(R.id.image)).setText( (String) ((Map<String,String>)getChild(groupPosition, childPosition)).get(AVAILABILITY) );
+
+                return v;
+            }
+
+            @Override
+            public View newChildView(boolean isLastChild, ViewGroup parent) {
+                 return getActivity().getLayoutInflater().inflate(R.layout.contactlist_child, null, false);
+            }
+        };
 		
 		mRosterEventHandler = new RosterEventHandler();
 	}
@@ -109,7 +125,7 @@ public class ContactsFragment extends Fragment {
 				Log.d(CLASS, String.format("onChildClick('%s', '%s', '%d', '%d', '%d')",
 				                           parent.toString(), v.toString(), groupPosition,
 				                           childPosition, id));
-				RelativeLayout listItem = (RelativeLayout)v;
+				TwoLineListItem listItem = (TwoLineListItem)v;
 				TextView textView = (TextView) listItem.getChildAt(0);
 				final String contact = textView.getText().toString();
 				Log.d(CLASS, String.format("clicked on child: %s", contact));
