@@ -2,9 +2,7 @@ package de.teammeet.activities.roster;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jivesoftware.smack.Roster;
@@ -35,7 +33,6 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.LinearLayout;
-import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.TwoLineListItem;
@@ -56,8 +53,6 @@ import de.teammeet.tasks.RemoveMateTask;
  */
 public class ContactsFragment extends Fragment {
 	private static final String CLASS = ContactsFragment.class.getSimpleName();
-	private static final String NAME = "name";
-	private static final String AVAILABILITY = "avail";
 	private static final String UNFILED_GROUP = "Unfiled contacts";
 	private static final int CONTEXT_MENU_INVITE_PARENT_ID = 0x7e000002;
 	private static final int CONTEXT_MENU_INVITE_ROOM_ID = 0x7e000003;
@@ -69,9 +64,9 @@ public class ContactsFragment extends Fragment {
 	private Roster mRoster = null;
 	private RosterListener mRosterEventHandler;
 	private ExpandableListView mContactsList;
-	private SimpleExpandableListAdapter mAdapter;
-	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
-	private List<List<Map<String, String>>> mExpandableChildren = new ArrayList<List<Map<String, String>>>();
+	private ContactlistAdapter mAdapter;
+	private List<String> mExpandableGroups = new ArrayList<String>();
+	private List<List<ContactlistChild>> mExpandableChildren = new ArrayList<List<ContactlistChild>>();
 	private ExpandableListContextMenuInfo mLastContextItemInfo;
 
 
@@ -80,33 +75,11 @@ public class ContactsFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 		Log.d(CLASS, String.format("Creating contacts fragment"));
 		
-		mAdapter = new SimpleExpandableListAdapter(
+		mAdapter = new ContactlistAdapter(
 				getActivity(),
 				mExpandableGroups,
-				android.R.layout.simple_expandable_list_item_1,
-				new String[] { NAME },
-				new int[] { android.R.id.text1},
-				mExpandableChildren,
-				0,
-				null,
-				new int[] {}
-				) {
-            @Override
-            public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-                final View v = super.getChildView(groupPosition, childPosition, isLastChild, convertView, parent);
-
-                // Populate your custom view here
-                ((TextView)v.findViewById(R.id.name)).setText( (String) ((Map<String,String>)getChild(groupPosition, childPosition)).get(NAME) );
-                ((TextView)v.findViewById(R.id.image)).setText( (String) ((Map<String,String>)getChild(groupPosition, childPosition)).get(AVAILABILITY) );
-
-                return v;
-            }
-
-            @Override
-            public View newChildView(boolean isLastChild, ViewGroup parent) {
-                 return getActivity().getLayoutInflater().inflate(R.layout.contactlist_child, null, false);
-            }
-        };
+				mExpandableChildren
+		);
 		
 		mRosterEventHandler = new RosterEventHandler();
 	}
@@ -300,15 +273,15 @@ public class ContactsFragment extends Fragment {
 	private String getExpandableListChild(long packedPosition) {
 		final int group_position = ExpandableListView.getPackedPositionGroup(packedPosition);
 		final int child_position = ExpandableListView.getPackedPositionChild(packedPosition);
-		final Map<String, String> child = (Map<String, String>) mAdapter.getChild(group_position,
+		final ContactlistChild child = (ContactlistChild) mAdapter.getChild(group_position,
 																				  child_position);
-		return child.get(NAME);
+		return child.mName;
 	}
 
 	private String getExpandableListGroup(long packedPosition) {
 		final int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
-		Map<String, String> group = (Map<String, String>)mAdapter.getGroup(groupPosition);
-		return group.get(NAME);
+		String group = (String) mAdapter.getGroup(groupPosition);
+		return group;
 	}
 
 	public void handleDisconnect() {
@@ -353,22 +326,27 @@ public class ContactsFragment extends Fragment {
 	}
 
 	private class ExpandableContactEntry {
-		protected Map<String, String> mGroup = null;
-		protected List<Map<String, String>> mChildren = null;
+		protected String mGroup;
+		protected List<ContactlistChild> mChildren;
 	
 		public ExpandableContactEntry(String groupName, Collection<RosterEntry> contacts, Roster roster) {
-			mGroup = new HashMap<String, String>();
-			mChildren = new ArrayList<Map<String, String>>();
-			
-			mGroup.put(NAME, groupName);
+			mGroup = groupName;
+			mChildren = new ArrayList<ContactlistChild>();
 
 			for (RosterEntry contact : contacts) {
-				Map<String, String> newChild = new HashMap<String, String>();
-				String jid = contact.getUser();
-				newChild.put(NAME, jid);
-				newChild.put(AVAILABILITY, roster.getPresence(jid).toString());
+				ContactlistChild newChild = new ContactlistChild(contact.getUser());
 				mChildren.add(newChild);
 			}
+		}
+	}
+
+	protected class ContactlistChild {
+
+		protected String mName = null;
+		protected int mStatus = 11100111;
+
+		public ContactlistChild(String name) {
+			mName = name;
 		}
 	}
 
