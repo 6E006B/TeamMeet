@@ -275,12 +275,6 @@ public class RosterActivity extends SherlockFragmentActivity {
 	}
 
 	private void clickedExit() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				mXMPPService.disconnect();
-			}
-		}).start();
 		final Intent intent = new Intent(this, XMPPService.class);
 		stopService(intent);
 		finish();
