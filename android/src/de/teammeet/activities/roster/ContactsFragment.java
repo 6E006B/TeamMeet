@@ -147,11 +147,13 @@ public class ContactsFragment extends Fragment {
 		ExpandableListView.ExpandableListContextMenuInfo info =
 				(ExpandableListView.ExpandableListContextMenuInfo) menuInfo;
 		final int type = ExpandableListView.getPackedPositionType(info.packedPosition);
-//		final int group = ExpandableListView.getPackedPositionGroup(info.packedPosition);
-//		final int child = ExpandableListView.getPackedPositionChild(info.packedPosition);
+		final int groupPos = ExpandableListView.getPackedPositionGroup(info.packedPosition);
 
-		//Only create a context menu for child items
 		if (type == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+			// create a context menu for child items
+			final int childPos = ExpandableListView.getPackedPositionChild(info.packedPosition);
+			final String title = mAdapter.getChild(groupPos, childPos).mName;
+			menu.setHeaderTitle(title);
 			createChildContextMenu(menu);
 		} else {
 			// long-press on a group
