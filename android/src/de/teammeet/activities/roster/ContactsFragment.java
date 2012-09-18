@@ -2,9 +2,7 @@ package de.teammeet.activities.roster;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jivesoftware.smack.Roster;
@@ -35,10 +33,7 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.LinearLayout;
-import android.widget.SimpleExpandableListAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.TwoLineListItem;
 import de.teammeet.R;
 import de.teammeet.activities.chat.Chat;
 import de.teammeet.activities.chat.ChatsActivity;
@@ -56,8 +51,6 @@ import de.teammeet.tasks.RemoveMateTask;
  */
 public class ContactsFragment extends Fragment {
 	private static final String CLASS = ContactsFragment.class.getSimpleName();
-	private static final String NAME = "name";
-	private static final String AVAILABILITY = "avail";
 	private static final String UNFILED_GROUP = "Unfiled contacts";
 	private static final int CONTEXT_MENU_INVITE_PARENT_ID = 0x7e000002;
 	private static final int CONTEXT_MENU_INVITE_ROOM_ID = 0x7e000003;
@@ -69,9 +62,9 @@ public class ContactsFragment extends Fragment {
 	private Roster mRoster = null;
 	private RosterListener mRosterEventHandler;
 	private ExpandableListView mContactsList;
-	private SimpleExpandableListAdapter mAdapter;
-	private List<Map<String, String>> mExpandableGroups = new ArrayList<Map<String, String>>();
-	private List<List<Map<String, String>>> mExpandableChildren = new ArrayList<List<Map<String, String>>>();
+	private ContactlistAdapter mAdapter;
+	private List<String> mExpandableGroups = new ArrayList<String>();
+	private List<List<ContactlistChild>> mExpandableChildren = new ArrayList<List<ContactlistChild>>();
 	private ExpandableListContextMenuInfo mLastContextItemInfo;
 
 
@@ -80,17 +73,11 @@ public class ContactsFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 		Log.d(CLASS, String.format("Creating contacts fragment"));
 		
-		mAdapter = new SimpleExpandableListAdapter(
+		mAdapter = new ContactlistAdapter(
 				getActivity(),
 				mExpandableGroups,
-				android.R.layout.simple_expandable_list_item_1,
-				new String[] { NAME },
-				new int[] { android.R.id.text1},
-				mExpandableChildren,
-				android.R.layout.simple_expandable_list_item_2,
-				new String[] { NAME, AVAILABILITY },
-				new int[] { android.R.id.text1, android.R.id.text2}
-				);
+				mExpandableChildren
+		);
 		
 		mRosterEventHandler = new RosterEventHandler();
 	}
@@ -109,9 +96,7 @@ public class ContactsFragment extends Fragment {
 				Log.d(CLASS, String.format("onChildClick('%s', '%s', '%d', '%d', '%d')",
 				                           parent.toString(), v.toString(), groupPosition,
 				                           childPosition, id));
-				TwoLineListItem listItem = (TwoLineListItem)v;
-				TextView textView = (TextView) listItem.getChildAt(0);
-				final String contact = textView.getText().toString();
+				final String contact = mAdapter.getChild(groupPosition, childPosition).mName;
 				Log.d(CLASS, String.format("clicked on child: %s", contact));
 				openChat(contact);
 				//return super.onChildClick(parent, v, groupPosition, childPosition, id);
@@ -284,15 +269,15 @@ public class ContactsFragment extends Fragment {
 	private String getExpandableListChild(long packedPosition) {
 		final int group_position = ExpandableListView.getPackedPositionGroup(packedPosition);
 		final int child_position = ExpandableListView.getPackedPositionChild(packedPosition);
-		final Map<String, String> child = (Map<String, String>) mAdapter.getChild(group_position,
+		final ContactlistChild child = (ContactlistChild) mAdapter.getChild(group_position,
 																				  child_position);
-		return child.get(NAME);
+		return child.mName;
 	}
 
 	private String getExpandableListGroup(long packedPosition) {
 		final int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
-		Map<String, String> group = (Map<String, String>)mAdapter.getGroup(groupPosition);
-		return group.get(NAME);
+		String group = (String) mAdapter.getGroup(groupPosition);
+		return group;
 	}
 
 	public void handleDisconnect() {
@@ -337,22 +322,57 @@ public class ContactsFragment extends Fragment {
 	}
 
 	private class ExpandableContactEntry {
-		protected Map<String, String> mGroup = null;
-		protected List<Map<String, String>> mChildren = null;
+		protected String mGroup;
+		protected List<ContactlistChild> mChildren;
 	
 		public ExpandableContactEntry(String groupName, Collection<RosterEntry> contacts, Roster roster) {
-			mGroup = new HashMap<String, String>();
-			mChildren = new ArrayList<Map<String, String>>();
-			
-			mGroup.put(NAME, groupName);
+			mGroup = groupName;
+			mChildren = new ArrayList<ContactlistChild>();
 
 			for (RosterEntry contact : contacts) {
-				Map<String, String> newChild = new HashMap<String, String>();
-				String jid = contact.getUser();
-				newChild.put(NAME, jid);
-				newChild.put(AVAILABILITY, roster.getPresence(jid).toString());
-				mChildren.add(newChild);
+				Presence presence = roster.getPresence(contact.getUser());
+				if (presence.isAvailable()) {
+					String message = Presence.Mode.available.toString();
+					int status_image = R.drawable.status_available;
+
+					Presence.Mode mode = presence.getMode();
+					if (mode != null) {
+						message = mode.toString();
+						switch (mode) {
+						case away:
+							status_image = R.drawable.status_away;
+							break;
+						case xa:
+							status_image = R.drawable.status_xa;
+							break;
+						case dnd:
+							status_image = R.drawable.status_dnd;
+							break;
+						}
+					}
+
+					String status = presence.getStatus();
+					if (status != null && status != "") {
+						message += String.format(": %s", status);
+					}
+
+					ContactlistChild newChild = new ContactlistChild(contact.getName(), status_image, message);
+					mChildren.add(newChild);
+				}
 			}
+		}
+	}
+
+	protected class ContactlistChild {
+
+		protected String mName = null;
+		protected int mMode;
+		protected String mStatus = null;
+
+		public ContactlistChild(String name, int mode, String status) {
+			mName = name;
+			mMode = mode;
+			mStatus = status;
 		}
 	}
 
