@@ -228,7 +228,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 		}
 		connectMenu.setTitle(connectTitle);
 		connectMenu.setTitleCondensed(connectTitleCondensed);
-		connectMenu.setEnabled(enableConnect);
+		connectMenu.setVisible(enableConnect);
 		formTeamMenu.setVisible(connected);
 		removeMateMenu.setVisible(connected);
 
@@ -332,6 +332,8 @@ public class RosterActivity extends SherlockFragmentActivity {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.d(CLASS, "RosterActivity has been (re-)bound to XMPP service ('" + className + "')");
 			mXMPPService = ((XMPPService.LocalBinder) binder).getService();
+			// enable the `connect` button now that the XMPP service is available
+			invalidateOptionsMenu();
 			handleIntent(mCurrentIntent);
 		}
 
