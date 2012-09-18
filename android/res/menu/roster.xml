@@ -4,10 +4,10 @@
     <item
         android:id="@+id/roster_menu_connect"
         android:icon="@drawable/ic_menu_connect_globe"
-        android:enabled="false"
         android:showAsAction="ifRoom"
         android:title="@string/roster_menu_connect"
-        android:titleCondensed="@string/roster_menu_connect_condensed"/>
+        android:titleCondensed="@string/roster_menu_connect_condensed"
+        android:visible="false"/>
     <item
         android:id="@+id/roster_menu_form_team"
         android:icon="@drawable/social_add_group"
