@@ -2,6 +2,7 @@ package de.teammeet.activities.roster;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -364,10 +365,12 @@ public class ContactsFragment extends Fragment {
 					mChildren.add(newChild);
 				}
 			}
+
+			Collections.sort(mChildren);
 		}
 	}
 
-	protected class ContactlistChild {
+	protected class ContactlistChild implements Comparable<ContactlistChild> {
 
 		protected String mName = null;
 		protected String mJID = null;
@@ -379,6 +382,11 @@ public class ContactsFragment extends Fragment {
 			mJID = jid;
 			mMode = mode;
 			mStatus = status;
+		}
+
+		@Override
+		public int compareTo(ContactlistChild another) {
+			return mName.toLowerCase().compareTo(another.mName.toLowerCase());
 		}
 	}
 
