@@ -33,8 +33,6 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import de.teammeet.R;
 import de.teammeet.activities.chat.Chat;
@@ -98,9 +96,7 @@ public class ContactsFragment extends Fragment {
 				Log.d(CLASS, String.format("onChildClick('%s', '%s', '%d', '%d', '%d')",
 				                           parent.toString(), v.toString(), groupPosition,
 				                           childPosition, id));
-				RelativeLayout listItem = (RelativeLayout)v;
-				TextView textView = (TextView) listItem.getChildAt(0);
-				final String contact = textView.getText().toString();
+				final String contact = mAdapter.getChild(groupPosition, childPosition).mName;
 				Log.d(CLASS, String.format("clicked on child: %s", contact));
 				openChat(contact);
 				//return super.onChildClick(parent, v, groupPosition, childPosition, id);
