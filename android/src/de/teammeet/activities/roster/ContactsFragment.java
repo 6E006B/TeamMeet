@@ -158,6 +158,8 @@ public class ContactsFragment extends Fragment {
 		} else {
 			// long-press on a group
 			Log.d(CLASS, "Long-Press on a group.");
+			String title = mAdapter.getGroup(groupPos);
+			menu.setHeaderTitle(title);
 			createGroupContextMenu(menu);
 		}
 	}
