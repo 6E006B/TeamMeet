@@ -334,10 +334,23 @@ public class ContactsFragment extends Fragment {
 			mChildren = new ArrayList<ContactlistChild>();
 
 			for (RosterEntry contact : contacts) {
-				String jid = contact.getUser();
-				String status = roster.getPresence(jid).toString();
-				ContactlistChild newChild = new ContactlistChild(jid, status);
-				mChildren.add(newChild);
+				Presence presence = roster.getPresence(contact.getUser());
+				if (presence.isAvailable()) {
+					String message = Presence.Mode.available.toString();
+
+					Presence.Mode mode = presence.getMode();
+					if (mode != null) {
+						message = mode.toString();
+					}
+
+					String status = presence.getStatus();
+					if (status != null && status != "") {
+						message += String.format(": %s", status);
+					}
+
+					ContactlistChild newChild = new ContactlistChild(contact.getName(), message);
+					mChildren.add(newChild);
+				}
 			}
 		}
 	}
