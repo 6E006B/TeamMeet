@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import de.teammeet.R;
 import de.teammeet.activities.roster.ContactsFragment.ContactlistChild;
@@ -44,8 +45,8 @@ public class ContactlistAdapter extends BaseExpandableListAdapter {
 	public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 		if (convertView == null || !(convertView instanceof TextView)) {
 			TextView contactName;
-			TextView contactStatus;
-			int status;
+			TextView contactStatusMessage;
+			ImageView contactStatusImage;
 
 			convertView = mActivity.getLayoutInflater().inflate(R.layout.contactlist_child, null, false);
 
@@ -53,9 +54,11 @@ public class ContactlistAdapter extends BaseExpandableListAdapter {
 			contactName = (TextView)convertView.findViewById(R.id.contact_name);
 			contactName.setText((String) ((ContactlistChild) getChild(groupPosition, childPosition)).mName);
 
-			status = (int) ((ContactlistChild) getChild(groupPosition, childPosition)).mStatus;
-			contactStatus = (TextView)convertView.findViewById(R.id.contact_status);
-			contactStatus.setText(Integer.toString(status));
+			contactStatusImage = (ImageView) convertView.findViewById(R.id.contact_status_image);
+			contactStatusImage.setImageResource(R.drawable.status_available);
+
+			contactStatusMessage = (TextView)convertView.findViewById(R.id.contact_status_message);
+			contactStatusMessage.setText((String) ((ContactlistChild) getChild(groupPosition, childPosition)).mStatus);
 		}
 		return convertView;
 	}

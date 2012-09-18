@@ -104,6 +104,7 @@
     <string name="button_decline">Decline</string>
     <string name="text_group_name">Group Name:</string>
     <string name="text_contact_name">Contact:</string>
+    <string name="contact_status_description">The availability of the contact</string>
     <string name="notification_service_title_connected">TeamMeet is connected.</string>
     <string name="notification_service_title_disconnected">TeamMeet is disconnected.</string>
     <string name="notification_service_text_connected">Click to bring to front.</string>

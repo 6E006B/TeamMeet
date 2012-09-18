@@ -334,7 +334,9 @@ public class ContactsFragment extends Fragment {
 			mChildren = new ArrayList<ContactlistChild>();
 
 			for (RosterEntry contact : contacts) {
-				ContactlistChild newChild = new ContactlistChild(contact.getUser());
+				String jid = contact.getUser();
+				String status = roster.getPresence(jid).toString();
+				ContactlistChild newChild = new ContactlistChild(jid, status);
 				mChildren.add(newChild);
 			}
 		}
@@ -343,10 +345,11 @@ public class ContactsFragment extends Fragment {
 	protected class ContactlistChild {
 
 		protected String mName = null;
-		protected int mStatus = 11100111;
+		protected String mStatus = null;
 
-		public ContactlistChild(String name) {
+		public ContactlistChild(String name, String status) {
 			mName = name;
+			mStatus = status;
 		}
 	}
 
