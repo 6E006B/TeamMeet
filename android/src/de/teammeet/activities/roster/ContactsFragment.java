@@ -96,7 +96,7 @@ public class ContactsFragment extends Fragment {
 				Log.d(CLASS, String.format("onChildClick('%s', '%s', '%d', '%d', '%d')",
 				                           parent.toString(), v.toString(), groupPosition,
 				                           childPosition, id));
-				final String contact = mAdapter.getChild(groupPosition, childPosition).mName;
+				final String contact = mAdapter.getChild(groupPosition, childPosition).mJID;
 				Log.d(CLASS, String.format("clicked on child: %s", contact));
 				openChat(contact);
 				//return super.onChildClick(parent, v, groupPosition, childPosition, id);
@@ -152,7 +152,7 @@ public class ContactsFragment extends Fragment {
 		if (type == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
 			// create a context menu for child items
 			final int childPos = ExpandableListView.getPackedPositionChild(info.packedPosition);
-			final String title = mAdapter.getChild(groupPos, childPos).mName;
+			final String title = mAdapter.getChild(groupPos, childPos).mJID;
 			menu.setHeaderTitle(title);
 			createChildContextMenu(menu);
 		} else {
@@ -360,7 +360,7 @@ public class ContactsFragment extends Fragment {
 						message += String.format(": %s", status);
 					}
 
-					ContactlistChild newChild = new ContactlistChild(contact.getName(), status_image, message);
+					ContactlistChild newChild = new ContactlistChild(contact.getName(), contact.getUser(), status_image, message);
 					mChildren.add(newChild);
 				}
 			}
@@ -370,11 +370,13 @@ public class ContactsFragment extends Fragment {
 	protected class ContactlistChild {
 
 		protected String mName = null;
+		protected String mJID = null;
 		protected int mMode;
 		protected String mStatus = null;
 
-		public ContactlistChild(String name, int mode, String status) {
+		public ContactlistChild(String name, String jid, int mode, String status) {
 			mName = name;
+			mJID = jid;
 			mMode = mode;
 			mStatus = status;
 		}
