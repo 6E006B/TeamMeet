@@ -337,10 +337,22 @@ public class ContactsFragment extends Fragment {
 				Presence presence = roster.getPresence(contact.getUser());
 				if (presence.isAvailable()) {
 					String message = Presence.Mode.available.toString();
+					int status_image = R.drawable.status_available;
 
 					Presence.Mode mode = presence.getMode();
 					if (mode != null) {
 						message = mode.toString();
+						switch (mode) {
+						case away:
+							status_image = R.drawable.status_away;
+							break;
+						case xa:
+							status_image = R.drawable.status_xa;
+							break;
+						case dnd:
+							status_image = R.drawable.status_dnd;
+							break;
+						}
 					}
 
 					String status = presence.getStatus();
@@ -348,7 +360,7 @@ public class ContactsFragment extends Fragment {
 						message += String.format(": %s", status);
 					}
 
-					ContactlistChild newChild = new ContactlistChild(contact.getName(), message);
+					ContactlistChild newChild = new ContactlistChild(contact.getName(), status_image, message);
 					mChildren.add(newChild);
 				}
 			}
@@ -358,10 +370,12 @@ public class ContactsFragment extends Fragment {
 	protected class ContactlistChild {
 
 		protected String mName = null;
+		protected int mMode;
 		protected String mStatus = null;
 
-		public ContactlistChild(String name, String status) {
+		public ContactlistChild(String name, int mode, String status) {
 			mName = name;
+			mMode = mode;
 			mStatus = status;
 		}
 	}

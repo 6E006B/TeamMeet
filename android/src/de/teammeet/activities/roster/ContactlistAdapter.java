@@ -51,14 +51,16 @@ public class ContactlistAdapter extends BaseExpandableListAdapter {
 			convertView = mActivity.getLayoutInflater().inflate(R.layout.contactlist_child, null, false);
 
 			// Populate your custom view here
+			ContactlistChild child = (ContactlistChild) getChild(groupPosition, childPosition);
+
 			contactName = (TextView)convertView.findViewById(R.id.contact_name);
-			contactName.setText((String) ((ContactlistChild) getChild(groupPosition, childPosition)).mName);
+			contactName.setText((String) child.mName);
 
 			contactStatusImage = (ImageView) convertView.findViewById(R.id.contact_status_image);
-			contactStatusImage.setImageResource(R.drawable.status_available);
+			contactStatusImage.setImageResource((int) child.mMode);
 
 			contactStatusMessage = (TextView)convertView.findViewById(R.id.contact_status_message);
-			contactStatusMessage.setText((String) ((ContactlistChild) getChild(groupPosition, childPosition)).mStatus);
+			contactStatusMessage.setText((String) child.mStatus);
 		}
 		return convertView;
 	}
