@@ -473,8 +473,10 @@ public class ContactsFragment extends Fragment {
 				
 				@Override
 				public void run() {
-					fillExpandableList(mRoster);
-					mAdapter.notifyDataSetChanged();
+					if(mRoster != null) {
+						fillExpandableList(mRoster);
+						mAdapter.notifyDataSetChanged();
+					}
 				}
 			});
 		}
