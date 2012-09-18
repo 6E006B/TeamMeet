@@ -228,7 +228,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 		}
 		connectMenu.setTitle(connectTitle);
 		connectMenu.setTitleCondensed(connectTitleCondensed);
-		connectMenu.setEnabled(enableConnect);
+		connectMenu.setVisible(enableConnect);
 		formTeamMenu.setVisible(connected);
 		removeMateMenu.setVisible(connected);
 
