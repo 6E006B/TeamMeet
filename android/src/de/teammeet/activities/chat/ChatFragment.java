@@ -165,7 +165,8 @@ public class ChatFragment extends SherlockFragment {
 		} else {
 			Log.e(CLASS, "onResume(): bind to XMPP service failed");
 			Toast.makeText(getActivity().getApplicationContext(),
-			               "Couldn't connect to XMPP service.", 3);
+			               "Couldn't connect to XMPP service.",
+			               Toast.LENGTH_LONG).show();
 		}
 	}
 
