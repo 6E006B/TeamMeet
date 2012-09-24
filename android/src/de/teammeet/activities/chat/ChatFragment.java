@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -31,6 +30,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.teammeet.R;
+import de.teammeet.activities.chat.Chat.ChatEntry;
 import de.teammeet.activities.teams.TeamMeetActivity;
 import de.teammeet.services.xmpp.ChatMessage;
 import de.teammeet.services.xmpp.XMPPService;
@@ -40,7 +40,7 @@ public class ChatFragment extends SherlockFragment {
 	private static final String CLASS = ChatFragment.class.getSimpleName();
 
 	private ListView mChatListView = null;
-	private ArrayAdapter<CharSequence> mListAdapter = null;
+	private ChatAdapter mListAdapter = null;
 	private EditText mChatEditText = null;
 	private ImageButton mSendButton = null;
 	private int mType = 0;
@@ -116,7 +116,7 @@ public class ChatFragment extends SherlockFragment {
 
 		LinearLayout rootView = (LinearLayout) inflater.inflate(R.layout.chat, container, false);
 		mChatListView = (ListView) rootView.findViewById(R.id.chatListView);
-		mListAdapter = new ArrayAdapter<CharSequence>(getActivity(), R.layout.chat_item);
+		mListAdapter = new ChatAdapter(getActivity(), R.layout.chat_item);
 		mChatListView.setAdapter(mListAdapter);
 		mChatEditText = (EditText) rootView.findViewById(R.id.chatInput);
 		mChatEditText.setOnEditorActionListener(new OnEditorActionListener() {
@@ -139,7 +139,7 @@ public class ChatFragment extends SherlockFragment {
 		}
 		List<ChatMessage> messages = mChat.fetchMessages();
 		for (ChatMessage message : messages) {
-			mListAdapter.add(mChat.createMessageSequence(message));
+			mListAdapter.add(mChat.new ChatEntry(message));
 		}
 		mListAdapter.notifyDataSetChanged();
 		mChatListView.setSelection(mListAdapter.getCount());
@@ -228,7 +228,7 @@ public class ChatFragment extends SherlockFragment {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void handleMessage(final CharSequence message) {
+	public void handleMessage(final ChatEntry message) {
 		Log.d(CLASS, String.format("ChatFragment.handleMessage('%s')", message));
 		mChatListView.post(new Runnable() {
 			@Override

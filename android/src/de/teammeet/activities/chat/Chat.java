@@ -126,33 +126,6 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 		return concerned;
 	}
 
-	public CharSequence createMessageSequence(ChatMessage message) {
-		String colour = "red";
-		String from = "";
-		switch (mType) {
-		case TYPE_NORMAL_CHAT:
-			if (message.getFrom().startsWith(mOwnID)) {
-				colour = "green";
-			}
-			from = getUsername(message.getFrom());
-			break;
-
-		case TYPE_GROUP_CHAT:
-			//TODO: this is probably not a reliable way to do this, since the own username might be
-			// 		already taken when joining a MUC. Currently this probably hinders joining the
-			//		MUC at all, but we probably want to change that.
-			if (message.getFrom().endsWith(String.format("/%s", mOwnUsername))) {
-				colour = "green";
-			}
-			from = getResource(message.getFrom());
-			break;
-		}
-
-		final String sender = String.format("<b><font color=\"%s\">%s:</font></b> ", colour, from);
-		final Spanned senderHTML = Html.fromHtml(sender);
-		return TextUtils.concat(senderHTML, message.getMessage());
-	}
-
 	public static String getUsername(String jid) {
 		return StringUtils.parseName(jid);
 	}
@@ -171,7 +144,7 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 		if (mType == TYPE_GROUP_CHAT) {
 			Log.d(CLASS, "Chat.handleGroupMessage()");
 			if (isConcerned(message)) {
-				mMessageHandler.handleMessage(createMessageSequence(message));
+				mMessageHandler.handleMessage(new ChatEntry(message));
 				handled = true;
 			}
 		}
@@ -184,10 +157,50 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 		if (mType == TYPE_NORMAL_CHAT) {
 			Log.d(CLASS, "Chat.handleMessage()");
 			if (isConcerned(message)) {
-				mMessageHandler.handleMessage(createMessageSequence(message));
+				mMessageHandler.handleMessage(new ChatEntry(message));
 				handled = true;
 			}
 		}
 		return handled;
+	}
+
+	protected class ChatEntry {
+
+		private String mText;
+		private String mSender;
+		private boolean mFromMe = false;
+
+		public ChatEntry(ChatMessage message) {
+			String from = message.getFrom();
+			mText = message.getMessage();
+
+			switch (mType) {
+			case TYPE_NORMAL_CHAT:
+				mFromMe = from.startsWith(mOwnID);
+				mSender = getUsername(from);
+				break;
+
+			case TYPE_GROUP_CHAT:
+				//TODO: this is probably not a reliable way to do this, since the own username might be
+				// 		already taken when joining a MUC. Currently this probably hinders joining the
+				//		MUC at all, but we probably want to change that.
+				mFromMe = from.endsWith(String.format("/%s", mOwnUsername));
+				mSender = getResource(from);
+				break;
+			}
+		}
+
+		public CharSequence format() {
+			int userColour = mFromMe ? R.color.chatMyUsername : R.color.chatOtherUsername;
+			final String sender = String.format("<b><font color=\"%s\">%s:</font></b> ",
+					                            mMessageHandler.getResources().getColor(userColour),
+					                            mSender);
+			final Spanned senderHTML = Html.fromHtml(sender);
+			return TextUtils.concat(senderHTML, mText);
+		}
+
+		public boolean isFromMe() {
+			return mFromMe;
+		}
 	}
 }
