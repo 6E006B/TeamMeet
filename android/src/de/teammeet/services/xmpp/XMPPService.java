@@ -153,8 +153,8 @@ public class XMPPService extends Service implements IXMPPService {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.d(CLASS, "XMPPService.onStartCommand()");
-		if (intent.hasExtra(ACTION)) {
+		Log.d(CLASS, String.format("XMPPService.onStartCommand(): %s", intent));
+		if (intent != null && intent.hasExtra(ACTION)) {
 			if (intent.getStringExtra(ACTION).equals(ACTION_CONNECT)) {
 				Log.d(CLASS, "contains connect extra");
 				new Thread(new Runnable() {
