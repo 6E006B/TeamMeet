@@ -21,5 +21,11 @@
 
     <color name="paint_default">#FF000000</color>
     <color name="transparent">#FF000000</color>
+    <color name="chatBackground">#FFE5E5E5</color>
+    <color name="chatText">#FF000000</color>
+    <color name="chatMyUsername">#FF005090</color>
+    <color name="chatOtherUsername">#FF5EA5EA</color>
+    <color name="chatMyBackground">#FFF5F5F5</color>
+    <color name="chatOtherBackground">#FFFFFFFF</color>
 
 </resources>
