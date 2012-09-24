@@ -1,5 +1,7 @@
 package de.teammeet.activities.chat;
 
+import org.jivesoftware.smack.util.StringUtils;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -66,12 +68,6 @@ public class ChatInformation implements Parcelable {
 	}
 
 	public String getUsername() {
-		String username = "";
-		if (mType == Chat.TYPE_GROUP_CHAT) {
-			username = Chat.getResource(mCounterpart);
-		} else {
-			username = Chat.getUsername(mCounterpart);
-		}
-		return username;
+		return StringUtils.parseName(mCounterpart);
 	}
 }
