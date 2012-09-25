@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jivesoftware.smack.util.StringUtils;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -43,7 +45,6 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 
 import de.teammeet.R;
-import de.teammeet.activities.chat.Chat;
 import de.teammeet.services.xmpp.TeamMeetPacketExtension;
 import de.teammeet.services.xmpp.XMPPService;
 
@@ -137,7 +138,7 @@ public class MatesOverlay extends ItemizedOverlay<OverlayItem> {
 			Mate mate = parseMate(intent.getExtras());
 			if (mate != null) {
 				Log.d(CLASS, "MatesOverlay.MateUpdateReceiver.onReceive()");
-				if (!Chat.getResource(mate.getID()).equals(mOwnID)) {
+				if (!StringUtils.parseResource(mate.getID()).equals(mOwnID)) {
 					acquireLock();
 					try {
 						if (mMates.containsKey(mate.getID())) {

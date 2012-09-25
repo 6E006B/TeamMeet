@@ -43,7 +43,7 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 		mMessageHandler = messageHandler;
 		mDatabase = new ChatOpenHelper(mMessageHandler.getActivity().getApplicationContext());
 
-		mContact = getUsernameAndServer(mCounterpart);
+		mContact = StringUtils.parseBareAddress(mCounterpart);
 
 		if (mType == 0) {
 			throw new InvalidTypeException(mType);
@@ -126,18 +126,6 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 		return concerned;
 	}
 
-	public static String getUsername(String jid) {
-		return StringUtils.parseName(jid);
-	}
-
-	public static String getUsernameAndServer(String jid) {
-		return StringUtils.parseBareAddress(jid);
-	}
-
-	public static String getResource(String jid) {
-		return StringUtils.parseResource(jid);
-	}
-
 	@Override
 	public boolean handleGroupMessage(ChatMessage message) {
 		boolean handled = false;
@@ -177,7 +165,7 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 			switch (mType) {
 			case TYPE_NORMAL_CHAT:
 				mFromMe = from.startsWith(mOwnID);
-				mSender = getUsername(from);
+				mSender = StringUtils.parseName(from);
 				break;
 
 			case TYPE_GROUP_CHAT:
@@ -185,7 +173,7 @@ public class Chat implements IChatMessageHandler, IGroupMessageHandler {
 				// 		already taken when joining a MUC. Currently this probably hinders joining the
 				//		MUC at all, but we probably want to change that.
 				mFromMe = from.endsWith(String.format("/%s", mOwnUsername));
-				mSender = getResource(from);
+				mSender = StringUtils.parseResource(from);
 				break;
 			}
 		}

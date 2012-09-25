@@ -13,7 +13,7 @@ public class ChatInformation implements Parcelable {
 	public ChatInformation(int type, String counterpart) {
 		mType = type;
 		if (mType == Chat.TYPE_NORMAL_CHAT) {
-			mCounterpart = Chat.getUsernameAndServer(counterpart);
+			mCounterpart = StringUtils.parseBareAddress(counterpart);
 		} else {
 			mCounterpart = counterpart;
 		}
