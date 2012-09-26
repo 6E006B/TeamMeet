@@ -32,8 +32,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragment;
 
 import de.teammeet.R;
-import de.teammeet.activities.chat.Chat;
-import de.teammeet.activities.chat.ChatsActivity;
+import de.teammeet.activities.teams.TeamActivity;
 import de.teammeet.activities.teams.TeamMeetActivity;
 import de.teammeet.helper.BroadcastHelper;
 import de.teammeet.interfaces.IXMPPService;
@@ -207,8 +206,8 @@ public class TeamsFragment extends SherlockFragment {
 	private void clickedOpenChat(MenuItem item) {
 		ExpandableListContextMenuInfo menuInfo = (ExpandableListContextMenuInfo)item.getMenuInfo();
 		String team = getExpandableListChild(menuInfo.packedPosition);
-		Intent intent = new Intent(getActivity().getApplicationContext(), ChatsActivity.class);
-		intent.putExtra(XMPPService.TYPE, Chat.TYPE_GROUP_CHAT);
+		Intent intent = new Intent(getActivity().getApplicationContext(), TeamActivity.class);
+		//intent.putExtra(XMPPService.TYPE, Chat.TYPE_GROUP_CHAT);
 		intent.putExtra(XMPPService.SENDER, team);
 		startActivity(intent);
 	}

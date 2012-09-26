@@ -77,6 +77,8 @@
     <string name="join_team_dialog_title">Join a Team</string>
     <string name="tab_contacts">Contacts</string>
     <string name="tab_teams">Teams</string>
+    <string name="tab_teamchat">Chat</string>
+    <string name="tab_map">Map</string>
     <string name="context_invite">Invite to team</string>
     <string name="context_invite_condensed">Invite</string>
     <string name="context_add_contact_to_group">Add Contact to Group</string>

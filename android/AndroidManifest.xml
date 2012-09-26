@@ -61,6 +61,10 @@
             android:name=".activities.chat.ChatsActivity"
             android:launchMode="singleInstance" >
         </activity>
+        <activity
+            android:name=".activities.teams.TeamActivity"
+            android:launchMode="singleTop" >
+        </activity>
 
         <receiver android:name=".services.xmpp.BootBroadcastReceiver" >
             <intent-filter>
