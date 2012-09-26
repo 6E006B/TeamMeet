@@ -37,7 +37,7 @@ public class TeamActivity extends SherlockFragmentActivity {
 		// Handle Intent
 		handleIntent(getIntent());
 
-		// Intialise ViewPager
+		// Initialize ViewPager
 		intialiseViewPager(actionBar);
 
 		if (savedInstanceState != null) {
@@ -74,10 +74,9 @@ public class TeamActivity extends SherlockFragmentActivity {
         args.putString(XMPPService.SENDER, mTeamName);
 		tabsAdapter.addTab(tab, ChatFragment.class, args);
 
-		/*tab = bar.newTab();
+		tab = bar.newTab();
 		tab.setText(R.string.tab_map);
-		tab.setIcon(R.drawable.social_group);
-		tabsAdapter.addTab(tab, ChatFragment.class, null);
-		*/
+		tab.setIcon(R.drawable.location_map);
+		tabsAdapter.addTab(tab, MapFragment.class, null);
 	}
 }
