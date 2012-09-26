@@ -2,7 +2,6 @@ package de.teammeet.activities.teams;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -13,7 +12,6 @@ import com.actionbarsherlock.view.MenuItem;
 import de.teammeet.R;
 import de.teammeet.activities.chat.Chat;
 import de.teammeet.activities.chat.ChatFragment;
-import de.teammeet.activities.chat.TabsAdapter;
 import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.services.xmpp.XMPPService;
 
@@ -23,13 +21,15 @@ public class TeamActivity extends SherlockFragmentActivity {
 
 	public static String SELECT_TAB = "select_tab";
 	public static enum Tabs {
-		CHAT (0),
-		MAP (1);
+		CHAT (0, "chat_tab"),
+		MAP (1, "map_tab");
 
 		public final int position;
+		public final String tag;
 
-		Tabs(int position) {
+		Tabs(int position, String tag) {
 			this.position = position;
+			this.tag = tag;
 		}
 	};
 
@@ -43,7 +43,7 @@ public class TeamActivity extends SherlockFragmentActivity {
 		Log.d(CLASS, "Creating tabbed team activity");
 
 		// Inflate the layout
-		setContentView(R.layout.tabbed_roster);
+		setContentView(R.layout.team_activity);
 
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
@@ -53,8 +53,8 @@ public class TeamActivity extends SherlockFragmentActivity {
 		// Handle Intent
 		handleIntent(getIntent());
 
-		// Initialize ViewPager
-		intialiseViewPager(actionBar);
+		// Create tabs
+		createTabs(actionBar);
 
 		if (savedInstanceState != null) {
 			//set the tab as per the saved state
@@ -79,23 +79,34 @@ public class TeamActivity extends SherlockFragmentActivity {
 		mSelectTab = intent.getIntExtra(SELECT_TAB, Tabs.CHAT.position);
 	}
 
-	private void intialiseViewPager(ActionBar bar) {
-		ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-		TabsAdapter tabsAdapter = new TabsAdapter(this, bar, viewPager);
+	private void createTabs(ActionBar bar) {
+		Bundle chatArgs = new Bundle();
+		chatArgs.putInt(XMPPService.TYPE, Chat.TYPE_GROUP_CHAT);
+		chatArgs.putString(XMPPService.SENDER, mTeamName);
 
-		Tab tab = bar.newTab();
-		tab.setText(R.string.tab_teamchat);
-		tab.setIcon(R.drawable.social_group);
+		TabListener<ChatFragment> chatTabListener = new TabListener<ChatFragment>(this,
+																				  Tabs.CHAT.tag,
+																				  ChatFragment.class,
+																				  R.id.team_tab,
+																				  chatArgs);
+		TabListener<MapFragment> mapTabListener = new TabListener<MapFragment>(this,
+																			   Tabs.MAP.tag,
+																			   MapFragment.class,
+																			   R.id.team_tab,
+																			   null);
 
-		Bundle args = new Bundle();
-        args.putInt(XMPPService.TYPE, Chat.TYPE_GROUP_CHAT);
-        args.putString(XMPPService.SENDER, mTeamName);
-		tabsAdapter.addTab(tab, ChatFragment.class, args);
+		Tab chatTab = bar.newTab();
+		chatTab.setText(R.string.tab_teamchat);
+		chatTab.setIcon(R.drawable.social_group);
+		chatTab.setTabListener(chatTabListener);
 
-		tab = bar.newTab();
-		tab.setText(R.string.tab_map);
-		tab.setIcon(R.drawable.location_map);
-		tabsAdapter.addTab(tab, MapFragment.class, null);
+		Tab mapTab = bar.newTab();
+		mapTab.setText(R.string.tab_map);
+		mapTab.setIcon(R.drawable.location_map);
+		mapTab.setTabListener(mapTabListener);
+
+		bar.addTab(chatTab);
+		bar.addTab(mapTab);
 	}
 
 	/** (non-Javadoc)

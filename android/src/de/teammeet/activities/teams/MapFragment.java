@@ -1,6 +1,7 @@
 package de.teammeet.activities.teams;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,26 +17,30 @@ import de.teammeet.R;
  *
  */
 public class MapFragment extends SherlockFragment {
+	private static final String CLASS = MapFragment.class.getSimpleName();
 
-	//public static final String TAG = "mapFragment";
-
-	public MapFragment() {}
+	private MapView mMapView;
 
 	@Override
 	public void onCreate(Bundle arg0) {
 		super.onCreate(arg0);
 		setRetainInstance(true);
+		Log.d(CLASS, "MapFragment.onCreate()");
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup vg, Bundle data) {
 
-		// Initialize MapView
-		MapView mapView = (MapView)inflater.inflate(R.layout.mapview, vg, false);
+		// Initialize new MapView, if there is none yet
+		if (mMapView == null) {
+			mMapView = (MapView)inflater.inflate(R.layout.mapview, vg, false);
+			Log.d(CLASS, String.format("MapFragment.onCreateView() => %s", mMapView));
 
-		mapView.setClickable(true);
-		mapView.setBuiltInZoomControls(true); // If you want.
+			mMapView.setBuiltInZoomControls(true);
+		} else {
+			((ViewGroup)mMapView.getParent()).removeAllViews();
+		}
 
-		return mapView;
+		return mMapView;
 	}
 }
