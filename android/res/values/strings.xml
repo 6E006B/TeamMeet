@@ -85,10 +85,10 @@
     <string name="context_add_contact_to_group_condensed">Add Contact</string>
     <string name="context_remove_contact">Remove Contact</string>
     <string name="context_remove_contact_condensed">Remove</string>
-    <string name="context_open_map">Open team in map</string>
+    <string name="context_open_map">Open map</string>
     <string name="context_open_map_condensed">Open map</string>
     <string name="context_open_chat">Open chat</string>
-    <string name="context_open_chat_condensed">Chat</string>
+    <string name="context_open_chat_condensed">Open chat</string>
     <string name="context_open_team_chat">Open team chat</string>
     <string name="context_open_team_chat_condensed">Open chat</string>
     <string name="context_leave_team">Leave Team</string>

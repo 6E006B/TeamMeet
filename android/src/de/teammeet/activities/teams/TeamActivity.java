@@ -19,7 +19,20 @@ public class TeamActivity extends SherlockFragmentActivity {
 	private static String CLASS = TeamActivity.class.getSimpleName();
 	private static String SAVED_TAB_KEY = "last_tab";
 
+	public static String SELECT_TAB = "select_tab";
+	public static enum Tabs {
+		CHAT (0),
+		MAP (1);
+
+		public final int position;
+
+		Tabs(int position) {
+			this.position = position;
+		}
+	};
+
 	private String mTeamName;
+	private int mSelectTab;
 
 
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +44,7 @@ public class TeamActivity extends SherlockFragmentActivity {
 		setContentView(R.layout.tabbed_roster);
 
 		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		actionBar.setDisplayShowTitleEnabled(false);
 
@@ -43,6 +57,8 @@ public class TeamActivity extends SherlockFragmentActivity {
 		if (savedInstanceState != null) {
 			//set the tab as per the saved state
 			actionBar.setSelectedNavigationItem(savedInstanceState.getInt(SAVED_TAB_KEY));
+		} else {
+			actionBar.setSelectedNavigationItem(mSelectTab);
 		}
 	}
 
@@ -54,12 +70,12 @@ public class TeamActivity extends SherlockFragmentActivity {
 		} else {
 			Log.d(CLASS, "no extras");
 		}
-		//final int type = intent.getIntExtra(XMPPService.TYPE, 0);
-		//intent.removeExtra(XMPPService.TYPE);
+
 		mTeamName = intent.getStringExtra(XMPPService.SENDER);
 		intent.removeExtra(XMPPService.SENDER);
-	}
 
+		mSelectTab = intent.getIntExtra(SELECT_TAB, Tabs.CHAT.position);
+	}
 
 	private void intialiseViewPager(ActionBar bar) {
 		ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -78,5 +94,15 @@ public class TeamActivity extends SherlockFragmentActivity {
 		tab.setText(R.string.tab_map);
 		tab.setIcon(R.drawable.location_map);
 		tabsAdapter.addTab(tab, MapFragment.class, null);
+	}
+
+	/** (non-Javadoc)
+	 * @see android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os.Bundle)
+	 */
+	protected void onSaveInstanceState(Bundle outState) {
+		Log.d(CLASS, "saving instance state...");
+		ActionBar bar = getSupportActionBar();
+		outState.putInt(SAVED_TAB_KEY, bar.getSelectedNavigationIndex()); //save the tab selected
+		super.onSaveInstanceState(outState);
 	}
 }

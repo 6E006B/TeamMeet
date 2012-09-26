@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/teams_list_context_open_map"
-        android:icon="@drawable/location_map"
-        android:title="@string/context_open_map"
-        android:titleCondensed="@string/context_open_map_condensed"/>
-    <item
         android:id="@+id/teams_list_context_open_chat"
         android:icon="@drawable/social_chat"
         android:title="@string/context_open_chat"
         android:titleCondensed="@string/context_open_chat_condensed"/>
+    <item
+        android:id="@+id/teams_list_context_open_map"
+        android:icon="@drawable/location_map"
+        android:title="@string/context_open_map"
+        android:titleCondensed="@string/context_open_map_condensed"/>
     <item
         android:id="@+id/teams_list_context_leave"
         android:title="@string/context_leave_team"
