@@ -8,11 +8,13 @@ import android.util.Log;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
 
 import de.teammeet.R;
 import de.teammeet.activities.chat.Chat;
 import de.teammeet.activities.chat.ChatFragment;
 import de.teammeet.activities.chat.TabsAdapter;
+import de.teammeet.helper.ActionBarHelper;
 import de.teammeet.services.xmpp.XMPPService;
 
 public class TeamActivity extends SherlockFragmentActivity {
@@ -104,5 +106,16 @@ public class TeamActivity extends SherlockFragmentActivity {
 		ActionBar bar = getSupportActionBar();
 		outState.putInt(SAVED_TAB_KEY, bar.getSelectedNavigationIndex()); //save the tab selected
 		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			ActionBarHelper.navigateUpInHierarchy(this);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 }
