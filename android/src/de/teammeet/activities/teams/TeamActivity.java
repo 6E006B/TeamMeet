@@ -84,6 +84,9 @@ public class TeamActivity extends SherlockFragmentActivity {
 		chatArgs.putInt(XMPPService.TYPE, Chat.TYPE_GROUP_CHAT);
 		chatArgs.putString(XMPPService.SENDER, mTeamName);
 
+		Bundle mapArgs = new Bundle();
+		mapArgs.putString(XMPPService.GROUP, mTeamName);
+
 		TabListener<ChatFragment> chatTabListener = new TabListener<ChatFragment>(this,
 																				  Tabs.CHAT.tag,
 																				  ChatFragment.class,
@@ -93,7 +96,7 @@ public class TeamActivity extends SherlockFragmentActivity {
 																			   Tabs.MAP.tag,
 																			   MapFragment.class,
 																			   R.id.team_tab,
-																			   null);
+																			   mapArgs);
 
 		Tab chatTab = bar.newTab();
 		chatTab.setText(R.string.tab_teamchat);
@@ -128,5 +131,10 @@ public class TeamActivity extends SherlockFragmentActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	@Override
+	protected boolean isRouteDisplayed() {
+		return false;
 	}
 }

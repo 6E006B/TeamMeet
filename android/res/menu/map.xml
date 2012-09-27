@@ -20,12 +20,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/open_chat"
-        android:icon="@drawable/social_chat"
-        android:showAsAction="ifRoom"
-        android:title="@string/context_open_team_chat"
-        android:titleCondensed="@string/context_open_team_chat_condensed"/>
-    <item
         android:id="@+id/goto_mylocation"
         android:icon="@drawable/device_access_location_found"
         android:showAsAction="ifRoom"
