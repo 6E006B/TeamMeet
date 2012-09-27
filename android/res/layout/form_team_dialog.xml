@@ -8,7 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="3dip"
-        android:text="@string/text_group_name" />
+        android:text="@string/text_team_name" />
     
     <EditText
         android:id="@+id/form_team_dialog_teamname"
