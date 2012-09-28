@@ -356,8 +356,8 @@ public class ContactsFragment extends Fragment {
 
 	protected class ContactlistChild implements Comparable<ContactlistChild> {
 
-		protected String mName = null;
-		protected String mJID = null;
+		private String mName = null;
+		private String mJID = null;
 		protected int mMode;
 		protected String mStatus = null;
 

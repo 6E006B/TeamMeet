@@ -54,7 +54,7 @@ public class ContactlistAdapter extends BaseExpandableListAdapter {
 			ContactlistChild child = (ContactlistChild) getChild(groupPosition, childPosition);
 
 			contactName = (TextView)convertView.findViewById(R.id.contact_name);
-			contactName.setText((String) child.mName);
+			contactName.setText((String) child.getDisplayName());
 
 			contactStatusImage = (ImageView) convertView.findViewById(R.id.contact_status_image);
 			contactStatusImage.setImageResource((int) child.mMode);
