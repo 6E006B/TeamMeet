@@ -370,7 +370,12 @@ public class ContactsFragment extends Fragment {
 
 		@Override
 		public int compareTo(ContactlistChild another) {
-			return mName.toLowerCase().compareTo(another.mName.toLowerCase());
+			return getDisplayName().compareTo(another.getDisplayName());
+		}
+
+		public String getDisplayName() {
+			String displayName = mName != null? mName : mJID;
+			return displayName.toLowerCase();
 		}
 	}
 
