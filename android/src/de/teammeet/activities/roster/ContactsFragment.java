@@ -167,40 +167,28 @@ public class ContactsFragment extends Fragment {
 	public boolean onContextItemSelected(MenuItem item) {
 		Log.d(CLASS, String.format("Context item '%s' clicked", item.getTitleCondensed()));
 
-		ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item.getMenuInfo();
-		int type = ExpandableListView.getPackedPositionType(info.packedPosition);
-		if (type == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-			switch(item.getItemId()) {
-				case CONTEXT_MENU_OPEN_CHAT_ID:
-					clickedOpenChat(item);
-					return true;
-				case CONTEXT_MENU_INVITE_PARENT_ID:
-					/* backup info, will need it when sub-menu item gets selected.
-					 * cf http://code.google.com/p/android/issues/detail?id=7139.
-					 */
-					mLastContextItemInfo = ((ExpandableListContextMenuInfo)item.getMenuInfo());
-					return true;
-				case CONTEXT_MENU_INVITE_ROOM_ID:
-					clickedInviteToTeam(item);
-					return true;
-				case CONTEXT_MENU_REMOVE_MATE_ID:
-					clickedRemoveMate(item);
-					return true;
-				default:
-					Log.d(CLASS, String.format("unhandeled context menu item clicked: 0x%x",
-					                           item.getItemId()));
-			}
-		} else {
-			// selected item is a group
-			Log.d(CLASS, "Clicked on a context menu item regarding a group.");
-			switch(item.getItemId()) {
+		switch(item.getItemId()) {
 			case R.id.roster_list_context_group_add_contact:
 				clickedAddContactToGroup(item);
+				return true;
+			case R.id.roster_context_contact_open_chat:
+				clickedOpenChat(item);
+				return true;
+			case CONTEXT_MENU_INVITE_PARENT_ID:
+				/* backup info, will need it when sub-menu item gets selected.
+				 * cf http://code.google.com/p/android/issues/detail?id=7139.
+				 */
+				mLastContextItemInfo = ((ExpandableListContextMenuInfo)item.getMenuInfo());
+				return true;
+			case CONTEXT_MENU_INVITE_ROOM_ID:
+				clickedInviteToTeam(item);
+				return true;
+			case R.id.roster_context_contact_remove_contact:
+				clickedRemoveMate(item);
 				return true;
 			default:
 				Log.d(CLASS, String.format("unhandeled context menu item clicked: 0x%x",
 				                           item.getItemId()));
-			}
 		}
 		return super.onContextItemSelected(item);
 	}
