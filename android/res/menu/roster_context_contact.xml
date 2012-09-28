@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item android:id="@+id/roster_context_contact_open_chat"
+          android:orderInCategory="1"
+          android:title="@string/context_open_chat"
+          android:titleCondensed="@string/context_open_chat_condensed" />
+
+    <item android:id="@+id/roster_context_contact_remove_contact"
+          android:orderInCategory="3"
+          android:title="@string/context_remove_contact"
+          android:titleCondensed="@string/context_remove_contact_condensed" />
+
+</menu>

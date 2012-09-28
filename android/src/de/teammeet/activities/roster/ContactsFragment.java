@@ -55,8 +55,6 @@ public class ContactsFragment extends Fragment {
 	private static final String UNFILED_GROUP = "Unfiled contacts";
 	private static final int CONTEXT_MENU_INVITE_PARENT_ID = 0x7e000002;
 	private static final int CONTEXT_MENU_INVITE_ROOM_ID = 0x7e000003;
-	private static final int CONTEXT_MENU_REMOVE_MATE_ID = 0x7e000004;
-	private static final int CONTEXT_MENU_OPEN_CHAT_ID = 0x7e000005;
 
 	private BroadcastReceiver mConnectReceiver;
 	private BroadcastReceiver mDisconnectReceiver;
@@ -208,17 +206,16 @@ public class ContactsFragment extends Fragment {
 	}
 
 	private void createChildContextMenu(ContextMenu menu) {
-		//TODO Uncomment if you added static entries to an XML layout
-		//MenuInflater inflater = getMenuInflater();
-		//inflater.inflate(R.menu.roster_context, menu);
 		Log.d(CLASS, "creating context menu");
 
-		menu.add(Menu.NONE, CONTEXT_MENU_OPEN_CHAT_ID, Menu.NONE, R.string.context_open_chat);
+		MenuInflater inflater = getActivity().getMenuInflater();
+		inflater.inflate(R.menu.roster_context_contact, menu);
+
 		try {
 			Set<String> teams = ((RosterActivity) getActivity()).getXMPPService().getTeams();
 			if (!teams.isEmpty()) {
 				SubMenu inviteSubMenu = menu.addSubMenu(Menu.NONE, CONTEXT_MENU_INVITE_PARENT_ID,
-														Menu.NONE, R.string.context_invite);
+														2, R.string.context_invite);
 				for (String teamName : teams) {
 					Log.d(CLASS, "team: " + teamName);
 					inviteSubMenu.add(Menu.NONE, CONTEXT_MENU_INVITE_ROOM_ID, Menu.NONE, teamName);
@@ -229,7 +226,6 @@ public class ContactsFragment extends Fragment {
 			Log.e(CLASS, problem);
 			Toast.makeText(getActivity(), problem, Toast.LENGTH_LONG).show();
 		}
-		menu.add(Menu.NONE, CONTEXT_MENU_REMOVE_MATE_ID, Menu.NONE, R.string.context_remove_mate);
 	}
 
 	private void createGroupContextMenu(ContextMenu menu) {
