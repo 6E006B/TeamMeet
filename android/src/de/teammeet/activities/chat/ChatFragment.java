@@ -137,12 +137,7 @@ public class ChatFragment extends SherlockFragment {
 			mChatEditText.setEnabled(false);
 			mSendButton.setEnabled(false);
 		}
-		List<ChatMessage> messages = mChat.fetchMessages();
-		for (ChatMessage message : messages) {
-			mListAdapter.add(mChat.new ChatEntry(message));
-		}
-		mListAdapter.notifyDataSetChanged();
-		mChatListView.setSelection(mListAdapter.getCount());
+
 		return rootView;
 	}
 	
@@ -168,6 +163,8 @@ public class ChatFragment extends SherlockFragment {
 			               "Couldn't connect to XMPP service.",
 			               Toast.LENGTH_LONG).show();
 		}
+
+		setupChatList();
 	}
 
 	@Override
@@ -188,6 +185,9 @@ public class ChatFragment extends SherlockFragment {
 			getActivity().unbindService(mXMPPServiceConnection);
 		}
 		mXMPPService = null;
+
+		mListAdapter.clear();
+
 		super.onPause();
 	}
 
@@ -227,6 +227,16 @@ public class ChatFragment extends SherlockFragment {
 			Log.w(CLASS, "Unknown options item id: '" + item.getItemId() + "'");
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void setupChatList() {
+		List<ChatMessage> messages = mChat.fetchMessages();
+		for (ChatMessage message : messages) {
+			mListAdapter.add(mChat.new ChatEntry(message));
+		}
+		mListAdapter.notifyDataSetChanged();
+
+		mChatListView.setSelection(mListAdapter.getCount());
 	}
 
 	public void handleMessage(final ChatEntry message) {
