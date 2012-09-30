@@ -2,7 +2,6 @@ package de.teammeet.activities.chat;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import de.teammeet.R;
 import de.teammeet.activities.chat.Chat.ChatEntry;
-import de.teammeet.activities.roster.ContactsFragment;
 
 public class ChatAdapter extends ArrayAdapter<ChatEntry> {
-
-	private static final String CLASS = ContactsFragment.class.getSimpleName();
 
 	private Context mContext;
 	private Resources mResources;
@@ -27,7 +23,6 @@ public class ChatAdapter extends ArrayAdapter<ChatEntry> {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		Log.d(CLASS, String.format("getting view for position %d, cache: %s", position, convertView));
 
 		if (convertView == null || !(convertView instanceof TextView)) {
 			// Inflate new view
