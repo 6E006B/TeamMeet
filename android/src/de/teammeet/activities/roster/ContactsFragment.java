@@ -260,7 +260,7 @@ public class ContactsFragment extends Fragment {
 		final int child_position = ExpandableListView.getPackedPositionChild(packedPosition);
 		final ContactlistChild child = (ContactlistChild) mAdapter.getChild(group_position,
 																				  child_position);
-		return child.mName;
+		return child.mJID;
 	}
 
 	private String getExpandableListGroup(long packedPosition) {
