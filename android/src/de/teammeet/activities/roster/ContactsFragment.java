@@ -260,7 +260,7 @@ public class ContactsFragment extends Fragment {
 		final int child_position = ExpandableListView.getPackedPositionChild(packedPosition);
 		final ContactlistChild child = (ContactlistChild) mAdapter.getChild(group_position,
 																				  child_position);
-		return child.mName;
+		return child.mJID;
 	}
 
 	private String getExpandableListGroup(long packedPosition) {
@@ -356,8 +356,8 @@ public class ContactsFragment extends Fragment {
 
 	protected class ContactlistChild implements Comparable<ContactlistChild> {
 
-		protected String mName = null;
-		protected String mJID = null;
+		private String mName = null;
+		private String mJID = null;
 		protected int mMode;
 		protected String mStatus = null;
 
@@ -370,7 +370,12 @@ public class ContactsFragment extends Fragment {
 
 		@Override
 		public int compareTo(ContactlistChild another) {
-			return mName.toLowerCase().compareTo(another.mName.toLowerCase());
+			return getDisplayName().compareTo(another.getDisplayName());
+		}
+
+		public String getDisplayName() {
+			String displayName = mName != null? mName : mJID;
+			return displayName.toLowerCase();
 		}
 	}
 
