@@ -115,7 +115,7 @@ public class RosterActivity extends SherlockFragmentActivity {
 	}
 
 	@Override
-	protected void onNewIntent(Intent intent) {
+	public void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		mCurrentIntent = intent;
 	}
