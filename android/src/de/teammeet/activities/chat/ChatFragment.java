@@ -5,6 +5,7 @@ import java.util.List;
 import org.jivesoftware.smack.XMPPException;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -188,6 +190,8 @@ public class ChatFragment extends SherlockFragment {
 
 		mListAdapter.clear();
 
+		hideKeyboard();
+
 		super.onPause();
 	}
 
@@ -278,5 +282,10 @@ public class ChatFragment extends SherlockFragment {
 		Intent intent = new Intent(getActivity().getApplicationContext(), TeamMeetActivity.class);
 		intent.putExtra(XMPPService.GROUP, mCounterpart);
 		startActivity(intent);
+	}
+
+	private void hideKeyboard() {
+		InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(mChatEditText.getWindowToken(), 0);
 	}
 }
