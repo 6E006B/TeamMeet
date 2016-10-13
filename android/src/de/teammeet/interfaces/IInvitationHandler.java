@@ -7,7 +7,6 @@ public interface IInvitationHandler {
 	boolean handleInvitation(Connection connection,
                              String room,
                              String inviter,
-                             String reason,
                              String password,
                              Message message);
 }

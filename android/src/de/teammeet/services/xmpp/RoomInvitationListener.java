@@ -17,10 +17,10 @@ public class RoomInvitationListener implements InvitationListener {
 	}
 
 	@Override
-    public void invitationReceived(Connection connection, String room, String inviter,
-    							   String reason, String password, Message message) {
-        Log.d(CLASS, "GroupInvitationListener.invitationReceived(... '" + room + "', '" + inviter +
-                     "', '" + reason + "', '" +  password + "' ...) from " + message.getFrom());
-        mXMPPService.newInvitation(connection, room, inviter, reason, password, message);
+	public void invitationReceived(Connection connection, String room, String inviter,
+								   String reason, String password, Message message) {
+		Log.d(CLASS, String.format("Received invitation to '%s' [pass: '%s'] from '%s'",
+									room, password, inviter));
+		mXMPPService.newInvitation(connection, room, inviter, password, message);
 	}
 }
